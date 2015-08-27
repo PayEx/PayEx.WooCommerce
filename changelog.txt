@@ -1,0 +1,27 @@
+Version 2.0.0pre
+* WooCommerce 2.3 Compatible
+* Improved WooCommerce Subscriptions support
+* Refund feature (WC 2.2+)
+* Capture/Cancel when order status change
+* Use metadata to store transaction data instead database table
+* Fixed problem during re-payment of failed orders
+* WooCommerce Subscriptions: Fixed problem when payment method switching
+* Integrated plugins: bankdebit, factoring, invoice and wywallet
+
+Version 1.1.3
+* Fixed problem when subscription switches
+* Don't remove agreement when subscription cancel
+
+Version 1.1.2
+* Fixed problems when subscription changes
+
+Version 1.1.1
+* Fixed problem with success page on failed payment (Woocommerce v2.0 only)
+
+Version 1.1.0
+* Subscriptions support (recurring payments)
+* Use Wordpress Coding Standards
+* Disabled debug log  by default
+* Changed Text Domain name
+* Check compatibility of store currency
+* Bugfixes

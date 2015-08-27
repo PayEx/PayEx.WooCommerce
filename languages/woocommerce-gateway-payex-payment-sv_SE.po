@@ -1,0 +1,721 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Woocommerce PayEx\n"
+"POT-Creation-Date: 2015-08-10 19:05+0600\n"
+"PO-Revision-Date: 2015-08-10 19:05+0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sv_SE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: __;_e;_e(sprintf\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../woocommerce-gateway-payex-payment.php:46
+msgid "PayEx Settings"
+msgstr ""
+
+#: ../woocommerce-gateway-payex-payment.php:132
+#: ../includes/class-wc-gateway-payex-invoice.php:705
+#: ../includes/class-wc-gateway-payex-wywallet.php:487
+#: ../includes/class-wc-gateway-payex-factoring.php:371
+#: ../includes/class-wc-gateway-payex-payment.php:296
+#: ../includes/class-wc-gateway-payex-payment.php:344
+#: ../includes/class-wc-gateway-payex-payment.php:747
+#: ../includes/class-wc-gateway-payex-bankdebit.php:546
+#, php-format
+msgid "Transaction captured. Transaction Id: %s"
+msgstr ""
+
+#: ../woocommerce-gateway-payex-payment.php:174
+#, php-format
+msgid "Transaction canceled. Transaction Id: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:13
+msgid "PayEx Invoice (Ledger Service)"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:85
+#: ../includes/class-wc-gateway-payex-wywallet.php:64
+#: ../includes/class-wc-gateway-payex-factoring.php:81
+#: ../includes/class-wc-gateway-payex-payment.php:96
+#: ../includes/class-wc-gateway-payex-bankdebit.php:88
+msgid "Enable/Disable"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:87
+#: ../includes/class-wc-gateway-payex-wywallet.php:66
+#: ../includes/class-wc-gateway-payex-factoring.php:83
+#: ../includes/class-wc-gateway-payex-payment.php:98
+#: ../includes/class-wc-gateway-payex-bankdebit.php:90
+msgid "Enable plugin"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:91
+#: ../includes/class-wc-gateway-payex-wywallet.php:70
+#: ../includes/class-wc-gateway-payex-factoring.php:87
+#: ../includes/class-wc-gateway-payex-payment.php:102
+#: ../includes/class-wc-gateway-payex-bankdebit.php:94
+msgid "Title"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:93
+#: ../includes/class-wc-gateway-payex-wywallet.php:72
+#: ../includes/class-wc-gateway-payex-factoring.php:89
+#: ../includes/class-wc-gateway-payex-payment.php:104
+#: ../includes/class-wc-gateway-payex-bankdebit.php:96
+msgid "This controls the title which the user sees during checkout."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:94
+#: ../includes/class-wc-gateway-payex-invoice.php:100
+msgid "PayEx Invoice"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:97
+#: ../includes/class-wc-gateway-payex-wywallet.php:76
+#: ../includes/class-wc-gateway-payex-factoring.php:93
+#: ../includes/class-wc-gateway-payex-payment.php:108
+#: ../includes/class-wc-gateway-payex-bankdebit.php:100
+msgid "Description"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:99
+#: ../includes/class-wc-gateway-payex-wywallet.php:78
+#: ../includes/class-wc-gateway-payex-factoring.php:95
+#: ../includes/class-wc-gateway-payex-payment.php:110
+#: ../includes/class-wc-gateway-payex-bankdebit.php:102
+msgid "This controls the description which the user sees during checkout."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:103
+#: ../includes/class-wc-gateway-payex-wywallet.php:82
+#: ../includes/class-wc-gateway-payex-factoring.php:99
+#: ../includes/class-wc-gateway-payex-payment.php:114
+#: ../includes/class-wc-gateway-payex-bankdebit.php:106
+msgid "Account Number"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:105
+#: ../includes/class-wc-gateway-payex-wywallet.php:84
+#: ../includes/class-wc-gateway-payex-factoring.php:101
+#: ../includes/class-wc-gateway-payex-payment.php:116
+#: ../includes/class-wc-gateway-payex-bankdebit.php:108
+msgid "Account Number of PayEx Merchant."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:109
+#: ../includes/class-wc-gateway-payex-wywallet.php:88
+#: ../includes/class-wc-gateway-payex-factoring.php:105
+#: ../includes/class-wc-gateway-payex-payment.php:120
+#: ../includes/class-wc-gateway-payex-bankdebit.php:112
+msgid "Encryption Key"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:111
+#: ../includes/class-wc-gateway-payex-wywallet.php:90
+#: ../includes/class-wc-gateway-payex-factoring.php:107
+#: ../includes/class-wc-gateway-payex-payment.php:122
+#: ../includes/class-wc-gateway-payex-bankdebit.php:114
+msgid "PayEx Encryption Key of PayEx Merchant."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:115
+#: ../includes/class-wc-gateway-payex-wywallet.php:94
+#: ../includes/class-wc-gateway-payex-payment.php:126
+msgid "Purchase Operation"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:118
+#: ../includes/class-wc-gateway-payex-wywallet.php:97
+#: ../includes/class-wc-gateway-payex-payment.php:129
+msgid ""
+"If used AUTHORIZATION then amount will be authorized (2-phased transaction). "
+"If used SALE then amount will be captured (1-phased transaction)."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:122
+#: ../includes/class-wc-gateway-payex-wywallet.php:101
+#: ../includes/class-wc-gateway-payex-factoring.php:122
+#: ../includes/class-wc-gateway-payex-payment.php:146
+#: ../includes/class-wc-gateway-payex-bankdebit.php:128
+msgid "Language"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:137
+#: ../includes/class-wc-gateway-payex-wywallet.php:116
+#: ../includes/class-wc-gateway-payex-factoring.php:137
+#: ../includes/class-wc-gateway-payex-payment.php:161
+#: ../includes/class-wc-gateway-payex-bankdebit.php:143
+msgid "Language of pages displayed by PayEx during payment."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:141
+#: ../includes/class-wc-gateway-payex-invoice.php:147
+msgid "Invoice distribution"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:151
+#: ../includes/class-wc-gateway-payex-invoice.php:153
+#, fuzzy
+msgid "Invoice Text"
+msgstr "Faktura avgift"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:157
+#: ../includes/class-wc-gateway-payex-invoice.php:162
+#, fuzzy
+msgid "Invoice due days"
+msgstr "Faktura avgift"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:166
+#: ../includes/class-wc-gateway-payex-invoice.php:168
+msgid "Allow unapproved by CreditCheck"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:172
+#: ../includes/class-wc-gateway-payex-wywallet.php:120
+#: ../includes/class-wc-gateway-payex-factoring.php:141
+#: ../includes/class-wc-gateway-payex-payment.php:165
+#: ../includes/class-wc-gateway-payex-bankdebit.php:147
+msgid "Test Mode"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:174
+#: ../includes/class-wc-gateway-payex-wywallet.php:122
+#: ../includes/class-wc-gateway-payex-factoring.php:143
+#: ../includes/class-wc-gateway-payex-payment.php:167
+#: ../includes/class-wc-gateway-payex-bankdebit.php:149
+msgid "Enable PayEx Test Mode"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:178
+#: ../includes/class-wc-gateway-payex-wywallet.php:132
+#: ../includes/class-wc-gateway-payex-factoring.php:147
+#: ../includes/class-wc-gateway-payex-payment.php:195
+#: ../includes/class-wc-gateway-payex-bankdebit.php:165
+msgid "Debug"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:180
+#: ../includes/class-wc-gateway-payex-wywallet.php:134
+#: ../includes/class-wc-gateway-payex-factoring.php:149
+#: ../includes/class-wc-gateway-payex-payment.php:197
+#: ../includes/class-wc-gateway-payex-bankdebit.php:167
+msgid "Enable logging"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:184
+#: ../includes/class-wc-gateway-payex-factoring.php:153
+msgid "Fee"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:189
+#: ../includes/class-wc-gateway-payex-factoring.php:158
+msgid "Factoring fee. Set 0 to disable."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:193
+#: ../includes/class-wc-gateway-payex-invoice.php:195
+#: ../includes/class-wc-gateway-payex-factoring.php:162
+#: ../includes/class-wc-gateway-payex-factoring.php:164
+msgid "Fee is Taxable"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:199
+#: ../includes/class-wc-gateway-payex-factoring.php:168
+msgid "Tax class of Fee"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:202
+#: ../includes/class-wc-gateway-payex-factoring.php:171
+msgid "Tax class of fee."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:215
+msgid "Private"
+msgstr "Privat"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:222
+msgid "Social Security Number"
+msgstr "Personnummer"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:231
+msgid "Corporate"
+msgstr "Organisation"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:238
+msgid "Organization Number"
+msgstr "Organisations nummer"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:289
+msgid "Please select invoice method."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:298
+#: ../includes/class-wc-gateway-payex-factoring.php:217
+#, fuzzy
+msgid "Please enter your Social Security Number and confirm your order."
+msgstr "Var god och skriv in ditt organisations nummer och godkän ordern"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:315
+#: ../includes/class-wc-gateway-payex-factoring.php:229
+#, fuzzy
+msgid "Invalid Social Security Number"
+msgstr "Personnummer"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:323
+msgid "Please enter your Organization Number and confirm your order."
+msgstr "Var god och skriv in ditt organisations nummer och godkän ordern"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:337
+msgid "Invalid Organization Number"
+msgstr "Ogiltigt organisations nummer"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:357
+msgid ""
+"Unfortunately PayEx did not grant you Invoice credit. Please try other means "
+"of payment"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:391
+msgid "Invoice Fee"
+msgstr "Faktura avgift"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:482
+#: ../includes/class-wc-gateway-payex-wywallet.php:263
+#: ../includes/class-wc-gateway-payex-payment.php:522
+#: ../includes/class-wc-gateway-payex-bankdebit.php:304
+msgid "Shipping"
+msgstr "Leverans"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:540
+#: ../includes/class-wc-gateway-payex-wywallet.php:322
+#: ../includes/class-wc-gateway-payex-factoring.php:462
+#: ../includes/class-wc-gateway-payex-payment.php:581
+#: ../includes/class-wc-gateway-payex-bankdebit.php:363
+msgid "Discount"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:714
+#: ../includes/class-wc-gateway-payex-wywallet.php:493
+#: ../includes/class-wc-gateway-payex-factoring.php:380
+#: ../includes/class-wc-gateway-payex-payment.php:757
+#: ../includes/class-wc-gateway-payex-bankdebit.php:552
+#, php-format
+msgid "Transaction is pending. Transaction Id: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:722
+#: ../includes/class-wc-gateway-payex-wywallet.php:497
+#: ../includes/class-wc-gateway-payex-factoring.php:388
+#: ../includes/class-wc-gateway-payex-payment.php:308
+#: ../includes/class-wc-gateway-payex-payment.php:761
+#: ../includes/class-wc-gateway-payex-bankdebit.php:556
+#, php-format
+msgid "Transaction authorized. Transaction Id: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-invoice.php:738
+#: ../includes/class-wc-gateway-payex-wywallet.php:507
+#: ../includes/class-wc-gateway-payex-factoring.php:403
+#: ../includes/class-wc-gateway-payex-payment.php:771
+#: ../includes/class-wc-gateway-payex-bankdebit.php:566
+#, fuzzy
+msgid "Transaction is failed."
+msgstr "Transaktionen misslyckades"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:740
+#: ../includes/class-wc-gateway-payex-wywallet.php:509
+#: ../includes/class-wc-gateway-payex-factoring.php:405
+#: ../includes/class-wc-gateway-payex-payment.php:773
+#: ../includes/class-wc-gateway-payex-bankdebit.php:568
+#, fuzzy, php-format
+msgid "Transaction is failed. Transaction Id: %s."
+msgstr "Transaktionen misslyckades"
+
+#: ../includes/class-wc-gateway-payex-invoice.php:743
+#: ../includes/class-wc-gateway-payex-wywallet.php:512
+#: ../includes/class-wc-gateway-payex-factoring.php:408
+#: ../includes/class-wc-gateway-payex-payment.php:776
+#: ../includes/class-wc-gateway-payex-bankdebit.php:571
+#, php-format
+msgid "Details: %s."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:88
+msgid "Standard"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:105
+#: ../includes/class-wc-gateway-payex-abstract.php:112
+#: ../includes/class-wc-gateway-payex-abstract.php:116
+msgid ""
+"Your customers bank declined the transaction, your customer can contact "
+"their bank for more information"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:106
+msgid "An unhandled exception occurred"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:107
+msgid ""
+"A problem with Visa or MasterCards directory server, that communicates "
+"transactions for 3D-Secure verification"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:108
+msgid "Communication error with the acquiring bank"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:109
+msgid "The sum of your order lines is not equal to the price set in initialize"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:110
+msgid ""
+"Your customers card is not eligible for this kind of purchase, your customer "
+"can contact their bank for more information"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:111
+msgid ""
+"Some problem occurred with the credit card, your customer can contact their "
+"bank for more information"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:113
+msgid "The merchant account number sent in on request is invalid"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:114
+msgid ""
+"The IP address the request comes from is not registered in PayEx, you can "
+"set it up in PayEx Admin under Merchant profile"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:115
+msgid "The merchant does not have access to requested functionality"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:117
+#: ../includes/class-wc-gateway-payex-abstract.php:118
+msgid "The merchant account is not active"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:119
+msgid "The merchant account is locked out"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:120
+msgid "Generic validation error"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:121
+msgid ""
+"The hash on request is not valid, this might be due to the encryption key "
+"being incorrect"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:123
+msgid "The operation was cancelled by the client"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:124
+msgid "Unexpecter error at 3rd party"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:125
+msgid "The amount is not valid for this operation"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:126
+msgid "No data found"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:127
+msgid "The operation is not allowed, transaction is in invalid state"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:128
+msgid "Could not get in touch with the card issuer"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:129
+msgid "The card could not be verified"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:130
+msgid "There is a problem with this card"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:131
+msgid "The card expired"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:132
+msgid "Insufficient funds"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:133
+msgid "Incorrect amount"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:134
+msgid "Payment cancelled"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:135
+msgid "Your Credit Card not accepted for this purchase"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-abstract.php:165
+#, php-format
+msgid "PayEx error: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-wywallet.php:11
+#: ../includes/class-wc-gateway-payex-wywallet.php:73
+#: ../includes/class-wc-gateway-payex-wywallet.php:79
+msgid "PayEx WyWallet"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-wywallet.php:126
+#: ../includes/class-wc-gateway-payex-payment.php:177
+#: ../includes/class-wc-gateway-payex-bankdebit.php:159
+msgid "Enable Responsive Skinning"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-wywallet.php:128
+#: ../includes/class-wc-gateway-payex-payment.php:179
+#: ../includes/class-wc-gateway-payex-bankdebit.php:161
+msgid "Use Responsive web design on PayEx pages"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-wywallet.php:144
+#: ../includes/class-wc-gateway-payex-payment.php:207
+#, php-format
+msgid ""
+"You will be redirected to <a target=\"_blank\" href=\"%s\">PayEx</a> website "
+"when you place an order."
+msgstr ""
+"Du kommer att skickas till <a target=\"_blank\" href=\"%s\">PayEx</a> "
+"hemsida när du har placerat din order"
+
+#: ../includes/class-wc-gateway-payex-wywallet.php:410
+#: ../includes/class-wc-gateway-payex-payment.php:670
+msgid "Customer has been redirected to PayEx."
+msgstr "Kunden har skickats till PayEx"
+
+#: ../includes/class-wc-gateway-payex-wywallet.php:476
+#: ../includes/class-wc-gateway-payex-payment.php:736
+#: ../includes/class-wc-gateway-payex-bankdebit.php:535
+#, php-format
+msgid "Customer returned from PayEx. Order reference: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:13
+#: ../includes/class-wc-gateway-payex-factoring.php:90
+#: ../includes/class-wc-gateway-payex-factoring.php:96
+msgid "PayEx Factoring"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:111
+msgid "Payment Type"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:114
+msgid "User select"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:115
+#: ../includes/class-wc-gateway-payex-factoring.php:186
+msgid "Invoice 2.0 (Factoring)"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:116
+#: ../includes/class-wc-gateway-payex-factoring.php:187
+msgid "Part Payment"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:118
+msgid "Default payment type."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:184
+msgid "Please select payment method:"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:191
+#, fuzzy
+msgid "Social Security Number:"
+msgstr "Personnummer"
+
+#: ../includes/class-wc-gateway-payex-factoring.php:213
+msgid "Please specify country."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:267
+msgid "Factoring Fee"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:350
+msgid ""
+"Phone number not recognized, please use +countrycodenumber  ex. "
+"+467xxxxxxxxxx"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-factoring.php:398
+#, fuzzy
+msgid "Order canceled."
+msgstr "Beställningen har återbetalats"
+
+#: ../includes/class-wc-gateway-payex-payment.php:19
+#: ../includes/class-wc-gateway-payex-payment.php:105
+#: ../includes/class-wc-gateway-payex-payment.php:111
+msgid "PayEx Payments"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:133
+msgid "Payment View"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:142
+msgid "Default payment method."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:171
+#: ../includes/class-wc-gateway-payex-bankdebit.php:153
+msgid "Enable checkout information"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:173
+#: ../includes/class-wc-gateway-payex-bankdebit.php:155
+msgid "Send order lines and billing/delivery addresses to PayEx"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:183
+msgid "Max amount per transaction"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:185
+msgid ""
+"This option use with WC Subscriptions plugin. One single transaction can "
+"never be greater than this amount."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:186
+msgid "1000"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:189
+msgid "Agreement URL"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:191
+msgid ""
+"This option use with WC Subscriptions plugin. A reference that links this "
+"agreement to something the merchant takes money for."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:305
+#, fuzzy, php-format
+msgid "Transaction pending. Transaction Id: %s"
+msgstr "Transaktionen misslyckades"
+
+#: ../includes/class-wc-gateway-payex-payment.php:317
+#: ../includes/class-wc-gateway-payex-payment.php:339
+msgid "Transaction failed."
+msgstr "Transaktionen misslyckades"
+
+#: ../includes/class-wc-gateway-payex-payment.php:327
+msgid "Order refunded."
+msgstr "Beställningen har återbetalats"
+
+#: ../includes/class-wc-gateway-payex-payment.php:417
+#, php-format
+msgid ""
+"PayEx Recurring Payments don't work with WC Subscriptions in \"%s\" mode. "
+"Please set \"Credit Card\" mode."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:828
+#, fuzzy, php-format
+msgid "Refunded: %s. Transaction ID: %s. Reason: %s"
+msgstr "Transaktionen misslyckades"
+
+#: ../includes/class-wc-gateway-payex-payment.php:845
+#: ../includes/class-wc-gateway-payex-payment.php:859
+#: ../includes/class-wc-gateway-payex-payment.php:866
+#, php-format
+msgid "Subscription \"%s\" suspended with PayEx. Details: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:845
+#: ../includes/class-wc-gateway-payex-payment.php:889
+msgid "Invalid agreement reference"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:866
+#: ../includes/class-wc-gateway-payex-payment.php:910
+msgid "Invalid agreement status"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:871
+#, php-format
+msgid "Subscription \"%s\" reactivated with PayEx"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:889
+#: ../includes/class-wc-gateway-payex-payment.php:903
+#: ../includes/class-wc-gateway-payex-payment.php:910
+#: ../includes/class-wc-gateway-payex-payment.php:929
+#, php-format
+msgid ""
+"Failed to charge \"%s\" from Credit Card with PayEx. Subscription \"%s\". "
+"Details: %s."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-payment.php:939
+#, php-format
+msgid ""
+"Charged \"%s\" from Credit Card with PayEx. Subscription \"%s\". Transaction "
+"Id: %s"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-bankdebit.php:31
+#: ../includes/class-wc-gateway-payex-bankdebit.php:97
+#: ../includes/class-wc-gateway-payex-bankdebit.php:103
+msgid "PayEx Bank Debit"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-bankdebit.php:118
+#, fuzzy
+msgid "Banks"
+msgstr "Tack!"
+
+#: ../includes/class-wc-gateway-payex-bankdebit.php:123
+msgid "Available banks for payment."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-bankdebit.php:180
+msgid "Select bank:"
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-bankdebit.php:207
+msgid "Wrong bank."
+msgstr ""
+
+#: ../includes/class-wc-gateway-payex-bankdebit.php:469
+#, fuzzy
+msgid "Customer has been redirected to Bank."
+msgstr "Kunden har skickats till PayEx"
+
+#~ msgid "Cancel"
+#~ msgstr "Avbryt"
