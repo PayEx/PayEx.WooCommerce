@@ -21,7 +21,7 @@ class Px
 
     /** @see http://www.payexpim.com/technical-reference/wsdl/wsdl-files/ */
     /** @var array WSDL Files */
-    protected static $_wdsl = array(
+    protected static $_wsdl = array(
         'PxOrderWSDL' => '',
         'PxVerificationWSDL' => '',
         'PxAgreementWSDL' => '',
@@ -34,11 +34,12 @@ class Px
         /** @see http://www.payexpim.com/category/pxorder/ */
         'PxOrderWSDL' => array(
             'AddOrderAddress2', 'AddSingleOrderLine2', 'AuthorizeEVC', 'AuthorizeGC', 'AuthorizeInvoice',
-            'AuthorizeInvoiceLedger', 'Cancel2', 'Capture4', 'Capture5', 'Check2', 'Complete', 'Credit4', 'Credit5', 'CreditOrderLine3',
-            'GetLowestMonthlyInvoiceSaleAmount', 'GetTransactionDetails2', 'Initialize7', 'Initialize8', 'InvoiceLinkGet',
-            'PrepareAuthorizeDD', 'PrepareSaleDD2', 'PurchaseActivate', 'PurchaseInvoiceCorporate', 'PurchaseInvoicePartPaymentSale',
-            'PurchaseInvoicePrivate', 'PurchaseInvoiceSale', 'PurchaseOTT', 'PurchasePartPaymentSale', 'PurchasePX', 'ReserveIVR', 'SaleEVC',
-            'SaleInvoiceLedger', 'SaleIVR'
+            'AuthorizeInvoiceLedger', 'Cancel2', 'Capture5', 'Check2', 'Complete', 'Credit5', 'CreditOrderLine3',
+            'FinalizeTransaction', 'GetAddressByPaymentMethod', 'GetApprovedDeliveryAddress', 'GetLowestMonthlyInvoiceSaleAmount',
+            'GetTransactionDetails2', 'Initialize8', 'InvoiceLinkGet', 'PrepareAuthorizeDD', 'PrepareSaleDD2', 'PurchaseActivate',
+            'PurchaseFinancingInvoice', 'PurchaseInvoiceCorporate', 'PurchaseInvoicePrivate', 'PurchaseInvoiceSale',
+            'PurchasePartPaymentSale', 'PurchaseOTT', 'PurchaseInvoicePartPaymentSale', 'PurchasePX', 'SaleEVC',
+            'SaleInvoiceLedger', 'SaleGC', 'PurchaseWyWallet', 'PreparePurchaseWyWallet'
         ),
         /** @see http://www.payexpim.com/category/pxverification/ */
         'PxVerificationWSDL' => array(
@@ -46,7 +47,7 @@ class Px
         ),
         /** @see http://www.payexpim.com/category/pxagreement/ */
         'PxAgreementWSDL' => array(
-            'ActivatePxAgreement', 'AgreementCheck', 'AutoPay2', 'AutoPay3', 'CreateAgreement3', 'DeleteAgreement'
+            'ActivatePxAgreement', 'AutoPay3', 'AgreementCheck', 'CreateAgreement3', 'DeleteAgreement'
         ),
         /** @see http://www.payexpim.com/category/pxagreement/ */
         'PxRecurringWSDL' => array(
@@ -60,6 +61,7 @@ class Px
 
     /**
      * Constructor
+     * @param array $options
      */
     public function __construct($options = array())
     {
@@ -87,7 +89,7 @@ class Px
      */
     public function getVersion()
     {
-        return '2.0.1';
+        return '2.0.2';
     }
 
     /**
@@ -112,19 +114,19 @@ class Px
      */
     protected function initWSDL($debug_mode)
     {
-        self::$_wdsl['PxOrderWSDL'] = 'https://test-external.payex.com/pxorder/pxorder.asmx?WSDL';
-        self::$_wdsl['PxConfinedWSDL'] = 'https://test-confined.payex.com/PxConfined/pxorder.asmx?WSDL';
-        self::$_wdsl['PxVerificationWSDL'] = 'https://test-external.payex.com/PxVerification/pxverification.asmx?WSDL';
-        self::$_wdsl['PxAgreementWSDL'] = 'https://test-external.payex.com/pxagreement/pxagreement.asmx?WSDL';
-        self::$_wdsl['PxRecurringWSDL'] = 'https://test-external.payex.com/pxagreement/pxrecurring.asmx?WSDL';
+        self::$_wsdl['PxOrderWSDL'] = 'https://test-external.payex.com/pxorder/pxorder.asmx?WSDL';
+        self::$_wsdl['PxConfinedWSDL'] = 'https://test-confined.payex.com/PxConfined/pxorder.asmx?WSDL';
+        self::$_wsdl['PxVerificationWSDL'] = 'https://test-external.payex.com/PxVerification/pxverification.asmx?WSDL';
+        self::$_wsdl['PxAgreementWSDL'] = 'https://test-external.payex.com/pxagreement/pxagreement.asmx?WSDL';
+        self::$_wsdl['PxRecurringWSDL'] = 'https://test-external.payex.com/pxagreement/pxrecurring.asmx?WSDL';
 
         // Set Live environment
         if (!$debug_mode ) {
-            self::$_wdsl['PxOrderWSDL'] = 'https://external.payex.com/pxorder/pxorder.asmx?WSDL';
-            self::$_wdsl['PxConfinedWSDL'] = 'https://confined.payex.com/PxConfined/pxorder.asmx?WSDL';
-            self::$_wdsl['PxVerificationWSDL'] = 'https://external.payex.com/pxverification/pxverification.asmx?WSDL';
-            self::$_wdsl['PxAgreementWSDL'] = 'https://external.payex.com/pxagreement/pxagreement.asmx?WSDL';
-            self::$_wdsl['PxRecurringWSDL'] = 'https://external.payex.com/pxagreement/pxrecurring.asmx?WSDL';
+            self::$_wsdl['PxOrderWSDL'] = 'https://external.payex.com/pxorder/pxorder.asmx?WSDL';
+            self::$_wsdl['PxConfinedWSDL'] = 'https://confined.payex.com/PxConfined/pxorder.asmx?WSDL';
+            self::$_wsdl['PxVerificationWSDL'] = 'https://external.payex.com/pxverification/pxverification.asmx?WSDL';
+            self::$_wsdl['PxAgreementWSDL'] = 'https://external.payex.com/pxagreement/pxagreement.asmx?WSDL';
+            self::$_wsdl['PxRecurringWSDL'] = 'https://external.payex.com/pxagreement/pxrecurring.asmx?WSDL';
         }
     }
 
@@ -137,7 +139,7 @@ class Px
     {
         foreach (self::$_rules as $wsdl_type => $function_list) {
             if (in_array($px_function, $function_list)) {
-                return self::$_wdsl[$wsdl_type];
+                return self::$_wsdl[$wsdl_type];
             }
         }
         return false;
@@ -159,12 +161,12 @@ class Px
         }
 
         $result = array();
-        $black_listed = array('header', 'id', 'status');
+        $blacklisted = array('header', 'id', 'status');
         $items = $doc->getElementsByTagName('payex')->item(0)->getElementsByTagName('*');
         foreach ($items as $item) {
             $key = $item->nodeName;
             $value = $item->nodeValue;
-            if (!in_array($key, $black_listed)) {
+            if (!in_array($key, $blacklisted)) {
                 $result[$key] = $value;
             }
         }
@@ -193,7 +195,7 @@ class Px
         }
 
         $wsdl = $this->getWSDL($px_function);
-        if ($wsdl === false || empty($wsdl)) {
+        if (!$wsdl || empty($wsdl)) {
             throw new Exception('Unknown PayEx Method.');
         }
 
@@ -217,7 +219,7 @@ class Px
         // Call PayEx Method
         $client = new SoapClient($wsdl, $this->_options);
         $result = $client->__soapCall($px_function, $arguments);
-        if (property_exists($result, $px_function . 'Result') === false) {
+        if (!property_exists($result, $px_function . 'Result')) {
             throw new Exception('Invalid PayEx Response.');
         }
         $result = $result->{$px_function . 'Result'};

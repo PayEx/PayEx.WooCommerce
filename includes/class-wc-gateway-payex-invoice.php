@@ -288,6 +288,9 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			return;
 		}
 
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
+
 		// Verify
 		switch ( $_POST['pxinvoice_method'] ) {
 			case 'private':
@@ -371,6 +374,9 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 
 		$customer_id = (int) $order->customer_user;
 		$amount      = $order->order_total;
+
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
 		// Call PxOrder.Initialize8
 		$params = array(

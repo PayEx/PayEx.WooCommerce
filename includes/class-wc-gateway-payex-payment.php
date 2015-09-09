@@ -400,6 +400,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			);
 		}
 
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
+
 		$customer_id = (int) $order->customer_user;
 		$amount      = $order->order_total;
 		$currency    = get_option( 'woocommerce_currency' );
@@ -459,10 +462,10 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
 			'additionalValues'  => $additional,
 			'externalID'        => '',
-			'returnUrl'         => $this->get_return_url( $order ),
+			'returnUrl'         => html_entity_decode( $this->get_return_url( $order ) ),
 			'view'              => $this->payment_view,
 			'agreementRef'      => $agreement,
-			'cancelUrl'         => $order->get_cancel_order_url(),
+			'cancelUrl'         => html_entity_decode( $order->get_cancel_order_url() ),
 			'clientLanguage'    => $this->language
 		);
 		$result = $this->getPx()->Initialize8( $params );
@@ -696,6 +699,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			return;
 		}
 
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
+
 		// Call PxOrder.Complete
 		$params = array(
 			'accountNumber' => '',
@@ -808,6 +814,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		if ( is_null( $amount ) ) {
 			$amount = $order->order_total;
 		}
+
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
 		// Call PxOrder.Credit5
 		$params = array(

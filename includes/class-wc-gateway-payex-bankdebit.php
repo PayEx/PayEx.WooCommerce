@@ -224,8 +224,11 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		$currency    = get_option( 'woocommerce_currency' );
 		$bank_id     = ! empty( $_POST['bank_id'] ) ? $_POST['bank_id'] : 'NB';
 
-		$returnUrl = $this->get_return_url( $order );
-		$cancelUrl = $order->get_cancel_order_url();
+		$returnUrl = html_entity_decode( $this->get_return_url( $order ) );
+		$cancelUrl = html_entity_decode( $order->get_cancel_order_url() );
+
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
 		// Call PxOrder.Initialize8
 		$params = array(
@@ -494,6 +497,9 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		if ( empty( $_GET['orderRef'] ) ) {
 			return;
 		}
+
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
 		// Call PxOrder.Complete
 		$params = array(

@@ -214,20 +214,20 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			$this->add_message( __( 'Please enter your Social Security Number and confirm your order.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
 
-		// Call PxVerification.GetConsumerLegalAddress
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
+
+		// Call PxOrder.GetAddressByPaymentMethod
 		$params = array(
-			'accountNumber'        => '',
-			'countryCode'          => $_POST['billing_country'], // Supported only "SE"
-			'socialSecurityNumber' => $_POST['social-security-number']
+			'accountNumber' => '',
+			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
+			'ssn' => $_POST['social-security-number'],
+			'zipcode' => '',
+			'countryCode' => $_POST['billing_country'],
+			'ipAddress' => $_SERVER['REMOTE_ADDR']
 		);
-		$result = $this->getPx()->GetConsumerLegalAddress( $params );
+		$result = $this->getPx()->GetAddressByPaymentMethod($params);
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-			if ( preg_match( '/\bInvalid parameter:SocialSecurityNumber\b/i', $result['description'] ) ) {
-				$this->add_message( __( 'Invalid Social Security Number', 'woocommerce-gateway-payex-payment' ), 'error' );
-
-				return;
-			}
-
 			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return;
@@ -254,6 +254,9 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		if ( $this->mode === 'SELECT' ) {
 			$this->mode = $_POST['factoring-menu'];
 		}
+
+		// Init PayEx
+		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
 		// Call PxOrder.Initialize8
 		$params = array(
