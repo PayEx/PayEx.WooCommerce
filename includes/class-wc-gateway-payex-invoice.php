@@ -413,22 +413,26 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 
 		// add Order Lines
 		$i = 1;
-		foreach ( $order->get_items() as $product ) {
-			$taxPercent = ( $product['line_tax'] > 0 ) ? round( 100 / ( $product['line_total'] / $product['line_tax'] ) ) : 0;
+		foreach ( $order->get_items() as $order_item ) {
+			$price = $order->get_line_subtotal( $order_item, false, false );
+			$priceWithTax = $order->get_line_subtotal( $order_item, true, false );
+			$tax = $priceWithTax - $price;
+			$taxPercent = ( $tax > 0 ) ? round( 100 / ( $price / $tax ) ) : 0;
 
 			// Call PxOrder.AddSingleOrderLine2
 			$params = array(
 				'accountNumber'    => '',
 				'orderRef'         => $orderRef,
 				'itemNumber'       => $i,
-				'itemDescription1' => $product['name'],
+				'itemDescription1' => $order_item['name'],
 				'itemDescription2' => '',
 				'itemDescription3' => '',
 				'itemDescription4' => '',
 				'itemDescription5' => '',
-				'quantity'         => $product['qty'],
-				'amount'           => (int) ( 100 * ( $product['line_total'] + $product['line_tax'] ) ),
-				'vatPrice'         => (int) ( 100 * $product['line_tax'] ),
+				'quantity'         => $order_item['qty'],
+				'amount'           => (int) ( 100 * $priceWithTax ),
+				//must include tax
+				'vatPrice'         => (int) ( 100 * $tax ),
 				'vatPercent'       => (int) ( 100 * $taxPercent )
 			);
 			$result = $this->getPx()->AddSingleOrderLine2( $params );
@@ -458,6 +462,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				'itemDescription5' => '',
 				'quantity'         => 1,
 				'amount'           => (int) ( 100 * ( $order->order_shipping + $order->order_shipping_tax ) ),
+				//must include tax
 				'vatPrice'         => (int) ( 100 * $order->order_shipping_tax ),
 				'vatPercent'       => (int) ( 100 * $taxPercent )
 			);
@@ -487,7 +492,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				'itemDescription4' => '',
 				'itemDescription5' => '',
 				'quantity'         => 1,
-				'amount'           => (int) ( 100 * ( $fee['line_total'] + $fee['line_tax'] ) ),
+				'amount'           => (int) ( 100 * ( $fee['line_total'] + $fee['line_tax'] ) ), //must include tax
 				'vatPrice'         => (int) ( 100 * $fee['line_tax'] ),
 				'vatPercent'       => (int) ( 100 * $taxPercent )
 			);
@@ -504,7 +509,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Add discount line
-		if ( $order->get_total_discount() > 0 ) {
+		if ( $order->get_total_discount( false ) > 0 ) {
 			$params = array(
 				'accountNumber'    => '',
 				'orderRef'         => $orderRef,
@@ -515,7 +520,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				'itemDescription4' => '',
 				'itemDescription5' => '',
 				'quantity'         => 1,
-				'amount'           => - 1 * (int) ( $order->get_total_discount() * 100 ),
+				'amount'           => - 1 * (int) ( $order->get_total_discount( false ) * 100 ),
 				'vatPrice'         => 0,
 				'vatPercent'       => 0
 			);

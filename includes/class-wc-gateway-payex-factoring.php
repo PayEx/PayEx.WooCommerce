@@ -398,16 +398,19 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$OrderLines = $dom->createElement( 'OrderLines' );
 		$OnlineInvoice->appendChild( $OrderLines );
 
-		foreach ( $order->get_items() as $product ) {
-			$taxPercent = ( $product['line_tax'] > 0 ) ? round( 100 / ( $product['line_total'] / $product['line_tax'] ) ) : 0;
+		foreach ( $order->get_items() as $order_item ) {
+			$price = $order->get_line_subtotal( $order_item, false, false );
+			$priceWithTax = $order->get_line_subtotal( $order_item, true, false );
+			$tax = $priceWithTax - $price;
+			$taxPercent = ( $tax > 0 ) ? round( 100 / ( $price / $tax ) ) : 0;
 
 			$OrderLine = $dom->createElement( 'OrderLine' );
-			$OrderLine->appendChild( $dom->createElement( 'Product', $product['name'] ) );
-			$OrderLine->appendChild( $dom->createElement( 'Qty', $product['qty'] ) );
-			$OrderLine->appendChild( $dom->createElement( 'UnitPrice', round( $product['line_total'] / $product['qty'], 2 ) ) );
+			$OrderLine->appendChild( $dom->createElement( 'Product', $order_item['name'] ) );
+			$OrderLine->appendChild( $dom->createElement( 'Qty', $order_item['qty'] ) );
+			$OrderLine->appendChild( $dom->createElement( 'UnitPrice', round( $price / $order_item['qty'], 2 ) ) );
 			$OrderLine->appendChild( $dom->createElement( 'VatRate', $taxPercent ) );
-			$OrderLine->appendChild( $dom->createElement( 'VatAmount', round( $product['line_tax'], 2 ) ) );
-			$OrderLine->appendChild( $dom->createElement( 'Amount', round( $product['line_total'] + $product['line_tax'], 2 ) ) );
+			$OrderLine->appendChild( $dom->createElement( 'VatAmount', round( $tax, 2 ) ) );
+			$OrderLine->appendChild( $dom->createElement( 'Amount', round( $priceWithTax, 2 ) ) );
 			$OrderLines->appendChild( $OrderLine );
 		}
 
@@ -426,14 +429,14 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Add discount line
-		if ( $order->get_total_discount() > 0 ) {
+		if ( $order->get_total_discount( false ) > 0 ) {
 			$OrderLine = $dom->createElement( 'OrderLine' );
 			$OrderLine->appendChild( $dom->createElement( 'Product', __( 'Discount', 'woocommerce-gateway-payex-payment' ) ) );
 			$OrderLine->appendChild( $dom->createElement( 'Qty', 1 ) );
-			$OrderLine->appendChild( $dom->createElement( 'UnitPrice', - 1 * $order->get_total_discount() ) );
+			$OrderLine->appendChild( $dom->createElement( 'UnitPrice', - 1 * $order->get_total_discount( false ) ) );
 			$OrderLine->appendChild( $dom->createElement( 'VatRate', 0 ) );
 			$OrderLine->appendChild( $dom->createElement( 'VatAmount', 0 ) );
-			$OrderLine->appendChild( $dom->createElement( 'Amount', - 1 * $order->get_total_discount() ) );
+			$OrderLine->appendChild( $dom->createElement( 'Amount', - 1 * $order->get_total_discount( false ) ) );
 			$OrderLines->appendChild( $OrderLine );
 		}
 
