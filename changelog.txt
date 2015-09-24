@@ -8,6 +8,8 @@ Version 2.0.0pre
 * WooCommerce Subscriptions: Fixed problem when payment method switching
 * Integrated plugins: bankdebit, factoring, invoice and wywallet
 * Order lines and discount changes
+* Factoring: added Financing Invoice mode
+* Addons: added SSN Field
 
 Version 1.1.3
 * Fixed problem when subscription switches

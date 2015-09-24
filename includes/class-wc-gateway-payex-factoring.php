@@ -109,11 +109,12 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				'type'        => 'select',
 				'options'     => array(
 					'SELECT'        => __( 'User select', 'woocommerce-gateway-payex-payment' ),
+					'FINANCING'     => __( 'Financing Invoice', 'woocommerce-gateway-payex-payment' ),
 					'FACTORING'     => __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ),
 					'CREDITACCOUNT' => __( 'Part Payment', 'woocommerce-gateway-payex-payment' ),
 				),
 				'description' => __( 'Default payment type.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => 'FACTORING'
+				'default'     => 'FINANCING'
 			),
 			'language'       => array(
 				'title'       => __( 'Language', 'woocommerce-gateway-payex-payment' ),
@@ -180,7 +181,8 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			<label for="factoring-menu"></label>
 			<label for="social-security-number"><?php echo __( 'Please select payment method:', 'woocommerce-gateway-payex-payment' ); ?></label>
 			<select name="factoring-menu" id="factoring-menu" class="required-entry">
-				<option selected value="FACTORING"><?php echo __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ); ?></option>
+				<option selected value="FINANCING"><?php echo __( 'Financing Invoice', 'woocommerce-gateway-payex-payment' ); ?></option>
+				<option value="FACTORING"><?php echo __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ); ?></option>
 				<option value="CREDITACCOUNT"><?php echo __( 'Part Payment', 'woocommerce-gateway-payex-payment' ); ?></option>
 			</select>
 			<div class="clear"></div>
@@ -242,7 +244,6 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 	 * @return array|void
 	 */
 	public function process_payment( $order_id ) {
-		global $woocommerce;
 		$order = wc_get_order( $order_id );
 
 		$customer_id = (int) $order->customer_user;
@@ -290,31 +291,75 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 
 		$orderRef = $result['orderRef'];
 
-		// Call PxOrder.PurchaseInvoiceSale / PxOrder.PurchasePartPaymentSale
-		$params = array(
-			'accountNumber'        => '',
-			'orderRef'             => $orderRef,
-			'socialSecurityNumber' => $ssn,
-			'legalFirstName'       => $order->billing_first_name,
-			'legalLastName'        => $order->billing_last_name,
-			'legalStreetAddress'   => trim( $order->billing_address_1 . ' ' . $order->billing_address_2 ),
-			'legalCoAddress'       => '',
-			'legalPostNumber'      => $order->billing_postcode,
-			'legalCity'            => $order->billing_city,
-			'legalCountryCode'     => $order->billing_country,
-			'email'                => $order->billing_email,
-			'msisdn'               => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
-			'ipAddress'            => $_SERVER['REMOTE_ADDR'],
-		);
+		// Perform Payment
+		switch ($this->mode) {
+			case 'FINANCING':
+				// Call PxOrder.PurchaseFinancingInvoice
+				$params = array(
+					'accountNumber' => '',
+					'orderRef' => $orderRef,
+					'socialSecurityNumber' => $ssn,
+					'legalName' => $order->billing_first_name . ' ' . $order->billing_last_name,
+					'streetAddress' => trim( $order->billing_address_1 . ' ' . $order->billing_address_2 ),
+					'coAddress' => '',
+					'zipCode' => $order->billing_postcode,
+					'city' => $order->billing_city,
+					'countryCode' => $order->billing_country,
+					'paymentMethod' => $order->billing_country === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
+					'email' => $order->billing_email,
+					'msisdn' => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
+					'ipAddress' => $_SERVER['REMOTE_ADDR']
+				);
+				$result = $this->getPx()->PurchaseFinancingInvoice($params);
+				break;
+			case 'FACTORING':
+				// Call PxOrder.PurchaseInvoiceSale
+				$params = array(
+					'accountNumber'        => '',
+					'orderRef'             => $orderRef,
+					'socialSecurityNumber' => $ssn,
+					'legalFirstName'       => $order->billing_first_name,
+					'legalLastName'        => $order->billing_last_name,
+					'legalStreetAddress'   => trim( $order->billing_address_1 . ' ' . $order->billing_address_2 ),
+					'legalCoAddress'       => '',
+					'legalPostNumber'      => $order->billing_postcode,
+					'legalCity'            => $order->billing_city,
+					'legalCountryCode'     => $order->billing_country,
+					'email'                => $order->billing_email,
+					'msisdn'               => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
+					'ipAddress'            => $_SERVER['REMOTE_ADDR'],
+				);
 
-		if ( $this->mode === 'FACTORING' ) {
-			$result = $this->getPx()->PurchaseInvoiceSale( $params );
-		} else {
-			$result = $this->getPx()->PurchasePartPaymentSale( $params );
+				$result = $this->getPx()->PurchaseInvoiceSale($params);
+				break;
+			case 'CREDITACCOUNT':
+				// Call PxOrder.PurchasePartPaymentSale
+				$params = array(
+					'accountNumber'        => '',
+					'orderRef'             => $orderRef,
+					'socialSecurityNumber' => $ssn,
+					'legalFirstName'       => $order->billing_first_name,
+					'legalLastName'        => $order->billing_last_name,
+					'legalStreetAddress'   => trim( $order->billing_address_1 . ' ' . $order->billing_address_2 ),
+					'legalCoAddress'       => '',
+					'legalPostNumber'      => $order->billing_postcode,
+					'legalCity'            => $order->billing_city,
+					'legalCountryCode'     => $order->billing_country,
+					'email'                => $order->billing_email,
+					'msisdn'               => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
+					'ipAddress'            => $_SERVER['REMOTE_ADDR'],
+				);
+
+				$result = $this->getPx()->PurchasePartPaymentSale($params);
+				break;
+			default:
+				$order->update_status( 'failed', __( 'Invalid payment mode', 'woocommerce-gateway-payex-payment' ) );
+				$this->add_message( __( 'Invalid payment mode', 'woocommerce-gateway-payex-payment' ), 'error' );
+				return;
 		}
 
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-			$this->log( 'PxOrder.PurchaseInvoiceSale / PurchasePartPaymentSale:' . $result['errorCode'] . '(' . $result['description'] . ')' );
+			$this->log( 'PurchaseFinancingInvoice / PxOrder.PurchaseInvoiceSale / PurchasePartPaymentSale:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 			if ( preg_match( '/\bInvalid parameter:msisdn\b/i', $result['description'] ) ) {
 				$this->add_message( __( 'Phone number not recognized, please use +countrycodenumber  ex. +467xxxxxxxxxx', 'woocommerce-gateway-payex-payment' ), 'error' );
 
@@ -339,7 +384,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			case 6:
 				$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 				$order->payment_complete();
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				return array(
 					'result'   => 'success',
@@ -347,7 +392,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				);
 			case 1:
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction is pending. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				return array(
 					'result'   => 'success',
@@ -355,7 +400,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				);
 			case 3:
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction authorized. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				return array(
 					'result'   => 'success',

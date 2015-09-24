@@ -103,7 +103,7 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
     public function getErrorMessageByCode( $errorCode ) {
         $errorMessages = array(
             'REJECTED_BY_ACQUIRER'                    => __( 'Your customers bank declined the transaction, your customer can contact their bank for more information', 'woocommerce-gateway-payex-payment' ),
-            'Error_Generic'                           => __( 'An unhandled exception occurred', 'woocommerce-gateway-payex-payment' ),
+            //'Error_Generic'                           => __( 'An unhandled exception occurred', 'woocommerce-gateway-payex-payment' ),
             '3DSecureDirectoryServerError'            => __( 'A problem with Visa or MasterCards directory server, that communicates transactions for 3D-Secure verification', 'woocommerce-gateway-payex-payment' ),
             'AcquirerComunicationError'               => __( 'Communication error with the acquiring bank', 'woocommerce-gateway-payex-payment' ),
             'AmountNotEqualOrderLinesTotal'           => __( 'The sum of your order lines is not equal to the price set in initialize', 'woocommerce-gateway-payex-payment' ),
@@ -170,19 +170,21 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
      *
      * @param string $message
      *
-     * @param string $type
+     * @param string $notice_type
      */
-    public function add_message( $message='', $type = 'error' ) {
+    public function add_message( $message = '', $notice_type = 'error' ) {
         global $woocommerce;
 
-        if ( version_compare( $woocommerce->version, '2.1', '<' ) ) {
-            if ( 'error' !== $type ) {
-                $woocommerce->add_message( $message );
-            } else {
+        if ( function_exists( 'wc_add_notice' ) ) {
+            wc_add_notice( $message, $notice_type );
+        } else { // WC < 2.1
+            if ( 'error' === $notice_type ) {
                 $woocommerce->add_error( $message );
+            } else {
+                $woocommerce->add_message( $message );
             }
-        } else {
-            wc_add_notice( $message, $type );
+
+            $woocommerce->set_messages();
         }
     }
 

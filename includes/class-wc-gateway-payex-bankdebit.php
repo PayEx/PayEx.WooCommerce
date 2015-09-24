@@ -202,7 +202,6 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 	 * @return bool|void
 	 */
 	public function validate_fields() {
-		global $woocommerce;
 		if ( empty( $_POST['bank_id'] ) || ! isset( self::$available_banks[ $_POST['bank_id'] ] ) ) {
 			$this->add_message( __( 'Wrong bank.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
@@ -216,7 +215,6 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 	 * @return array|void
 	 */
 	public function process_payment( $order_id ) {
-		global $woocommerce;
 		$order = wc_get_order( $order_id );
 
 		$customer_id = (int) $order->customer_user;
@@ -387,8 +385,8 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 			}
 
 			// Add Order Address
-			$countries = $woocommerce->countries->countries;
-			$states    = $woocommerce->countries->states;
+			$countries = WC()->countries->countries;
+			$states    = WC()->countries->states;
 
 			// Call PxOrder.AddOrderAddress2
 			$params = array(
@@ -425,7 +423,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 				'deliveryGsm'         => '',
 			);
 
-			if ( $woocommerce->cart->needs_shipping() ) {
+			if ( WC()->cart->needs_shipping() ) {
 				$shipping_params = array(
 					'deliveryFirstName'   => $order->shipping_first_name,
 					'deliveryLastName'    => $order->shipping_last_name,
@@ -484,8 +482,6 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 	 * Payment confirm action
 	 */
 	public function payment_confirm() {
-		global $woocommerce;
-
 		if ( empty( $_GET['key'] ) ) {
 			return;
 		}
@@ -554,16 +550,16 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 			case 6:
 				$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 				$order->payment_complete();
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				break;
 			case 1:
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction is pending. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 				break;
 			case 3:
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction authorized. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 				break;
 			case 4:
 				// Cancel

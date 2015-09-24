@@ -280,8 +280,6 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 	 * @return bool|void
 	 */
 	public function validate_fields() {
-		global $woocommerce;
-
 		if ( empty( $_POST['pxinvoice_method'] ) ) {
 			$this->add_message( __( 'Please select invoice method.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
@@ -307,7 +305,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 					'socialSecurityNumber' => $_POST['socialSecurityNumber'],
 					'firstName'            => $_POST['billing_first_name'],
 					'lastName'             => $_POST['billing_last_name'],
-					'amount'               => round( $woocommerce->cart->total * 100 ),
+					'amount'               => round( WC()->cart->total * 100 ),
 					'clientIPAddress'      => $_SERVER['REMOTE_ADDR']
 				);
 				$status = $this->getPx()->CreditCheckPrivate2( $params );
@@ -330,7 +328,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 					'accountNumber'      => '',
 					'countryCode'        => $_POST['billing_country'],
 					'organizationNumber' => $_POST['organizationNumber'],
-					'amount'             => round( $woocommerce->cart->total * 100 )
+					'amount'             => round( WC()->cart->total * 100 )
 				);
 				$status = $this->getPx()->CreditCheckCorporate2( $params );
 				if ( preg_match( '/\bInvalid parameter:OrganizationNumber\b/i', $status['description'] ) ) {
@@ -369,7 +367,6 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 	 * @return array|void
 	 */
 	public function process_payment( $order_id ) {
-		global $woocommerce;
 		$order = wc_get_order( $order_id );
 
 		$customer_id = (int) $order->customer_user;
@@ -535,8 +532,8 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Add Order Address
-		$countries = $woocommerce->countries->countries;
-		$states    = $woocommerce->countries->states;
+		$countries = WC()->countries->countries;
+		$states    = WC()->countries->states;
 
 		// Call PxOrder.AddOrderAddress2
 		$params = array(
@@ -573,7 +570,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			'deliveryGsm'         => '',
 		);
 
-		if ( $woocommerce->cart->needs_shipping() ) {
+		if ( WC()->cart->needs_shipping() ) {
 			$shipping_params = array(
 				'deliveryFirstName'   => $order->shipping_first_name,
 				'deliveryLastName'    => $order->shipping_last_name,
@@ -681,7 +678,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			case 6:
 				$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 				$order->payment_complete();
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				return array(
 					'result'   => 'success',
@@ -689,7 +686,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				);
 			case 1:
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction is pending. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				return array(
 					'result'   => 'success',
@@ -697,7 +694,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				);
 			case 3:
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction authorized. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$woocommerce->cart->empty_cart();
+				WC()->cart->empty_cart();
 
 				return array(
 					'result'   => 'success',
