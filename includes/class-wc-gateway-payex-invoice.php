@@ -381,7 +381,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			'purchaseOperation' => $this->purchase_operation,
 			'price'             => round( $amount * 100 ),
 			'priceArgList'      => '',
-			'currency'          => get_option( 'woocommerce_currency' ),
+			'currency'          => $order->order_currency,
 			'vat'               => 0,
 			'orderID'           => $order->id,
 			'productNumber'     => $customer_id, // Customer Id

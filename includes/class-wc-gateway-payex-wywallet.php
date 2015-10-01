@@ -174,7 +174,7 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 
 		$customer_id = (int) $order->customer_user;
 		$amount      = $order->order_total;
-		$currency    = get_option( 'woocommerce_currency' );
+		$currency    = $order->order_currency;
 
 		$additional = '';
 		if ( $this->responsive === 'yes' ) {

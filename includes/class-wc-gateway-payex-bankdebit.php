@@ -219,7 +219,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 
 		$customer_id = (int) $order->customer_user;
 		$amount      = $order->order_total;
-		$currency    = get_option( 'woocommerce_currency' );
+		$currency    = $order->order_currency;
 		$bank_id     = ! empty( $_POST['bank_id'] ) ? $_POST['bank_id'] : 'NB';
 
 		$returnUrl = html_entity_decode( $this->get_return_url( $order ) );

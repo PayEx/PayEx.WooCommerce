@@ -404,7 +404,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 		$customer_id = (int) $order->customer_user;
 		$amount      = $order->order_total;
-		$currency    = get_option( 'woocommerce_currency' );
+		$currency    = $order->order_currency;
 		$agreement   = '';
 
 		$additional = ( $this->payment_view === 'PX' ? 'PAYMENTMENU=TRUE' : '' );
