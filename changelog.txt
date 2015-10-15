@@ -11,6 +11,7 @@ Version 2.0.0pre
 * Factoring: added Financing Invoice mode
 * Addons: added SSN Field
 * Fixed problems on multi currency configurations
+* PayEx Payment Page 2.0 for 'Credit Card' and 'Direct Debit' views
 
 Version 1.1.3
 * Fixed problem when subscription switches

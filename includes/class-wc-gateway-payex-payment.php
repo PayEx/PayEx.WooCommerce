@@ -410,7 +410,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$additional = ( $this->payment_view === 'PX' ? 'PAYMENTMENU=TRUE' : '' );
 		if ( $this->responsive === 'yes' ) {
 			$separator = ( ! empty( $additional ) && mb_substr( $additional, - 1 ) !== '&' ) ? '&' : '';
-			$additional .= $separator . 'USECSS=RESPONSIVEDESIGN';
+			// PayEx Payment Page 2.0  works only for View 'Credit Card' and 'Direct Debit' at the moment
+			if (in_array($this->payment_view, array('CREDITCARD', 'DIRECTDEBIT'))) {
+				$additional .= $separator . 'RESPONSIVE=1';
+			} else {
+				$additional .= $separator . 'USECSS=RESPONSIVEDESIGN';
+			}
 		}
 
 		// Create Recurring Agreement

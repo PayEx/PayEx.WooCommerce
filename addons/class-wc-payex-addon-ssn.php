@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: main
- * Date: 24.09.15
- * Time: 12:30
- */
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // PHP-Name-Parser by Josh Fraser
 // See https://github.com/joshfraser/PHP-Name-Parser
