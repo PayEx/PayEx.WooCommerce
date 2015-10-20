@@ -5,6 +5,7 @@
     function process_ssn() {
         var social_security_number = $('.payex-ssn-class input').val();
         var billing_country = $('#billing_country').val();
+        var billing_postcode = $('#billing_postcode').val();
 
         // wc_checkout_params is required to continue, ensure the object exists
         if (typeof wc_checkout_params === 'undefined')
@@ -29,7 +30,8 @@
             data: {
                 action: 'payex_process_ssn',
                 social_security_number: social_security_number,
-                billing_country: billing_country
+                billing_country: billing_country,
+                billing_postcode: billing_postcode
             },
             success: function (response) {
                 if (!response.success) {
@@ -54,11 +56,11 @@
                             $('#billing_country').val(value).trigger('chosen:updated');
                             $('#billing_country').chosen().change();
                         } else {
-                            $('#billing_country').val(value)
+                            $('#billing_country').val(value).change();
                         }
                     }
 
-                    $('input[name="' + index + '"]').prop('disabled', true);
+                    $('input[name="' + index + '"]').prop('readonly', true);
                 });
 
                 // Process Shipping
@@ -75,11 +77,11 @@
                             $('#shipping_country').val(value).trigger('chosen:updated');
                             $('#shipping_country').chosen().change();
                         } else {
-                            $('#shipping_country').val(value)
+                            $('#shipping_country').val(value).change();
                         }
                     }
 
-                    $('input[name="' + index + '"]').prop('disabled', true);
+                    $('input[name="' + index + '"]').prop('readonly', true);
                 });
 
                 $('#customer_details').unblock();

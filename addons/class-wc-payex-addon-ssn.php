@@ -92,19 +92,29 @@ class WC_Payex_Addon_SSN {
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->options['account_no'], $this->options['encrypted_key'], (bool) $this->options['testmode'] );
 
+		if ( empty( $_POST['billing_country'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please select country', 'woocommerce-gateway-payex-payment' ) ) );
+			exit();
+		}
+
+		if ( empty( $_POST['billing_postcode'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please enter postcode', 'woocommerce-gateway-payex-payment' ) ) );
+			exit();
+		}
+
 		// Call PxOrder.GetAddressByPaymentMethod
 		$params = array(
 			'accountNumber' => '',
 			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
 			'ssn' => $_POST['social_security_number'],
-			'zipcode' => '',
+			'zipcode' => $_POST['billing_postcode'],
 			'countryCode' => $_POST['billing_country'],
 			'ipAddress' => $_SERVER['REMOTE_ADDR']
 		);
 		$result = $this->getPx()->GetAddressByPaymentMethod($params);
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 			if ( preg_match( '/\bInvalid parameter:SocialSecurityNumber\b/i', $result['description'] ) ) {
-				wp_send_json_error( array( 'message' => __( 'Invalid Social Security Number', 'factoring' ) ) );
+				wp_send_json_error( array( 'message' => __( 'Invalid Social Security Number', 'woocommerce-gateway-payex-payment' ) ) );
 				exit();
 			}
 
@@ -120,7 +130,7 @@ class WC_Payex_Addon_SSN {
 			'first_name' => $name['fname'],
 			'last_name'  => $name['lname'],
 			'address_1'  => $result['streetAddress'],
-			'address_2'  => ! empty($result['coAddress']) ? 'c/o' . $result['coAddress'] : '',
+			'address_2'  => ! empty($result['coAddress']) ? 'c/o ' . $result['coAddress'] : '',
 			'postcode'   => $result['zipCode'],
 			'city'       => $result['city'],
 			'country'    => $result['countryCode']
