@@ -1,0 +1,29 @@
+.btn-masterpass {
+    display: block;
+}
+
+.masterpass-payex.button,
+.masterpass-payex.button:hover,
+.masterpass-payex.button:active {
+    background-color: transparent;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    clear: both;
+}
+
+.masterpass-payex.button button,
+.masterpass-payex.button button:hover,
+.masterpass-payex.button button:active {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+
+
+

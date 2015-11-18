@@ -756,7 +756,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			case 0:
 			case 6:
 				$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-				$order->payment_complete();
+				$order->payment_complete( $result['transactionNumber'] );
 				WC()->cart->empty_cart();
 
 				// Activate subscriptions
