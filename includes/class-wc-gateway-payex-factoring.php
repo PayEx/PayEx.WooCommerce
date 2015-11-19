@@ -37,6 +37,16 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$this->fee_is_taxable = isset( $this->settings['fee_is_taxable'] ) ? $this->settings['fee_is_taxable'] : 'no';
 		$this->fee_tax_class  = isset( $this->settings['fee_tax_class'] ) ? $this->settings['fee_tax_class'] : 'standard';
 
+		// Get SSN Field options
+		$this->ssn_options = get_option( 'woocommerce_payex_addons_ssn_check', array(
+				'ssn_enabled' => false
+		) );
+
+		// Use SSN Field as primary
+		if ( $this->ssn_options['ssn_enabled'] ) {
+			$_POST['social-security-number'] = $_POST['payex_ssn'];
+		}
+
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
@@ -187,8 +197,11 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			</select>
 			<div class="clear"></div>
 		<?php endif; ?>
-		<label for="social-security-number"><?php echo __( 'Social Security Number:', 'woocommerce-gateway-payex-payment' ); ?></label>
-		<input type="text" name="social-security-number" id="social-security-number" value="" autocomplete="off">
+
+		<?php if ( ! $this->ssn_options['ssn_enabled'] ): ?>
+			<label for="social-security-number"><?php echo __( 'Social Security Number:', 'woocommerce-gateway-payex-payment' ); ?></label>
+			<input type="text" name="social-security-number" id="social-security-number" value="" autocomplete="off">
+		<?php endif; ?>
 
 		<div class="clear"></div>
 		<?php
