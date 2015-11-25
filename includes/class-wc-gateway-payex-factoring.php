@@ -120,7 +120,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				'options'     => array(
 					'SELECT'        => __( 'User select', 'woocommerce-gateway-payex-payment' ),
 					'FINANCING'     => __( 'Financing Invoice', 'woocommerce-gateway-payex-payment' ),
-					'FACTORING'     => __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ),
+					//'FACTORING'     => __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ),
 					'CREDITACCOUNT' => __( 'Part Payment', 'woocommerce-gateway-payex-payment' ),
 				),
 				'description' => __( 'Default payment type.', 'woocommerce-gateway-payex-payment' ),
@@ -192,7 +192,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			<label for="social-security-number"><?php echo __( 'Please select payment method:', 'woocommerce-gateway-payex-payment' ); ?></label>
 			<select name="factoring-menu" id="factoring-menu" class="required-entry">
 				<option selected value="FINANCING"><?php echo __( 'Financing Invoice', 'woocommerce-gateway-payex-payment' ); ?></option>
-				<option value="FACTORING"><?php echo __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ); ?></option>
+				<!-- <option value="FACTORING"><?php echo __( 'Invoice 2.0 (Factoring)', 'woocommerce-gateway-payex-payment' ); ?></option> -->
 				<option value="CREDITACCOUNT"><?php echo __( 'Part Payment', 'woocommerce-gateway-payex-payment' ); ?></option>
 			</select>
 			<div class="clear"></div>
