@@ -237,7 +237,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			'accountNumber' => '',
 			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
 			'ssn' => $_POST['social-security-number'],
-			'zipcode' => '',
+			'zipcode' => $_POST['billing_postcode'],
 			'countryCode' => $_POST['billing_country'],
 			'ipAddress' => $_SERVER['REMOTE_ADDR']
 		);
