@@ -43,7 +43,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		) );
 
 		// Use SSN Field as primary
-		if ( $this->ssn_options['ssn_enabled'] ) {
+		if ( $this->ssn_options['ssn_enabled'] && isset($_POST['payex_ssn']) ) {
 			$_POST['social-security-number'] = $_POST['payex_ssn'];
 		}
 
