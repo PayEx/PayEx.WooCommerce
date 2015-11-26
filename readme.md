@@ -4,7 +4,7 @@ Contributors: aait
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, payex, payment gateway
 Requires at least: 3.1
 License: GNU General Public License v3.0
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
+[License URI](http://www.gnu.org/licenses/gpl-3.0.html) 
 
 This plugin provide a Credit Card Payment Gateway through PayEx for WooCommerce.
 
