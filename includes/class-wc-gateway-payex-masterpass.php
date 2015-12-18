@@ -459,59 +459,6 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	}
 
 	/**
-	 * Process Refund
-	 *
-	 * If the gateway declares 'refunds' support, this will allow it to refund
-	 * a passed in amount.
-	 *
-	 * @param  int    $order_id
-	 * @param  float  $amount
-	 * @param  string $reason
-	 *
-	 * @return  bool|wp_error True or false based on success, or a WP_Error object
-	 */
-	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			return false;
-		}
-
-		// Check transaction status
-		$transaction_status = get_post_meta( $order_id, '_payex_transaction_status', true );
-		if ( ! in_array( (string) $transaction_status, array( '0', '6' ) ) ) {
-			return false;
-		}
-
-		// Full Refund
-		if ( is_null( $amount ) ) {
-			$amount = $order->order_total;
-		}
-
-		// Init PayEx
-		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
-
-		// Call PxOrder.Credit5
-		$params = array(
-			'accountNumber'     => '',
-			'transactionNumber' => $order->get_transaction_id(),
-			'amount'            => round( 100 * $amount ),
-			'orderId'           => $order->id,
-			'vatAmount'         => 0,
-			'additionalValues'  => ''
-		);
-		$result = $this->getPx()->Credit5( $params );
-		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-			$this->log( 'PxOrder.Credit5:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-
-			return new WP_Error( 'woocommerce-gateway-payex-payment', $this->getVerboseErrorMessage( $result ) );
-		}
-
-		$order->add_order_note( sprintf( __( 'Refunded: %s. Transaction ID: %s. Reason: %s', 'woocommerce-gateway-payex-payment' ), wc_price( $amount ), $result['transactionNumber'], $reason ) );
-
-		return true;
-	}
-
-	/**
 	 * Init Checkout
 	 */
 	public function checkout_init() {
