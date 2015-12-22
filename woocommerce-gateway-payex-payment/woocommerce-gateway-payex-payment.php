@@ -186,6 +186,9 @@ class WC_Payex_Payment {
 				$additionalValues = 'FINANCINGINVOICE_ORDERLINES=' . urlencode( $gateway->getInvoiceExtraPrintBlocksXML( $order ) );
 			}
 
+			// Init PayEx
+			$gateway->getPx()->setEnvironment( $gateway->account_no, $gateway->encrypted_key, $gateway->testmode === 'yes' );
+
 			// Call PxOrder.Capture5
 			$params = array(
 				'accountNumber'     => '',
