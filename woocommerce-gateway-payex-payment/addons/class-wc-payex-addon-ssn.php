@@ -106,10 +106,10 @@ class WC_Payex_Addon_SSN {
 		$params = array(
 			'accountNumber' => '',
 			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
-			'ssn' => $_POST['social_security_number'],
-			'zipcode' => $_POST['billing_postcode'],
-			'countryCode' => $_POST['billing_country'],
-			'ipAddress' => $_SERVER['REMOTE_ADDR']
+			'ssn' => trim($_POST['social_security_number']),
+			'zipcode' => trim($_POST['billing_postcode']),
+			'countryCode' => trim($_POST['billing_country']),
+			'ipAddress' => trim($_SERVER['REMOTE_ADDR'])
 		);
 		$result = $this->getPx()->GetAddressByPaymentMethod($params);
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
