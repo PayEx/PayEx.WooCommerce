@@ -185,7 +185,8 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
             'REJECTED_BY_ACQUIRER_INSUFFICIENT_FUNDS' => __( 'Insufficient funds', 'woocommerce-gateway-payex-payment' ),
             'REJECTED_BY_ACQUIRER_INVALID_AMOUNT'     => __( 'Incorrect amount', 'woocommerce-gateway-payex-payment' ),
             'USER_CANCELED'                           => __( 'Payment cancelled', 'woocommerce-gateway-payex-payment' ),
-            'CardNotAcceptedForThisPurchase'          => __( 'Your Credit Card not accepted for this purchase', 'woocommerce-gateway-payex-payment' )
+            'CardNotAcceptedForThisPurchase'          => __( 'Your Credit Card not accepted for this purchase', 'woocommerce-gateway-payex-payment' ),
+            'CreditCheckNotApproved'                  => __( 'CreditCheck failed', 'woocommerce-gateway-payex-payment' )
         );
         $errorMessages = array_change_key_case( $errorMessages, CASE_UPPER );
 
