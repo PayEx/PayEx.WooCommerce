@@ -1,18 +1,20 @@
 # WooCommerce PayEx Payments Gateway
 
-Contributors: aait
-Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, payex, payment gateway
-Requires at least: 3.1
-License: GNU General Public License v3.0
-[License URI](http://www.gnu.org/licenses/gpl-3.0.html)
-
 This plugin provide a Credit Card Payment Gateway through PayEx for WooCommerce.
+
+* Contributors: aait
+* Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, payex, payment gateway
+* Requires at least: 3.1
+* [License: GNU General Public License v3.0](http://www.gnu.org/licenses/gpl-3.0.html)
 
 ## Description
 
-WooCommerce PayEx Payments Gateway for WooCommerce.
-Payment gateway allows to accept payments through credit and debit cards (Visa, Mastercard, Visa Electron, Maestro).
-Payment gateway allows this methods also: Bank Debit, Factoring, Invoice (Ledger Service).
+PayEx Payments Gateway for WooCommerce. Payment gateway allows to accept payments through:
+
+* Credit and debit cards (Visa, Mastercard, Visa Electron, Maestro).
+* Bank Debit
+* Factoring
+* Invoice (Ledger Service)
 
 ## Installation
 
