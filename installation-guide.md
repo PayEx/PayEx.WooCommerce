@@ -18,15 +18,15 @@ NOTE! If you are using modules under 2.0 of this module (released aug 2015) you 
 
 Then sign in as administrator on your wordpress site, click the plugins menu item, then “add new”
 
-![](./media/image1.png)
+![image1](https://cloud.githubusercontent.com/assets/12283/12843856/573de27e-cbfc-11e5-84e5-76ed687d9618.png)
 
 then “upload”. Browse and find the module you want to upload and then click install.
 
-![](./media/image2.jpeg)
+![image2](https://cloud.githubusercontent.com/assets/12283/12843871/5fad651a-cbfc-11e5-9cb9-9d564f9fa09c.jpeg)
 
 When the module have uploaded successfully then you can activate it.
 
-![](./media/image3.jpeg)
+![image3](https://cloud.githubusercontent.com/assets/12283/12843874/5faf63ba-cbfc-11e5-88df-de137ad915dc.jpeg)
 
 Done
 
@@ -41,20 +41,20 @@ Configuration
 
 To configure the modules you have to go to the menu called WooCommerce and click settings.
 
-![](./media/image4.jpeg)
+![image4](https://cloud.githubusercontent.com/assets/12283/12843872/5fae264e-cbfc-11e5-85c0-ffc5a2bb4509.jpeg)
 
 Then in the overhead menu you click checkout
 
-![](./media/image5.jpeg)
+![image5](https://cloud.githubusercontent.com/assets/12283/12843873/5faeb1f4-cbfc-11e5-8b7f-79aff1852dff.jpeg)
 
 and there you can choose which module you want to configure.
 
-![](./media/image6.jpeg)
+![image6](https://cloud.githubusercontent.com/assets/12283/12843875/5fafe0ce-cbfc-11e5-9e00-7fcbb88834dc.jpeg)
 
 PayEx Bank Debit
 ----------------
 
-![](./media/image7.png)
+![image7](https://cloud.githubusercontent.com/assets/12283/12843876/5fb09f1e-cbfc-11e5-9e02-cd404438cd01.png)
 
 Enable/disable: Check the box to enable the plugin
 
@@ -70,23 +70,23 @@ How to generate an encryption key
 
 Step 1:
 
-you must go to http://www.payexpim.com/ and choose admin for either test or production environment. ![](./media/image8.png)
+you must go to http://www.payexpim.com/ and choose admin for either test or production environment. ![image8](https://cloud.githubusercontent.com/assets/12283/12843880/5fc8c080-cbfc-11e5-9ee4-8e3def333754.png)
 
 Step 2:
 
 Sign in with the information you have been given by payex
 
-![](./media/image9.png)
+![image9](https://cloud.githubusercontent.com/assets/12283/12843877/5fc7cc0c-cbfc-11e5-8cd5-b04829af760c.png)
 
 Step 3: In the margin on the left, find “Merchant” and click on “Merchant profile”
 
-![](./media/image10.png)
+![image10](https://cloud.githubusercontent.com/assets/12283/12843881/5fc9b116-cbfc-11e5-9a42-80cf8ffa3ef2.png)
 
 Step 4:
 
 Click on “new encryption key”
 
-![](./media/image11.png)
+![image11](https://cloud.githubusercontent.com/assets/12283/12843878/5fc82b8e-cbfc-11e5-81b4-d8d834b86ad0.png)
 
 Complete
 
@@ -101,7 +101,7 @@ Debug: check this to get debug logs
 PayEx Factoring and part payment
 --------------------------------
 
-![](./media/image12.png)
+![image12](https://cloud.githubusercontent.com/assets/12283/12843882/5fc9adf6-cbfc-11e5-8f9f-1f1309e8ec64.png)
 
 Enable/disable: Check the box to enable the plugin
 
@@ -131,7 +131,7 @@ Get address is a supplementary module you can get that only works with the facto
 PayEx Payments
 --------------
 
-![](./media/image13.png)
+![image13](https://cloud.githubusercontent.com/assets/12283/12843879/5fc85636-cbfc-11e5-9d5e-2bc861dd2ebf.png)
 
 Enable/disable: Check the box to enable the plugin
 
@@ -156,7 +156,7 @@ Debug: check this to get debug logs
 PayEx autopay
 -------------
 
-![](./media/image14.png)
+![image14](https://cloud.githubusercontent.com/assets/12283/12843884/5fe05f24-cbfc-11e5-8b31-9bf06ad4a061.png)
 
 Enable/disable: Check the box to enable the plugin
 
@@ -187,7 +187,7 @@ To translate the modules you need a program called poedit. The files you need to
 
 Every module have their own pot file that will be used to translate in to your desired language.
 
-Simply open up the .pot file with poedit and select the line which you want to translate and in the bottom row add the translation. ![](./media/image15.jpeg)The translation will appear in the right column of the main window.
+Simply open up the .pot file with poedit and select the line which you want to translate and in the bottom row add the translation. ![image15](https://cloud.githubusercontent.com/assets/12283/12843885/5fe2bf26-cbfc-11e5-9302-04178ae8e350.jpeg) The translation will appear in the right column of the main window.
 
 When you’re done don’t forget to set the language in the top right to the language you just translated to.
 
@@ -204,7 +204,7 @@ How to activate Transaction Callback
 
 Transaction callback is an extra process used by PayEx to verify that the webshop is informed of the result of the payment processing. It is useful if your server goes down during payment or if customer close the webbrowser or lose connection just after payment. Callback is a required functionality.
 
-![](./media/image16.jpg)
+![image16](https://cloud.githubusercontent.com/assets/12283/12843883/5fdf39c8-cbfc-11e5-9064-c56a4b95f0ca.jpg)
 
 Use the following URL
 
