@@ -34,6 +34,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 		$this->distribution       = isset( $this->settings['distribution'] ) ? $this->settings['distribution'] : '1';
 		$this->invoicetext        = isset( $this->settings['invoicetext'] ) ? $this->settings['invoicetext'] : 'Invoice text';
 		$this->invoiceduedays     = isset( $this->settings['invoiceduedays'] ) ? $this->settings['invoiceduedays'] : '15';
+		$this->credit_check       = isset( $this->settings['credit_check'] ) ? $this->settings['credit_check'] : 'yes';
 		$this->allow_unapproved   = isset( $this->settings['allow_unapproved'] ) ? $this->settings['allow_unapproved'] : 'no';
 		$this->testmode           = isset( $this->settings['testmode'] ) ? $this->settings['testmode'] : 'yes';
 		$this->debug              = isset( $this->settings['debug'] ) ? $this->settings['debug'] : 'no';
@@ -159,6 +160,12 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				'description'       => __( 'Invoice due days', 'woocommerce-gateway-payex-payment' ),
 				'default'           => '15'
 			),
+			'credit_check'   => array(
+				'title'   => __( 'Credit Check', 'woocommerce-gateway-payex-payment' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable Credit Check', 'woocommerce-gateway-payex-payment' ),
+				'default' => 'yes'
+			),
 			'allow_unapproved'   => array(
 				'title'   => __( 'Allow unapproved by CreditCheck', 'woocommerce-gateway-payex-payment' ),
 				'type'    => 'checkbox',
@@ -283,6 +290,11 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 		if ( empty( $_POST['pxinvoice_method'] ) ) {
 			$this->add_message( __( 'Please select invoice method.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
+			return;
+		}
+
+		// Credit Check is disabled
+		if ( $this->credit_check !== 'yes' ) {
 			return;
 		}
 
@@ -599,8 +611,22 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			return;
 		}
 
+		// Credit Check is disabled
+		if ( $this->credit_check === 'yes' ) {
+			$credit_data = WC()->session->payex_invoice_credit;
+		} else {
+			$credit_data = array(
+				'firstName' => $order->billing_first_name,
+				'lastName' => $order->billing_last_name,
+				'address' => trim($order->shipping_address_1 . ' ' . $order->shipping_address_2),
+				'postCode' => $order->billing_postcode,
+				'city' => $order->billing_city,
+				'name' => $order->billing_company,
+				'creditCheckRef' => ''
+			);
+		}
+
 		// Call Invoice Purchase
-		$credit_data = WC()->session->payex_invoice_credit;
 		$result      = array();
 		switch ( $_POST['pxinvoice_method'] ) {
 			case 'private':
