@@ -76,8 +76,8 @@ class WC_Payex_Addon_SSN {
 			woocommerce_form_field( 'payex_ssn', array(
 				'type'        => 'text',
 				'class'       => array( 'payex-ssn-class form-row-wide' ),
-				'label'       => __( 'Social Security Number' ),
-				'placeholder' => __( 'Social Security Number' ),
+				'label'       => __( 'Social Security Number', 'woocommerce-gateway-payex-payment' ),
+				'placeholder' => __( 'Social Security Number', 'woocommerce-gateway-payex-payment' ),
 			), $checkout->get_value( 'payex_ssn' ) );
 
 			echo '<input type="button" class="button alt" name="woocommerce_checkout_payex_ssn" id="payex_ssn_button" value="' . __( 'Get Profile', 'woocommerce-gateway-payex-payment' ) . '" />';
