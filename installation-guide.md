@@ -8,9 +8,8 @@ PHP extension:
 Installation 
 ------------
 
-We can only guarantee that the modules work on woocommerce version 2.1.5-2.3.\*
-
-##### **Note:** Before you update to a newer version of WooCommerce, always make a backup as we don’t guarantee functionality of new versions of Woocommerce. We can only guarantee that the modules work in the standard theme and checkout of woocommerce.
+##### **Note:** We can only guarantee that the modules work on woocommerce version 2.1.5-2.3.\*  
+Before you update to a newer version of WooCommerce, always make a backup as we don’t guarantee functionality of new versions of Woocommerce. We can only guarantee that the modules work in the standard theme and checkout of woocommerce.
 
 ##### If you are using modules under 2.0 of this module (released aug 2015) you first need to remove all old PayEx modules in the plugin folder of your Wordpress installation, usually /wp-content/plugins
 
