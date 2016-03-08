@@ -39,7 +39,7 @@ class Px
             'GetTransactionDetails2', 'Initialize8', 'InvoiceLinkGet', 'PrepareAuthorizeDD', 'PrepareSaleDD2', 'PurchaseActivate',
             'PurchaseFinancingInvoice', 'PurchaseInvoiceCorporate', 'PurchaseInvoicePrivate', 'PurchaseInvoiceSale',
             'PurchasePartPaymentSale', 'PurchaseOTT', 'PurchaseInvoicePartPaymentSale', 'PurchasePX', 'SaleEVC',
-            'SaleInvoiceLedger', 'SaleGC', 'PurchaseWyWallet', 'PreparePurchaseWyWallet'
+            'SaleInvoiceLedger', 'SaleGC', 'PurchaseWyWallet', 'PreparePurchaseWyWallet', 'PurchaseCreditAccount'
         ),
         /** @see http://www.payexpim.com/category/pxverification/ */
         'PxVerificationWSDL' => array(
@@ -89,7 +89,7 @@ class Px
      */
     public function getVersion()
     {
-        return '2.0.2';
+        return '2.0.3';
     }
 
     /**
