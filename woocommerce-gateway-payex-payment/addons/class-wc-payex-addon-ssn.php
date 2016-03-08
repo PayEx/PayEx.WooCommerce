@@ -61,7 +61,7 @@ class WC_Payex_Addon_SSN {
 	 * Add Scripts
 	 */
 	public function add_scripts() {
-		if ($this->options['ssn_enabled']) {
+		if (isset($this->options['ssn_enabled']) && $this->options['ssn_enabled']) {
 			wp_enqueue_script( 'wc-payex-addons-ssn', plugins_url( '/assets/js/ssn.js', __FILE__ ), array( 'wc-checkout' ), false, true );
 		}
 	}
@@ -71,7 +71,7 @@ class WC_Payex_Addon_SSN {
 	 * @param $checkout
 	 */
 	public function before_checkout_billing_form( $checkout ) {
-		if ($this->options['ssn_enabled']) {
+		if (isset($this->options['ssn_enabled']) && $this->options['ssn_enabled']) {
 			echo '<div id="payex_ssn">';
 			woocommerce_form_field( 'payex_ssn', array(
 				'type'        => 'text',
