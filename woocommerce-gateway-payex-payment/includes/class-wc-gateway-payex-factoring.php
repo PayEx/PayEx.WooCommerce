@@ -285,7 +285,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => '',
-			'additionalValues'  => '',
+			'additionalValues'  => $this->get_additional_values( array(), $order ),
 			'externalID'        => '',
 			'returnUrl'         => 'http://localhost.no/return',
 			'view'              => $this->mode,

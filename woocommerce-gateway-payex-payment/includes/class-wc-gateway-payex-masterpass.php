@@ -208,6 +208,12 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$orderRef = WC()->session->get( 'mp_order_reference' );
 		if ( ! $orderRef ) {
 			// Checkout using standard way
+			$additional = array(
+				'USEMASTERPASS=1',
+				'RESPONSIVE=1',
+				'SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) )
+			);
+
 			// Call PxOrder.Initialize8
 			$params = array(
 				'accountNumber'     => '',
@@ -221,7 +227,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-				'additionalValues'  => 'USEMASTERPASS=1&RESPONSIVE=1&SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) ),
+				'additionalValues'  => $this->get_additional_values( $additional, $order ),
 				'externalID'        => '',
 				'returnUrl'         => html_entity_decode( $this->get_return_url( $order ) ),
 				'view'              => 'CREDITCARD',
@@ -688,6 +694,12 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			// Store Order ID in session so it can be re-used after payment failure
 			WC()->session->order_awaiting_payment = $order_id;
 
+			$additional = array(
+				'USEMASTERPASS=1',
+				'RESPONSIVE=1',
+				'SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) )
+			);
+
 			// Init PayEx
 			$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
@@ -704,7 +716,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-				'additionalValues'  => 'USEMASTERPASS=1&RESPONSIVE=1&SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) ),
+				'additionalValues'  => $this->get_additional_values( $additional, $order ),
 				'externalID'        => '',
 				'returnUrl'         => WC()->cart->get_checkout_url(),
 				'view'              => 'CREDITCARD',

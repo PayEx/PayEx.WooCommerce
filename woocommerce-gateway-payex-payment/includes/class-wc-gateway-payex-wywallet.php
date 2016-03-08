@@ -176,10 +176,10 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 		$amount      = $order->order_total;
 		$currency    = $order->order_currency;
 
-		$additional = '';
-		if ( $this->responsive === 'yes' ) {
-			$separator = ( ! empty( $additional ) && mb_substr( $additional, - 1 ) !== '&' ) ? '&' : '';
-			$additional .= $separator . 'USECSS=RESPONSIVEDESIGN';
+		// Additional Values
+		$additional  = array();
+		if ($this->responsive === 'yes') {
+			$additional[] = 'USECSS=RESPONSIVEDESIGN';
 		}
 
 		// Init PayEx
@@ -201,7 +201,7 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-			'additionalValues'  => $additional,
+			'additionalValues'  => $this->get_additional_values( $additional, $order ),
 			'externalID'        => '',
 			'returnUrl'         => $returnUrl,
 			'view'              => 'MICROACCOUNT',

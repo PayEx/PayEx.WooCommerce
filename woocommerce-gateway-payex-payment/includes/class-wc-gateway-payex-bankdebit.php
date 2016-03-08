@@ -222,6 +222,12 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		$currency    = $order->order_currency;
 		$bank_id     = ! empty( $_POST['bank_id'] ) ? $_POST['bank_id'] : 'NB';
 
+		// Additional Values
+		$additional  = array();
+		if ($this->responsive === 'yes') {
+			$additional[] = 'USECSS=RESPONSIVEDESIGN';
+		}
+
 		$returnUrl = html_entity_decode( $this->get_return_url( $order ) );
 		$cancelUrl = html_entity_decode( $order->get_cancel_order_url() );
 
@@ -241,7 +247,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-			'additionalValues'  => ( $this->responsive === 'yes' ? 'USECSS=RESPONSIVEDESIGN' : '' ),
+			'additionalValues'  => $this->get_additional_values( $additional, $order ),
 			'externalID'        => '',
 			'returnUrl'         => $returnUrl,
 			'view'              => 'DIRECTDEBIT',
