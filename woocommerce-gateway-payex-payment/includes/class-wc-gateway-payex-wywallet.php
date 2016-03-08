@@ -172,9 +172,9 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$customer_id = (int) $order->customer_user;
-		$amount      = $order->order_total;
-		$currency    = $order->order_currency;
+		$customer_id = (int) $order->get_user_id();
+		$amount      = $order->get_total();
+		$currency    = $order->get_order_currency();
 
 		// Additional Values
 		$additional  = array();

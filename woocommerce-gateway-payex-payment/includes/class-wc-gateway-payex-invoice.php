@@ -381,8 +381,8 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$customer_id = (int) $order->customer_user;
-		$amount      = $order->order_total;
+		$customer_id = (int) $order->get_user_id();
+		$amount      = $order->get_total();
 
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
@@ -393,7 +393,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			'purchaseOperation' => $this->purchase_operation,
 			'price'             => round( $amount * 100 ),
 			'priceArgList'      => '',
-			'currency'          => $order->order_currency,
+			'currency'          => $order->get_order_currency(),
 			'vat'               => 0,
 			'orderID'           => $order->id,
 			'productNumber'     => $customer_id, // Customer Id

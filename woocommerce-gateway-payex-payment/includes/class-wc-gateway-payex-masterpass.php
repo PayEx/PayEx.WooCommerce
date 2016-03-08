@@ -218,12 +218,12 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			$params = array(
 				'accountNumber'     => '',
 				'purchaseOperation' => $this->purchase_operation,
-				'price'             => round( $order->order_total * 100 ),
+				'price'             => round( $order->get_total() * 100 ),
 				'priceArgList'      => '',
-				'currency'          => $order->order_currency,
+				'currency'          => $order->get_order_currency(),
 				'vat'               => 0,
 				'orderID'           => $order->id,
-				'productNumber'     => (int) $order->customer_user, // Customer Id
+				'productNumber'     => (int) $order->get_user_id(), // Customer Id
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -382,7 +382,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$params = array(
 			'accountNumber'   => '',
 			'orderRef'        => $_GET['orderRef'],
-			'amount'          => round( $order->order_total * 100 ),
+			'amount'          => round( $order->get_total() * 100 ),
 			'vatAmount'       => 0,
 			'clientIPAddress' => $_SERVER['REMOTE_ADDR']
 		);
@@ -707,12 +707,12 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			$params = array(
 				'accountNumber'     => '',
 				'purchaseOperation' => $this->purchase_operation,
-				'price'             => round( $order->order_total * 100 ),
+				'price'             => round( $order->get_total() * 100 ),
 				'priceArgList'      => '',
-				'currency'          => $order->order_currency,
+				'currency'          => $order->get_order_currency(),
 				'vat'               => 0,
 				'orderID'           => $order->id,
-				'productNumber'     => (int) $order->customer_user, // Customer Id
+				'productNumber'     => (int) $order->get_user_id(), // Customer Id
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -757,8 +757,8 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$ShoppingCart = $dom->createElement( 'ShoppingCart' );
 		$dom->appendChild( $ShoppingCart );
 
-		$ShoppingCart->appendChild( $dom->createElement( 'CurrencyCode', $order->order_currency ) );
-		$ShoppingCart->appendChild( $dom->createElement( 'Subtotal', (int) ( 100 * $order->order_total ) ) );
+		$ShoppingCart->appendChild( $dom->createElement( 'CurrencyCode', $order->get_order_currency() ) );
+		$ShoppingCart->appendChild( $dom->createElement( 'Subtotal', (int) ( 100 * $order->get_total() ) ) );
 
 		// Add Order Lines
 		foreach ( $order->get_items() as $order_item ) {
