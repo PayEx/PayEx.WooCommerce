@@ -55,21 +55,21 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$this->init_settings();
 
 		// Define user set variables
-		$this->enabled            = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : 'no';
-		$this->title              = isset( $this->settings['title'] ) ? $this->settings['title'] : '';
-		$this->account_no         = isset( $this->settings['account_no'] ) ? $this->settings['account_no'] : '';
-		$this->encrypted_key      = isset( $this->settings['encrypted_key'] ) ? $this->settings['encrypted_key'] : '';
-		$this->purchase_operation = isset( $this->settings['purchase_operation'] ) ? $this->settings['purchase_operation'] : 'SALE';
-		$this->payment_view       = isset( $this->settings['payment_view'] ) ? $this->settings['payment_view'] : '';
-		$this->description        = isset( $this->settings['description'] ) ? $this->settings['description'] : '';
-		$this->language           = isset( $this->settings['language'] ) ? $this->settings['language'] : 'en-US';
-		$this->testmode           = isset( $this->settings['testmode'] ) ? $this->settings['testmode'] : 'yes';
-		$this->checkout_info      = isset( $this->settings['checkout_info'] ) ? $this->settings['checkout_info'] : 'yes';
-		$this->responsive         = isset( $this->settings['responsive'] ) ? $this->settings['responsive'] : 'no';
-		$this->save_cards         = isset( $this->settings['save_cards'] ) ? $this->settings['save_cards'] : 'yes';
-		$this->max_amount         = isset( $this->settings['max_amount'] ) ? $this->settings['max_amount'] : 0;
-		$this->agreement_url      = isset( $this->settings['agreement_url'] ) ? $this->settings['agreement_url'] : '';
-		$this->debug              = isset( $this->settings['debug'] ) ? $this->settings['debug'] : 'no';
+		$this->enabled              = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : 'no';
+		$this->title                = isset( $this->settings['title'] ) ? $this->settings['title'] : '';
+		$this->account_no           = isset( $this->settings['account_no'] ) ? $this->settings['account_no'] : '';
+		$this->encrypted_key        = isset( $this->settings['encrypted_key'] ) ? $this->settings['encrypted_key'] : '';
+		$this->purchase_operation   = isset( $this->settings['purchase_operation'] ) ? $this->settings['purchase_operation'] : 'SALE';
+		$this->payment_view         = isset( $this->settings['payment_view'] ) ? $this->settings['payment_view'] : '';
+		$this->description          = isset( $this->settings['description'] ) ? $this->settings['description'] : '';
+		$this->language             = isset( $this->settings['language'] ) ? $this->settings['language'] : 'en-US';
+		$this->testmode             = isset( $this->settings['testmode'] ) ? $this->settings['testmode'] : 'yes';
+		$this->checkout_info        = isset( $this->settings['checkout_info'] ) ? $this->settings['checkout_info'] : 'yes';
+		$this->responsive           = isset( $this->settings['responsive'] ) ? $this->settings['responsive'] : 'no';
+		$this->save_cards           = isset( $this->settings['save_cards'] ) ? $this->settings['save_cards'] : 'yes';
+		$this->agreement_max_amount = isset( $this->settings['agreement_max_amount'] ) ? $this->settings['agreement_max_amount'] : 0;
+		$this->agreement_url        = isset( $this->settings['agreement_url'] ) ? $this->settings['agreement_url'] : '';
+		$this->debug                = isset( $this->settings['debug'] ) ? $this->settings['debug'] : 'no';
 
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
@@ -142,44 +142,44 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled'            => array(
+			'enabled'              => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce-gateway-payex-payment' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable plugin', 'woocommerce-gateway-payex-payment' ),
 				'default' => 'no'
 			),
-			'title'              => array(
+			'title'                => array(
 				'title'       => __( 'Title', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => __( 'PayEx Payments', 'woocommerce-gateway-payex-payment' )
 			),
-			'description'        => array(
+			'description'          => array(
 				'title'       => __( 'Description', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => __( 'PayEx Payments', 'woocommerce-gateway-payex-payment' ),
 			),
-			'account_no'         => array(
+			'account_no'           => array(
 				'title'       => __( 'Account Number', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'Account Number of PayEx Merchant.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => ''
 			),
-			'encrypted_key'      => array(
+			'encrypted_key'        => array(
 				'title'       => __( 'Encryption Key', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'PayEx Encryption Key of PayEx Merchant.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => ''
 			),
-			'purchase_operation' => array(
+			'purchase_operation'   => array(
 				'title'       => __( 'Purchase Operation', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'select',
 				'options'     => array( 'AUTHORIZATION' => 'Authorization', 'SALE' => 'Sale' ),
 				'description' => __( 'If used AUTHORIZATION then amount will be authorized (2-phased transaction). If used SALE then amount will be captured (1-phased transaction).', 'woocommerce-gateway-payex-payment' ),
 				'default'     => 'SALE'
 			),
-			'payment_view'       => array(
+			'payment_view'         => array(
 				'title'       => __( 'Payment View', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'select',
 				'options'     => array(
@@ -192,7 +192,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'description' => __( 'Default payment method.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => 'PX'
 			),
-			'language'           => array(
+			'language'             => array(
 				'title'       => __( 'Language', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'select',
 				'options'     => array(
@@ -211,44 +211,44 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'description' => __( 'Language of pages displayed by PayEx during payment.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => 'en-US'
 			),
-			'testmode'           => array(
+			'testmode'             => array(
 				'title'   => __( 'Test Mode', 'woocommerce-gateway-payex-payment' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable PayEx Test Mode', 'woocommerce-gateway-payex-payment' ),
 				'default' => 'yes'
 			),
-			'checkout_info'      => array(
+			'checkout_info'        => array(
 				'title'   => __( 'Enable checkout information', 'woocommerce-gateway-payex-payment' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Send order lines and billing/delivery addresses to PayEx', 'woocommerce-gateway-payex-payment' ),
 				'default' => 'yes'
 			),
-			'responsive'         => array(
+			'responsive'           => array(
 				'title'   => __( 'Enable Responsive Skinning', 'woocommerce-gateway-payex-payment' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Use Responsive web design on PayEx pages', 'woocommerce-gateway-payex-payment' ),
 				'default' => 'no'
 			),
-			'save_cards'         => array(
+			'save_cards'           => array(
 				'title'       => __( 'Allow Stored Cards', 'woocommerce-gateway-payex-payment' ),
 				'label'       => __( 'Allow logged in customers to save credit card profiles to use for future purchases', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'yes',
 			),
-			'max_amount'         => array(
+			'agreement_max_amount' => array(
 				'title'       => __( 'Max amount per transaction', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This option use with WC Subscriptions plugin. One single transaction can never be greater than this amount.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => __( '1000', 'woocommerce-gateway-payex-payment' )
 			),
-			'agreement_url'      => array(
+			'agreement_url'        => array(
 				'title'       => __( 'Agreement URL', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This option use with WC Subscriptions plugin. A reference that links this agreement to something the merchant takes money for.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => __( get_site_url(), 'woocommerce-gateway-payex-payment' )
 			),
-			'debug'              => array(
+			'debug'                => array(
 				'title'   => __( 'Debug', 'woocommerce-gateway-payex-payment' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable logging', 'woocommerce-gateway-payex-payment' ),
@@ -1350,7 +1350,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			'merchantRef'       => $this->agreement_url,
 			'description'       => $this->description,
 			'purchaseOperation' => $this->purchase_operation,
-			'maxAmount'         => round( $this->max_amount * 100 ),
+			'maxAmount'         => round( $this->agreement_max_amount * 100 ),
 			'notifyUrl'         => '',
 			'startDate'         => '',
 			'stopDate'          => ''
