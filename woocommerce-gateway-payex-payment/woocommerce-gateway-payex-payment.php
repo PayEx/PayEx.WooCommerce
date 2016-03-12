@@ -27,6 +27,9 @@ class WC_Payex_Payment {
 	 * Constructor
 	 */
 	public function __construct() {
+		// Activation
+		register_activation_hook( __FILE__, __CLASS__ . '::install' );
+
 		// Actions
 		add_action( 'init', array( $this, 'create_credit_card_post_type' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
@@ -64,6 +67,15 @@ class WC_Payex_Payment {
 		// Add Upgrade Notice
 		if ( version_compare( get_option( 'woocommerce_payex_version', '1.0.0' ), '2.0.0', '<' ) ) {
 			add_action( 'admin_notices', __CLASS__ . '::upgrade_notice' );
+		}
+	}
+
+	/**
+	 * Install
+	 */
+	public static function install() {
+		if ( ! get_option( 'woocommerce_payex_version' ) ) {
+			add_option( 'woocommerce_payex_version', '2.0.0' );
 		}
 	}
 
