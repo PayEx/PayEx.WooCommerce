@@ -562,6 +562,77 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			$this->add_message( __( 'Unable to change the payment method', 'woocommerce-gateway-payex-payment' ) );
 
 			return false;
+		} elseif ( $this->order_contains_subscription($order) && $order->get_total() == 0 ) {
+			// Trial period for Subscription
+			// Use New Credit Card
+			if ( $_POST['payex-credit-card'] === 'new' ) {
+				// Create Recurring Agreement
+				$agreement = $this->create_agreement();
+				if ( ! $agreement ) {
+					$this->add_message( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
+
+					return false;
+				}
+
+				$additional[] = 'VERIFICATION=true';
+
+				// Call PxOrder.Initialize8
+				$params = array(
+					'accountNumber'     => '',
+					'purchaseOperation' => $this->purchase_operation,
+					'price'             => round( $order->get_total() * 100 ),
+					'priceArgList'      => '',
+					'currency'          => $order->get_order_currency(),
+					'vat'               => 0,
+					'orderID'           => $order->id,
+					'productNumber'     => $order->id,
+					'description'       => $this->description,
+					'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
+					'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
+					'additionalValues'  => $this->get_additional_values( $additional, $order ),
+					'externalID'        => '',
+					'returnUrl'         => html_entity_decode( $this->get_return_url( $order ) ),
+					'view'              => 'CREDITCARD',
+					'agreementRef'      => $agreement,
+					'cancelUrl'         => html_entity_decode( $order->get_cancel_order_url() ),
+					'clientLanguage'    => $this->language
+				);
+				$result = $this->getPx()->Initialize8( $params );
+				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
+					$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
+					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+
+					return false;
+				}
+
+				return array(
+					'result'   => 'success',
+					'redirect' => $result['redirectUrl']
+				);
+			}
+
+			// Use Saved Credit Card
+			if ( isset( $_POST['payex-credit-card'] ) && abs( $_POST['payex-credit-card'] ) > 0 ) {
+				$card_id = $_POST['payex-credit-card'];
+				$card    = get_post( $card_id );
+				if ( $card->post_author != $order->get_user_id() ) {
+					$this->add_message( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
+
+					return false;
+				}
+
+				update_post_meta( $order->id, '_payex_card_id', $card_id );
+
+				return array(
+					'result'   => 'success',
+					'redirect' => $this->get_return_url( $order )
+				);
+			}
+
+			// Default action
+			$this->add_message( __( 'Unable to process payment', 'woocommerce-gateway-payex-payment' ) );
+
+			return false;
 		} elseif ( $order->get_total() == 0 ) {
 			// Allow empty order amount for "Payment Change" only
 			$this->add_message( __( 'Sorry, order total must be greater than zero.', 'woocommerce-gateway-payex-payment' ), 'error' );

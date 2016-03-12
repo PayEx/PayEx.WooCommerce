@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php if ( count( $cards ) === 0 ): ?>
 	<?php echo sprintf( __( 'You will be redirected to <a target="_blank" href="%s">PayEx</a> website when you place an order.', 'woocommerce-gateway-payex-payment' ), 'http://www.payex.com' ); ?>
+	<input type="hidden" name="payex-credit-card" id="payex-card-new" value="new" />
 	<div class="clear"></div>
 <?php else: ?>
 	<div class="credit_cards">
