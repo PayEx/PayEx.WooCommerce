@@ -52,16 +52,6 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			'process_admin_options'
 		) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
-
-		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = 'no';
-		}
-	}
-
-	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_payex_invoice_supported_currencies',
-			array( 'DKK', 'EUR', 'GBP', 'NOK', 'SEK', 'USD' )
-		) );
 	}
 
 	/**
@@ -381,8 +371,8 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$customer_id = (int) $order->customer_user;
-		$amount      = $order->order_total;
+		$customer_id = (int) $order->get_user_id();
+		$amount      = $order->get_total();
 
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
@@ -393,14 +383,14 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 			'purchaseOperation' => $this->purchase_operation,
 			'price'             => round( $amount * 100 ),
 			'priceArgList'      => '',
-			'currency'          => $order->order_currency,
+			'currency'          => $order->get_order_currency(),
 			'vat'               => 0,
 			'orderID'           => $order->id,
 			'productNumber'     => $customer_id, // Customer Id
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => '',
-			'additionalValues'  => '',
+			'additionalValues'  => $this->get_additional_values( array(), $order ),
 			'externalID'        => '',
 			'returnUrl'         => 'http://localhost.no/return',
 			'view'              => 'INVOICE',

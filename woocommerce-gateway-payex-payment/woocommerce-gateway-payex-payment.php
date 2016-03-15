@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce PayEx Payments Gateway
 Plugin URI: http://payex.com/
 Description: Provides a Credit Card Payment Gateway through PayEx for WooCommerce.
-Version: 2.0.0pre6
+Version: 2.0.0
 Author: AAIT Team
 Author URI: http://aait.se/
 License: GNU General Public License v3.0
@@ -27,7 +27,11 @@ class WC_Payex_Payment {
 	 * Constructor
 	 */
 	public function __construct() {
+		// Activation
+		register_activation_hook( __FILE__, __CLASS__ . '::install' );
+
 		// Actions
+		add_action( 'init', array( $this, 'create_credit_card_post_type' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ), 0 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_scripts' ) );
@@ -43,7 +47,10 @@ class WC_Payex_Payment {
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fee' ) );
 
 		// Add statuses for payment complete
-		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array( $this, 'add_valid_order_statuses' ), 10, 2 );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', array(
+			$this,
+			'add_valid_order_statuses'
+		), 10, 2 );
 
 		// Add MasterPass button to Cart Page
 		add_action( 'woocommerce_proceed_to_checkout', array( $this, 'add_mp_button_to_cart' ) );
@@ -53,6 +60,23 @@ class WC_Payex_Payment {
 
 		// Check is MasterPass Purchase
 		add_action( 'template_redirect', array( $this, 'check_mp_purchase' ) );
+
+		// PayEx Credit Card: Payment Method Change Callback
+		add_action('template_redirect', array( $this, 'check_payment_method_changed' ));
+
+		// Add Upgrade Notice
+		if ( version_compare( get_option( 'woocommerce_payex_version', '1.0.0' ), '2.0.0', '<' ) ) {
+			add_action( 'admin_notices', __CLASS__ . '::upgrade_notice' );
+		}
+	}
+
+	/**
+	 * Install
+	 */
+	public static function install() {
+		if ( ! get_option( 'woocommerce_payex_version' ) ) {
+			add_option( 'woocommerce_payex_version', '2.0.0' );
+		}
 	}
 
 	/**
@@ -83,7 +107,6 @@ class WC_Payex_Payment {
 
 		// Includes
 		include_once( dirname( __FILE__ ) . '/library/Px/Px.php' );
-		include_once( dirname( __FILE__ ) . '/includes/wc-compatibility-functions.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-abstract.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-payment.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-bankdebit.php' );
@@ -91,9 +114,43 @@ class WC_Payex_Payment {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-factoring.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-wywallet.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
+		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
 
 		// Addons
 		include_once( dirname( __FILE__ ) . '/addons/class-wc-payex-addon-ssn.php' );
+	}
+
+	/**
+	 * Upgrade Notice
+	 */
+	public static function upgrade_notice() {
+		if ( current_user_can( 'update_plugins' ) ) {
+			?>
+			<div id="message" class="error">
+				<p>
+					<?php
+					echo esc_html__( 'Warning! WooCommerce PayEx Payments plugin requires to update the database structure.', 'woocommerce-gateway-payex-payment' );
+					echo ' ' . sprintf( esc_html__('Please click %s here %s to start upgrade.', 'woocommerce-gateway-payex-payment'), '<a href="' . admin_url( 'admin.php?page=wc-payex-upgrade' ) . '">', '</a>' );
+					?>
+				</p>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Upgrade Page
+	 */
+	public static function upgrade_page() {
+		if ( !current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+
+		// Run Database Update
+		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-update.php' );
+		WC_Payex_Update::update();
+
+		echo esc_html__( 'Upgrade finished.', 'woocommerce-gateway-payex-payment' );
 	}
 
 	/**
@@ -151,17 +208,37 @@ class WC_Payex_Payment {
 
 	/**
 	 * Allow processing/completed statuses for capture
+	 *
 	 * @param $statuses
 	 * @param $order
 	 *
 	 * @return array
 	 */
-	public function add_valid_order_statuses($statuses, $order) {
-		if ( strpos($order->payment_method, 'payex') !== false ) {
+	public function add_valid_order_statuses( $statuses, $order ) {
+		if ( strpos( $order->payment_method, 'payex' ) !== false ) {
 			$statuses = array_merge( $statuses, array( 'processing', 'completed' ) );
 		}
 
 		return $statuses;
+	}
+
+	/**
+	 * Provide Credit Card Post Type
+	 */
+	public function create_credit_card_post_type() {
+		register_post_type( 'payex_credit_card',
+			array(
+				'labels'       => array(
+					'name' => __( 'Credit Cards', 'woocommerce-gateway-payex-payment' )
+				),
+				'public'       => false,
+				'show_ui'      => false,
+				'map_meta_cap' => false,
+				'rewrite'      => false,
+				'query_var'    => false,
+				'supports'     => false,
+			)
+		);
 	}
 
 	/**
@@ -178,7 +255,7 @@ class WC_Payex_Payment {
 
 		// Get Payment Gateway
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$gateway = $gateways[$order->payment_method];
+		$gateway  = $gateways[ $order->payment_method ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
 			// Get Additional Values
 			$additionalValues = '';
@@ -205,6 +282,7 @@ class WC_Payex_Payment {
 				$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
 				$order->update_status( 'on-hold', $message );
 				WC_Admin_Meta_Boxes::add_error( $message );
+
 				return;
 			}
 
@@ -228,10 +306,8 @@ class WC_Payex_Payment {
 
 		// Get Payment Gateway
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$gateway = $gateways[$order->payment_method];
+		$gateway  = $gateways[ $order->payment_method ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
-			$gateway = new WC_Gateway_Payex_Payment();
-
 			// Call PxOrder.Cancel2
 			$params = array(
 				'accountNumber'     => '',
@@ -254,9 +330,10 @@ class WC_Payex_Payment {
 	}
 
 	/**
-	 * Add PayEx Add-Ons link to Admin menu
+	 * Provide Admin Menu items
 	 */
 	public function admin_menu() {
+		// Add PayEx Add-Ons link to Admin menu
 		$addons = apply_filters( 'woocommerce_payex_addons', array() );
 		if ( count( $addons ) > 0 ) {
 			$show_in_menu = current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : false;
@@ -265,6 +342,14 @@ class WC_Payex_Payment {
 				'admin_page_addon'
 			) );
 		}
+
+		// Add Upgrade Page
+		global $_registered_pages;
+		$hookname = get_plugin_page_hookname('wc-payex-upgrade', '');
+		if (!empty($hookname)) {
+			add_action($hookname, __CLASS__ . '::upgrade_page');
+		}
+		$_registered_pages[$hookname] = true;
 	}
 
 	/**
@@ -348,7 +433,7 @@ class WC_Payex_Payment {
 	/**
 	 * Check for MasterPass purchase from cart page
 	 **/
-	function check_mp_purchase() {
+	public function check_mp_purchase() {
 		// Check for MasterPass purchase from cart page
 		if ( isset( $_GET['mp_from_cart_page'] ) && $_GET['mp_from_cart_page'] === '1' ) {
 			$gateway = new WC_Gateway_Payex_MasterPass;
@@ -359,6 +444,20 @@ class WC_Payex_Payment {
 		if ( isset( $_POST['mp_from_product_page'] ) && $_POST['mp_from_product_page'] === '1' ) {
 			$gateway = new WC_Gateway_Payex_MasterPass;
 			$gateway->masterpass_button_action();
+		}
+	}
+
+	/**
+	 * Payment Method Change Callback
+	 */
+	public function check_payment_method_changed() {
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		if (isset($gateways['payex'])) {
+			/** @var WC_Gateway_Payex_Payment $gateway */
+			$gateway = $gateways['payex'];
+			if ($gateway->enabled === 'yes') {
+				$gateway->check_payment_method_changed();
+			}
 		}
 	}
 }

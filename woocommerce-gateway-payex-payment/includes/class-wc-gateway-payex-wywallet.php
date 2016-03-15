@@ -42,16 +42,6 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 
 		// Payment confirmation
 		add_action( 'the_post', array( &$this, 'payment_confirm' ) );
-
-		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = 'no';
-		}
-	}
-
-	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_payex_wywallet_supported_currencies',
-			array( 'DKK', 'EUR', 'GBP', 'NOK', 'SEK', 'USD' )
-		) );
 	}
 
 	/**
@@ -172,14 +162,14 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$customer_id = (int) $order->customer_user;
-		$amount      = $order->order_total;
-		$currency    = $order->order_currency;
+		$customer_id = (int) $order->get_user_id();
+		$amount      = $order->get_total();
+		$currency    = $order->get_order_currency();
 
-		$additional = '';
-		if ( $this->responsive === 'yes' ) {
-			$separator = ( ! empty( $additional ) && mb_substr( $additional, - 1 ) !== '&' ) ? '&' : '';
-			$additional .= $separator . 'USECSS=RESPONSIVEDESIGN';
+		// Additional Values
+		$additional  = array();
+		if ($this->responsive === 'yes') {
+			$additional[] = 'USECSS=RESPONSIVEDESIGN';
 		}
 
 		// Init PayEx
@@ -201,7 +191,7 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-			'additionalValues'  => $additional,
+			'additionalValues'  => $this->get_additional_values( $additional, $order ),
 			'externalID'        => '',
 			'returnUrl'         => $returnUrl,
 			'view'              => 'MICROACCOUNT',

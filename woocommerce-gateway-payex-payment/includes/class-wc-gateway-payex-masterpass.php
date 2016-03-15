@@ -208,20 +208,26 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$orderRef = WC()->session->get( 'mp_order_reference' );
 		if ( ! $orderRef ) {
 			// Checkout using standard way
+			$additional = array(
+				'USEMASTERPASS=1',
+				'RESPONSIVE=1',
+				'SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) )
+			);
+
 			// Call PxOrder.Initialize8
 			$params = array(
 				'accountNumber'     => '',
 				'purchaseOperation' => $this->purchase_operation,
-				'price'             => round( $order->order_total * 100 ),
+				'price'             => round( $order->get_total() * 100 ),
 				'priceArgList'      => '',
-				'currency'          => $order->order_currency,
+				'currency'          => $order->get_order_currency(),
 				'vat'               => 0,
 				'orderID'           => $order->id,
-				'productNumber'     => (int) $order->customer_user, // Customer Id
+				'productNumber'     => (int) $order->get_user_id(), // Customer Id
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-				'additionalValues'  => 'USEMASTERPASS=1&RESPONSIVE=1&SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) ),
+				'additionalValues'  => $this->get_additional_values( $additional, $order ),
 				'externalID'        => '',
 				'returnUrl'         => html_entity_decode( $this->get_return_url( $order ) ),
 				'view'              => 'CREDITCARD',
@@ -376,7 +382,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$params = array(
 			'accountNumber'   => '',
 			'orderRef'        => $_GET['orderRef'],
-			'amount'          => round( $order->order_total * 100 ),
+			'amount'          => round( $order->get_total() * 100 ),
 			'vatAmount'       => 0,
 			'clientIPAddress' => $_SERVER['REMOTE_ADDR']
 		);
@@ -688,6 +694,12 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			// Store Order ID in session so it can be re-used after payment failure
 			WC()->session->order_awaiting_payment = $order_id;
 
+			$additional = array(
+				'USEMASTERPASS=1',
+				'RESPONSIVE=1',
+				'SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) )
+			);
+
 			// Init PayEx
 			$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
 
@@ -695,16 +707,16 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			$params = array(
 				'accountNumber'     => '',
 				'purchaseOperation' => $this->purchase_operation,
-				'price'             => round( $order->order_total * 100 ),
+				'price'             => round( $order->get_total() * 100 ),
 				'priceArgList'      => '',
-				'currency'          => $order->order_currency,
+				'currency'          => $order->get_order_currency(),
 				'vat'               => 0,
 				'orderID'           => $order->id,
-				'productNumber'     => (int) $order->customer_user, // Customer Id
+				'productNumber'     => (int) $order->get_user_id(), // Customer Id
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-				'additionalValues'  => 'USEMASTERPASS=1&RESPONSIVE=1&SHOPPINGCARTXML=' . urlencode( $this->getShoppingCartXML( $order ) ),
+				'additionalValues'  => $this->get_additional_values( $additional, $order ),
 				'externalID'        => '',
 				'returnUrl'         => WC()->cart->get_checkout_url(),
 				'view'              => 'CREDITCARD',
@@ -745,8 +757,8 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$ShoppingCart = $dom->createElement( 'ShoppingCart' );
 		$dom->appendChild( $ShoppingCart );
 
-		$ShoppingCart->appendChild( $dom->createElement( 'CurrencyCode', $order->order_currency ) );
-		$ShoppingCart->appendChild( $dom->createElement( 'Subtotal', (int) ( 100 * $order->order_total ) ) );
+		$ShoppingCart->appendChild( $dom->createElement( 'CurrencyCode', $order->get_order_currency() ) );
+		$ShoppingCart->appendChild( $dom->createElement( 'Subtotal', (int) ( 100 * $order->get_total() ) ) );
 
 		// Add Order Lines
 		foreach ( $order->get_items() as $order_item ) {

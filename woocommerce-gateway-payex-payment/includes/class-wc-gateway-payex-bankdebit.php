@@ -12,11 +12,11 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		'NB:DK'   => 'Nordea Bank DK',
 		'DDB'     => 'Den Danske Bank',
 		'BAX'     => 'BankAxess',
-		'SAMPO'   => 'Sampo',
+		'SAMPO'   => 'Danske Bank',
 		'AKTIA'   => 'Aktia, Säästöpankki',
 		'OP'      => 'Osuuspanki, Pohjola, Oko',
-		'NB:FI'   => 'Nordea Bank Finland',
-		'SHB:FI'  => 'SHB:FI',
+		'NB:FI'   => 'Nordea Finland',
+		'SHB:FI'  => 'Handelsbanken',
 		'SPANKKI' => 'SPANKKI',
 		'TAPIOLA' => 'TAPIOLA',
 		'AALAND'  => 'Ålandsbanken',
@@ -66,16 +66,6 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 
 		// Payment confirmation
 		add_action( 'the_post', array( &$this, 'payment_confirm' ) );
-
-		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = 'no';
-		}
-	}
-
-	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_payex_bankdebit_supported_currencies',
-			array( 'DKK', 'EUR', 'GBP', 'NOK', 'SEK', 'USD' )
-		) );
 	}
 
 	/**
@@ -217,10 +207,16 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$customer_id = (int) $order->customer_user;
-		$amount      = $order->order_total;
-		$currency    = $order->order_currency;
+		$customer_id = (int) $order->get_user_id();
+		$amount      = $order->get_total();
+		$currency    = $order->get_order_currency();
 		$bank_id     = ! empty( $_POST['bank_id'] ) ? $_POST['bank_id'] : 'NB';
+
+		// Additional Values
+		$additional  = array();
+		if ($this->responsive === 'yes') {
+			$additional[] = 'USECSS=RESPONSIVEDESIGN';
+		}
 
 		$returnUrl = html_entity_decode( $this->get_return_url( $order ) );
 		$cancelUrl = html_entity_decode( $order->get_cancel_order_url() );
@@ -241,7 +237,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
-			'additionalValues'  => ( $this->responsive === 'yes' ? 'USECSS=RESPONSIVEDESIGN' : '' ),
+			'additionalValues'  => $this->get_additional_values( $additional, $order ),
 			'externalID'        => '',
 			'returnUrl'         => $returnUrl,
 			'view'              => 'DIRECTDEBIT',
