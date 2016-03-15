@@ -1,18 +1,23 @@
-Version 2.0.0pre
-* WooCommerce 2.3 Compatible
-* Improved WooCommerce Subscriptions support
-* Refund feature (WC 2.2+)
+Version 2.0.0
+* WooCommerce 2.5 Compatible
+* WooCommerce Subscriptions 2.0+ support
+* Drop support of WooCommerce Subscriptions 1.5
+* WooCommerce Subscriptions: Fixed problem when payment method switching
+* WooCommerce Subscriptions: Credit Card switch
+* Refund feature
 * Capture/Cancel when order status change
 * Use metadata to store transaction data instead database table
 * Fixed problem during re-payment of failed orders
-* WooCommerce Subscriptions: Fixed problem when payment method switching
 * Integrated plugins: bankdebit, factoring, invoice and wywallet
 * Order lines and discount changes
-* Factoring: added Financing Invoice mode
 * Addons: added SSN Field
 * Fixed problems on multi currency configurations
 * PayEx Payment Page 2.0 for 'Credit Card' and 'Direct Debit' views
-* Added MasterPass Payment
+* Implemented MasterPass Payment method
+* Implemented PayEx Delbetala (PartPayment) method
+* Implemented PayEx Faktura (Financing Invoice) method
+* Removed deprecated Factoring (Invoice 2.0) method
+* Save Credit Cards of registered customers for quick payments
 
 Version 1.1.3
 * Fixed problem when subscription switches
