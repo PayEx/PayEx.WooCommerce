@@ -10,7 +10,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 	public function __construct() {
 		$this->id           = 'payex_factoring';
 		$this->has_fields   = true;
-		$this->method_title = __( 'PayEx Factoring', 'woocommerce-gateway-payex-payment' );
+		$this->method_title = __( 'PayEx Financing', 'woocommerce-gateway-payex-payment' );
 		$this->icon         = apply_filters( 'woocommerce_payex_factoring_icon', plugins_url( '/assets/images/payex.gif', dirname( __FILE__ ) ) );
 		$this->supports     = array(
 			'products',
@@ -94,13 +94,13 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Title', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( 'PayEx Factoring', 'woocommerce-gateway-payex-payment' )
+				'default'     => __( 'PayEx Financing', 'woocommerce-gateway-payex-payment' )
 			),
 			'description'    => array(
 				'title'       => __( 'Description', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( 'PayEx Factoring', 'woocommerce-gateway-payex-payment' ),
+				'default'     => __( 'PayEx Financing', 'woocommerce-gateway-payex-payment' ),
 			),
 			'account_no'     => array(
 				'title'       => __( 'Account Number', 'woocommerce-gateway-payex-payment' ),
@@ -163,7 +163,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				'custom_attributes' => array(
 					'step' => 'any'
 				),
-				'description'       => __( 'Factoring fee. Set 0 to disable.', 'woocommerce-gateway-payex-payment' ),
+				'description'       => __( 'Financing fee. Set 0 to disable.', 'woocommerce-gateway-payex-payment' ),
 				'default'           => '0'
 			),
 			'fee_is_taxable' => array(
@@ -288,7 +288,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			'additionalValues'  => $this->get_additional_values( array(), $order ),
 			'externalID'        => '',
 			'returnUrl'         => 'http://localhost.no/return',
-			'view'              => $this->mode,
+			'view'              => 'FINANCING',
 			'agreementRef'      => '',
 			'cancelUrl'         => 'http://localhost.no/cancel',
 			'clientLanguage'    => $this->language
@@ -346,24 +346,23 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				$result = $this->getPx()->PurchaseInvoiceSale($params);
 				break;
 			case 'CREDITACCOUNT':
-				// Call PxOrder.PurchasePartPaymentSale
+				// Call PxOrder.PurchaseCreditAccount
 				$params = array(
-					'accountNumber'        => '',
-					'orderRef'             => $orderRef,
+					'accountNumber' => '',
+					'orderRef' => $orderRef,
 					'socialSecurityNumber' => $ssn,
-					'legalFirstName'       => $order->billing_first_name,
-					'legalLastName'        => $order->billing_last_name,
-					'legalStreetAddress'   => trim( $order->billing_address_1 . ' ' . $order->billing_address_2 ),
-					'legalCoAddress'       => '',
-					'legalPostNumber'      => $order->billing_postcode,
-					'legalCity'            => $order->billing_city,
-					'legalCountryCode'     => $order->billing_country,
-					'email'                => $order->billing_email,
-					'msisdn'               => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
-					'ipAddress'            => $_SERVER['REMOTE_ADDR'],
+					'legalName' => trim ($order->billing_first_name . ' ' . $order->billing_last_name ),
+					'streetAddress' => trim( $order->billing_address_1 . ' ' . $order->billing_address_2 ),
+					'coAddress' => '',
+					'zipCode' => $order->billing_postcode,
+					'city' => $order->billing_city,
+					'countryCode' => $order->billing_country,
+					'paymentMethod' => $order->billing_country === 'SE' ? 'PXCREDITACCOUNTSE' : 'PXCREDITACCOUNTNO',
+					'email' => $order->billing_email,
+					'msisdn' => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
+					'ipAddress' => $_SERVER['REMOTE_ADDR']
 				);
-
-				$result = $this->getPx()->PurchasePartPaymentSale($params);
+				$result = $this->getPx()->PurchaseCreditAccount($params);
 				break;
 			default:
 				$order->update_status( 'failed', __( 'Invalid payment mode', 'woocommerce-gateway-payex-payment' ) );
