@@ -57,16 +57,6 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			'process_admin_options'
 		) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
-
-		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = 'no';
-		}
-	}
-
-	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_payex_factoring_supported_currencies',
-			array( 'DKK', 'EUR', 'GBP', 'NOK', 'SEK', 'USD' )
-		) );
 	}
 
 	/**

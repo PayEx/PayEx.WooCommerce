@@ -66,16 +66,6 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 
 		// Payment confirmation
 		add_action( 'the_post', array( &$this, 'payment_confirm' ) );
-
-		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = 'no';
-		}
-	}
-
-	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_payex_bankdebit_supported_currencies',
-			array( 'DKK', 'EUR', 'GBP', 'NOK', 'SEK', 'USD' )
-		) );
 	}
 
 	/**

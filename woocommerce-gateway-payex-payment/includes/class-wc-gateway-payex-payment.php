@@ -124,16 +124,6 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			// Callback for "Use New Credit Card" Payment Change
 			//add_action( 'template_redirect', array( $this, 'check_payment_method_changed' ) );
 		}
-
-		if ( ! $this->is_valid_for_use() ) {
-			$this->enabled = 'no';
-		}
-	}
-
-	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_payex_supported_currencies',
-			array( 'DKK', 'EUR', 'GBP', 'NOK', 'SEK', 'USD' )
-		) );
 	}
 
 	/**
