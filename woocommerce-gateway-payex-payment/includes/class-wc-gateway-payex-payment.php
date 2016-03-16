@@ -603,15 +603,26 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 			// Use Saved Credit Card
 			if ( isset( $_POST['payex-credit-card'] ) && abs( $_POST['payex-credit-card'] ) > 0 ) {
-				$card_id = $_POST['payex-credit-card'];
-				$card    = get_post( $card_id );
+				$card_id   = $_POST['payex-credit-card'];
+				$card      = get_post( $card_id );
+				$card_meta = get_post_meta( $card->ID, '_payex_card', true );
 				if ( $card->post_author != $order->get_user_id() ) {
 					$this->add_message( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
 
+				// Set Card ID
 				update_post_meta( $order->id, '_payex_card_id', $card_id );
+
+				// Payment success
+				$order->payment_complete();
+				$order->add_order_note(
+					sprintf(
+						__( 'Payment success. Credit Card: %s', 'woocommerce-gateway-payex-payment' ),
+						$card_meta['masked_number']
+					)
+				);
 
 				return array(
 					'result'   => 'success',
@@ -624,7 +635,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 			return false;
 		} elseif ( $order->get_total() == 0 ) {
-			// Allow empty order amount for "Payment Change" only
+			// Allow empty order amount for "Payment Change" and "Subscription trial period" only
 			$this->add_message( __( 'Sorry, order total must be greater than zero.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 			return false;
