@@ -187,7 +187,12 @@ class WC_Payex_Payment {
 
 		// Get Current Payment Method
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$default            = get_option( 'woocommerce_default_gateway', current( array_keys( $available_gateways ) ) );
+		$default            = get_option( 'woocommerce_default_gateway' );
+
+		if ( ! $default ) {
+			$default = current( array_keys( $available_gateways ) );
+		}
+
 		$current            = WC()->session->get( 'chosen_payment_method', $default );
 		$current_gateway    = $available_gateways[ $current ];
 
