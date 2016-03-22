@@ -38,8 +38,8 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$this->fee_tax_class  = isset( $this->settings['fee_tax_class'] ) ? $this->settings['fee_tax_class'] : 'standard';
 
 		// Get SSN Field options
-		$this->ssn_options = get_option( 'woocommerce_payex_addons_ssn_check', array(
-				'ssn_enabled' => false
+		$this->ssn_options = wp_parse_args( get_option( 'woocommerce_payex_addons_ssn_check', array() ), array(
+			'ssn_enabled' => false,
 		) );
 
 		// Use SSN Field as primary

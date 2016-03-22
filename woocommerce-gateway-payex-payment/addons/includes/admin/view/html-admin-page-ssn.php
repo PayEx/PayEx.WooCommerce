@@ -12,7 +12,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <?php settings_errors(); ?>
 <h3><span><?php _e( 'General Options', 'woocommerce-gateway-payex-payment' ); ?></span></h3>
-<?php $options = get_option( 'woocommerce_payex_addons_ssn_check', array() ); ?>
+<?php
+
+$options = wp_parse_args( get_option( 'woocommerce_payex_addons_ssn_check', array() ), array(
+	'ssn_enabled' => false,
+	'testmode' => false,
+	'account_no' => null,
+	'encrypted_key' => null,
+) );
+
+?>
 <form method="post" action="options.php">
 	<?php settings_fields( 'woocommerce_payex_addons' ); ?>
 <table class="form-table">
