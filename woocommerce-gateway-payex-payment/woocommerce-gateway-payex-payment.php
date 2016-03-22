@@ -358,7 +358,8 @@ class WC_Payex_Payment {
 	public function admin_page_addon() {
 		$addons = apply_filters( 'woocommerce_payex_addons', array() );
 		if ( count( $addons ) > 0 ) {
-			$default       = array_shift( array_keys( $addons ) );
+			$addons_keys = array_keys( $addons );
+			$default       = array_shift( $addons_keys );
 			$current_addon = ( isset( $_GET['addon'] ) ) ? $_GET['addon'] : $default;
 		}
 		?>
