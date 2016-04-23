@@ -114,6 +114,7 @@ class WC_Payex_Payment {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-factoring.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-wywallet.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
+		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
 
 		// Addons
@@ -173,6 +174,7 @@ class WC_Payex_Payment {
 		$methods[] = 'WC_Gateway_Payex_Factoring';
 		$methods[] = 'WC_Gateway_Payex_Wywallet';
 		$methods[] = 'WC_Gateway_Payex_MasterPass';
+		$methods[] = 'WC_Gateway_Payex_Swish';
 
 		return $methods;
 	}
