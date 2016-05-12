@@ -1,6 +1,6 @@
 # WooCommerce PayEx Payments Gateway
 
-This plugin provide a Credit Card Payment Gateway through PayEx for WooCommerce.
+This plugin provides the PayEx Payment Gateway for WooCommerce.
 
 * Contributors: aait
 * Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, payex, payment gateway
