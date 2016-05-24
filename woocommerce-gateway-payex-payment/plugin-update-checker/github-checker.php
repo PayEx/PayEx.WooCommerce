@@ -1,8 +1,8 @@
 <?php
 
-if ( !class_exists('PucGitHubChecker_3_0', false) ):
+if ( !class_exists('PucGitHubChecker_3_1', false) ):
 
-class PucGitHubChecker_3_0 extends PluginUpdateChecker_3_0 {
+class PucGitHubChecker_3_1 extends PluginUpdateChecker_3_1 {
 	/**
 	 * @var string GitHub username.
 	 */
@@ -54,13 +54,12 @@ class PucGitHubChecker_3_0 extends PluginUpdateChecker_3_0 {
 	 * Retrieve details about the latest plugin version from GitHub.
 	 *
 	 * @param array $unusedQueryArgs Unused.
-	 * @return PluginInfo_3_0
+	 * @return PluginInfo_3_1
 	 */
 	public function requestInfo($unusedQueryArgs = array()) {
-		$info = new PluginInfo_3_0();
+		$info = new PluginInfo_3_1();
 		$info->filename = $this->pluginFile;
 		$info->slug = $this->slug;
-		$info->sections = array();
 
 		$this->setInfoFromHeader($this->getPluginHeader(), $info);
 
@@ -240,7 +239,7 @@ class PucGitHubChecker_3_0 extends PluginUpdateChecker_3_0 {
 	 */
 	protected function parseMarkdown($markdown) {
 		if ( !class_exists('Parsedown', false) ) {
-			require_once(dirname(__FILE__) . '/vendor/Parsedown.php');
+			require_once(dirname(__FILE__) . '/vendor/Parsedown' . (version_compare(PHP_VERSION, '5.3.0', '>=') ? '' : 'Legacy') . '.php');
 		}
 
 		$instance = Parsedown::instance();
@@ -360,7 +359,7 @@ class PucGitHubChecker_3_0 extends PluginUpdateChecker_3_0 {
 	 * Copy plugin metadata from a file header to a PluginInfo object.
 	 *
 	 * @param array $fileHeader
-	 * @param PluginInfo_3_0 $pluginInfo
+	 * @param PluginInfo_3_1 $pluginInfo
 	 */
 	protected function setInfoFromHeader($fileHeader, $pluginInfo) {
 		$headerToPropertyMap = array(
@@ -382,9 +381,6 @@ class PucGitHubChecker_3_0 extends PluginUpdateChecker_3_0 {
 			}
 		}
 
-		if ( !isset($pluginInfo->sections) ) {
-			$pluginInfo->sections = array();
-		}
 		if ( !empty($fileHeader['Description']) ) {
 			$pluginInfo->sections['description'] = $fileHeader['Description'];
 		}
@@ -394,7 +390,7 @@ class PucGitHubChecker_3_0 extends PluginUpdateChecker_3_0 {
 	 * Copy plugin metadata from the remote readme.txt file.
 	 *
 	 * @param string $ref GitHub tag or branch where to look for the readme.
-	 * @param PluginInfo_3_0 $pluginInfo
+	 * @param PluginInfo_3_1 $pluginInfo
 	 */
 	protected function setInfoFromRemoteReadme($ref, $pluginInfo) {
 		$readmeTxt = $this->getRemoteFile('readme.txt', $ref);
