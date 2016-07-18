@@ -106,7 +106,7 @@ class WC_Payex_Payment {
 		load_plugin_textdomain( 'woocommerce-gateway-payex-payment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 		// Includes
-		include_once( dirname( __FILE__ ) . '/library/Px/Px.php' );
+		include_once( dirname( __FILE__ ) . '/vendor/payex/php-api/src/PayEx/Px.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-abstract.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-payment.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-bankdebit.php' );
