@@ -146,11 +146,26 @@ class WC_Payex_Addon_SSN {
 
 	/**
 	 * Get PayEx Handler
-	 * @return Px
+	 * @return \PayEx\Px
 	 */
 	public function getPx() {
 		if ( ! $this->_px ) {
-			$this->_px = new Px();
+			global $wp_version;
+
+			$plugin_version = get_file_data(
+				dirname(__FILE__) . '/../woocommerce-gateway-payex-payment.php',
+				array('Version'),
+				'woocommerce-gateway-payex-payment'
+			);
+
+			$this->_px = new \PayEx\Px();
+			$this->_px->setUserAgent(sprintf("PayEx.Ecommerce.Php/%s PHP/%s WordPress/%s WooCommerce/%s PayEx.WooCommerce/%s",
+				\PayEx\Px::VERSION,
+				phpversion(),
+				$wp_version,
+				WC()->version,
+				$plugin_version[0]
+			));
 		}
 
 		return $this->_px;
