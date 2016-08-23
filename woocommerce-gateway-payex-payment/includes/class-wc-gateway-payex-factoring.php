@@ -216,25 +216,6 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		if ( empty( $_POST['social-security-number'] ) ) {
 			$this->add_message( __( 'Please enter your Social Security Number and confirm your order.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
-
-		// Init PayEx
-		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
-
-		// Call PxOrder.GetAddressByPaymentMethod
-		$params = array(
-			'accountNumber' => '',
-			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
-			'ssn' => trim($_POST['social-security-number']),
-			'zipcode' => trim($_POST['billing_postcode']),
-			'countryCode' => trim($_POST['billing_country']),
-			'ipAddress' => $_SERVER['REMOTE_ADDR']
-		);
-		$result = $this->getPx()->GetAddressByPaymentMethod($params);
-		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-			return;
-		}
 	}
 
 	/**
