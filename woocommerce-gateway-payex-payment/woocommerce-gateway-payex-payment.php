@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
 
+require_once dirname( __FILE__ ) . '/vendor/autoload.php';
+
 class WC_Payex_Payment {
 
 	/**
@@ -68,6 +70,11 @@ class WC_Payex_Payment {
 		if ( version_compare( get_option( 'woocommerce_payex_version', '1.0.0' ), '2.0.0', '<' ) ) {
 			add_action( 'admin_notices', __CLASS__ . '::upgrade_notice' );
 		}
+
+		// Add SSN Checkout Field
+		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'before_checkout_billing_form' ) );
+		add_action( 'wp_ajax_payex_process_ssn', array( $this, 'ajax_payex_process_ssn' ) );
+		add_action( 'wp_ajax_nopriv_payex_process_ssn', array( $this, 'ajax_payex_process_ssn' ) );
 	}
 
 	/**
@@ -106,7 +113,6 @@ class WC_Payex_Payment {
 		load_plugin_textdomain( 'woocommerce-gateway-payex-payment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 		// Includes
-		include_once( dirname( __FILE__ ) . '/vendor/payex/php-api/src/PayEx/Px.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-abstract.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-payment.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-bankdebit.php' );
@@ -116,9 +122,6 @@ class WC_Payex_Payment {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
-
-		// Addons
-		include_once( dirname( __FILE__ ) . '/addons/class-wc-payex-addon-ssn.php' );
 	}
 
 	/**
@@ -161,6 +164,11 @@ class WC_Payex_Payment {
 		$mp_settings = get_option( 'woocommerce_payex_masterpass_settings' );
 		if ( $mp_settings['enabled'] === 'yes' ) {
 			wp_enqueue_style( 'wc-gateway-payex-masterpass', plugins_url( '/assets/css/masterpass.css', __FILE__ ), array(), false, 'all' );
+		}
+
+		$factoring_settings = get_option( 'woocommerce_payex_factoring_settings' );
+		if ( isset( $factoring_settings['checkout_field'] ) && $factoring_settings['checkout_field'] === 'yes' ) {
+			wp_enqueue_script( 'wc-payex-addons-ssn', plugins_url( '/assets/js/ssn.js', __FILE__ ), array( 'wc-checkout' ), false, true );
 		}
 	}
 
@@ -340,16 +348,6 @@ class WC_Payex_Payment {
 	 * Provide Admin Menu items
 	 */
 	public function admin_menu() {
-		// Add PayEx Add-Ons link to Admin menu
-		$addons = apply_filters( 'woocommerce_payex_addons', array() );
-		if ( count( $addons ) > 0 ) {
-			$show_in_menu = current_user_can( 'manage_woocommerce' ) ? 'woocommerce' : false;
-			$slug         = add_submenu_page( $show_in_menu, __( 'PayEx Add-Ons' ), __( 'PayEx Add-Ons' ), 'manage_woocommerce', 'wc_payex_addons', array(
-				&$this,
-				'admin_page_addon'
-			) );
-		}
-
 		// Add Upgrade Page
 		global $_registered_pages;
 		$hookname = get_plugin_page_hookname('wc-payex-upgrade', '');
@@ -357,47 +355,6 @@ class WC_Payex_Payment {
 			add_action($hookname, __CLASS__ . '::upgrade_page');
 		}
 		$_registered_pages[$hookname] = true;
-	}
-
-	/**
-	 * PayEx Add-Ons Admin Page
-	 */
-	public function admin_page_addon() {
-		$addons = apply_filters( 'woocommerce_payex_addons', array() );
-		if ( count( $addons ) > 0 ) {
-			$addons_keys = array_keys( $addons );
-			$default       = array_shift( $addons_keys );
-			$current_addon = ( isset( $_GET['addon'] ) ) ? $_GET['addon'] : $default;
-		}
-		?>
-		<div class="wrap woocommerce">
-			<div class="icon32 woocommerce-dynamic-pricing" id="icon-woocommerce">
-				<br>
-			</div>
-			<h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
-				<?php foreach ( $addons as $addon_id => $addon ) : ?>
-					<?php $class = ( $current_addon == $addon_id ) ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>
-					<a href="<?php echo admin_url( 'admin.php?page=wc_payex_addons&addon=' . $addon_id ) ?>" class="<?php echo $class; ?>">
-						<?php echo $addon['title']; ?>
-					</a>
-				<?php endforeach; ?>
-			</h2>
-
-			<div class="tab_top"><h3 class="has-help"><?php echo $addons[ $current_addon ]['title']; ?></h3>
-				<?php if ( ! empty ( $addons[ $current_addon ]['description'] ) ) : ?>
-					<p class="help"><?php echo $addons[ $current_addon ]['description']; ?></p>
-				<?php endif; ?>
-			</div>
-
-			<div class="payex-addon">
-				<?php
-				if ( ! empty ( $addons[ $current_addon ]['callback'] ) && is_callable( $addons[ $current_addon ]['callback'] ) ) {
-					call_user_func( $addons[ $current_addon ]['callback'] );
-				}
-				?>
-			</div>
-		</div>
-		<?php
 	}
 
 	/**
@@ -467,6 +424,90 @@ class WC_Payex_Payment {
 				$gateway->check_payment_method_changed();
 			}
 		}
+	}
+
+	/**
+	 * Hook before_checkout_billing_form
+	 * @param $checkout
+	 */
+	public function before_checkout_billing_form( $checkout ) {
+		$factoring_settings = get_option( 'woocommerce_payex_factoring_settings' );
+		if ( isset( $factoring_settings['checkout_field'] ) && $factoring_settings['checkout_field'] === 'yes' ) {
+			echo '<div id="payex_ssn">';
+			woocommerce_form_field( 'payex_ssn', array(
+				'type'        => 'text',
+				'class'       => array( 'payex-ssn-class form-row-wide' ),
+				'label'       => __( 'Social Security Number', 'woocommerce-gateway-payex-payment' ),
+				'placeholder' => __( 'Social Security Number', 'woocommerce-gateway-payex-payment' ),
+			), $checkout->get_value( 'payex_ssn' ) );
+
+			echo '<input type="button" class="button alt" name="woocommerce_checkout_payex_ssn" id="payex_ssn_button" value="' . __( 'Get Profile', 'woocommerce-gateway-payex-payment' ) . '" />';
+			echo '</div>';
+		}
+	}
+
+	/**
+	 * Ajax Hook
+	 */
+	public function ajax_payex_process_ssn() {
+		// Init PayEx
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		if ( ! $gateways[ 'payex_factoring' ] ) {
+			wp_send_json_error( array( 'message' => __( 'Financing Invoice method is inactive', 'woocommerce-gateway-payex-payment' ) ) );
+			exit();
+		}
+
+		/** @var WC_Gateway_Payex_Factoring $gateway */
+		$gateway = $gateways[ 'payex_factoring' ];
+
+		if ( empty( $_POST['billing_country'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please select country', 'woocommerce-gateway-payex-payment' ) ) );
+			exit();
+		}
+
+		if ( empty( $_POST['billing_postcode'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please enter postcode', 'woocommerce-gateway-payex-payment' ) ) );
+			exit();
+		}
+
+		// Init PayEx
+		$gateway->getPx()->setEnvironment( $gateway->account_no, $gateway->encrypted_key, $gateway->testmode === 'yes' );
+
+		// Call PxOrder.GetAddressByPaymentMethod
+		$params = array(
+			'accountNumber' => '',
+			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
+			'ssn' => trim($_POST['social_security_number']),
+			'zipcode' => trim($_POST['billing_postcode']),
+			'countryCode' => trim($_POST['billing_country']),
+			'ipAddress' => trim($_SERVER['REMOTE_ADDR'])
+		);
+		$result = $gateway->getPx()->GetAddressByPaymentMethod($params);
+		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
+			if ( preg_match( '/\bInvalid parameter:SocialSecurityNumber\b/i', $result['description'] ) ) {
+				wp_send_json_error( array( 'message' => __( 'Invalid Social Security Number', 'woocommerce-gateway-payex-payment' ) ) );
+				exit();
+			}
+
+			wp_send_json_error( array( 'message' => $result['errorCode'] . '(' . $result['description'] . ')' ) );
+			exit();
+		}
+
+		// Parse name field
+		$parser = new \FullNameParser();
+		$name = $parser->parse_name($result['name']);
+
+		$output = array(
+			'first_name' => $name['fname'],
+			'last_name'  => $name['lname'],
+			'address_1'  => $result['streetAddress'],
+			'address_2'  => ! empty($result['coAddress']) ? 'c/o ' . $result['coAddress'] : '',
+			'postcode'   => $result['zipCode'],
+			'city'       => $result['city'],
+			'country'    => $result['countryCode']
+		);
+		wp_send_json_success( $output );
+		exit();
 	}
 }
 
