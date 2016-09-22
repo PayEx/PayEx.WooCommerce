@@ -1,9 +1,9 @@
 {
-  "name": "payex/php-api",
+  "name": "aait/payex-wordpress-api",
   "type": "library",
-  "description": "A PHP client library for PayEx Payments API",
+  "description": "A WordPress/WooCommerce client library for PayEx Payments API",
   "keywords": ["payex"],
-  "homepage": "https://github.com/aait/payex-php-api",
+  "homepage": "https://github.com/aait/PayEx.Ecommerce.Php",
   "license": "MIT",
   "require": {
     "php": ">=5.3",

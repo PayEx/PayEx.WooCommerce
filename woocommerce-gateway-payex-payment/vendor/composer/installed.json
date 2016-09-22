@@ -1,0 +1,73 @@
+[
+    {
+        "name": "aait/payex-wordpress-api",
+        "version": "v1.0.1",
+        "version_normalized": "1.0.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/aait/PayEx.Ecommerce.Php.git",
+            "reference": "ad22c57585745593ed95d56d8c9d81a7da53ebb0"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/aait/PayEx.Ecommerce.Php/zipball/ad22c57585745593ed95d56d8c9d81a7da53ebb0",
+            "reference": "ad22c57585745593ed95d56d8c9d81a7da53ebb0",
+            "shasum": ""
+        },
+        "require": {
+            "ext-dom": "*",
+            "ext-soap": "*",
+            "ext-xml": "*",
+            "php": ">=5.3"
+        },
+        "time": "2016-09-22 09:23:10",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "PayEx\\": "src/PayEx/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "description": "A WordPress/WooCommerce client library for PayEx Payments API",
+        "homepage": "https://github.com/aait/PayEx.Ecommerce.Php",
+        "keywords": [
+            "payex"
+        ]
+    },
+    {
+        "name": "aait/php-name-parser",
+        "version": "1.0.0",
+        "version_normalized": "1.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/aait/PHP-Name-Parser.git",
+            "reference": "87d0b55bd6a4ebafccc55b9793e5d4a057f48a42"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/aait/PHP-Name-Parser/zipball/87d0b55bd6a4ebafccc55b9793e5d4a057f48a42",
+            "reference": "87d0b55bd6a4ebafccc55b9793e5d4a057f48a42",
+            "shasum": ""
+        },
+        "require": {
+            "php": "~5.3.0|~5.4.0|~5.5.0|~5.6.0|~7.0.0"
+        },
+        "time": "2016-08-11 09:37:03",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "parser.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "description": "PHP library to split names into their respective components (first, last, etc). Fork of joshfraser/PHP-Name-Parser"
+    }
+]

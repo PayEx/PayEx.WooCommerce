@@ -1,0 +1,6 @@
+{
+    "require": {
+        "aait/payex-wordpress-api": "^1.0",
+        "aait/php-name-parser": "^1.0"
+    }
+}
