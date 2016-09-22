@@ -64,7 +64,7 @@ class WC_Payex_Payment {
 		add_action( 'template_redirect', array( $this, 'check_mp_purchase' ) );
 
 		// PayEx Credit Card: Payment Method Change Callback
-		add_action('template_redirect', array( $this, 'check_payment_method_changed' ));
+		add_action( 'template_redirect', array( $this, 'check_payment_method_changed' ) );
 
 		// Add Upgrade Notice
 		if ( version_compare( get_option( 'woocommerce_payex_version', '1.0.0' ), '2.0.0', '<' ) ) {
@@ -95,7 +95,7 @@ class WC_Payex_Payment {
 	 */
 	public function plugin_action_links( $links ) {
 		$plugin_links = array(
-			'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc_gateway_payex_payment' ) . '">' . __( 'PayEx Settings', 'woocommerce-gateway-payex-payment' ) . '</a>'
+			'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc_gateway_payex_payment' ) ) . '">' . __( 'PayEx Settings', 'woocommerce-gateway-payex-payment' ) . '</a>'
 		);
 
 		return array_merge( $plugin_links, $links );
@@ -134,7 +134,7 @@ class WC_Payex_Payment {
 				<p>
 					<?php
 					echo esc_html__( 'Warning! WooCommerce PayEx Payments plugin requires to update the database structure.', 'woocommerce-gateway-payex-payment' );
-					echo ' ' . sprintf( esc_html__('Please click %s here %s to start upgrade.', 'woocommerce-gateway-payex-payment'), '<a href="' . admin_url( 'admin.php?page=wc-payex-upgrade' ) . '">', '</a>' );
+					echo ' ' . sprintf( esc_html__( 'Please click %s here %s to start upgrade.', 'woocommerce-gateway-payex-payment' ), '<a href="' . esc_url( admin_url( 'admin.php?page=wc-payex-upgrade' ) ) . '">', '</a>' );
 					?>
 				</p>
 			</div>
@@ -146,7 +146,7 @@ class WC_Payex_Payment {
 	 * Upgrade Page
 	 */
 	public static function upgrade_page() {
-		if ( !current_user_can( 'update_plugins' ) ) {
+		if ( ! current_user_can( 'update_plugins' ) ) {
 			return;
 		}
 
@@ -203,8 +203,8 @@ class WC_Payex_Payment {
 			$default = current( array_keys( $available_gateways ) );
 		}
 
-		$current            = WC()->session->get( 'chosen_payment_method', $default );
-		$current_gateway    = $available_gateways[ $current ];
+		$current         = WC()->session->get( 'chosen_payment_method', $default );
+		$current_gateway = $available_gateways[ $current ];
 
 		// Fee feature in Invoice and Factoring modules
 		if ( ! in_array( $current_gateway->id, array( 'payex_invoice', 'payex_factoring' ) ) ) {
@@ -270,7 +270,8 @@ class WC_Payex_Payment {
 
 		// Get Payment Gateway
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$gateway  = $gateways[ $order->payment_method ];
+		/** @var WC_Gateway_Payex_Abstract $gateway */
+		$gateway = $gateways[ $order->payment_method ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
 			// Get Additional Values
 			$additionalValues = '';
@@ -321,7 +322,8 @@ class WC_Payex_Payment {
 
 		// Get Payment Gateway
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$gateway  = $gateways[ $order->payment_method ];
+		/** @var WC_Gateway_Payex_Abstract $gateway */
+		$gateway = $gateways[ $order->payment_method ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
 			// Call PxOrder.Cancel2
 			$params = array(
@@ -350,11 +352,11 @@ class WC_Payex_Payment {
 	public function admin_menu() {
 		// Add Upgrade Page
 		global $_registered_pages;
-		$hookname = get_plugin_page_hookname('wc-payex-upgrade', '');
-		if (!empty($hookname)) {
-			add_action($hookname, __CLASS__ . '::upgrade_page');
+		$hookname = get_plugin_page_hookname( 'wc-payex-upgrade', '' );
+		if ( ! empty( $hookname ) ) {
+			add_action( $hookname, __CLASS__ . '::upgrade_page' );
 		}
-		$_registered_pages[$hookname] = true;
+		$_registered_pages[ $hookname ] = true;
 	}
 
 	/**
@@ -366,9 +368,9 @@ class WC_Payex_Payment {
 			wc_get_template(
 				'masterpass/cart-button.php',
 				array(
-					'image'       => plugins_url( '/assets/images/masterpass-button.png', __FILE__ ),
+					'image'       => esc_url( plugins_url( '/assets/images/masterpass-button.png', __FILE__ ) ),
 					'description' => $mp_settings['description'],
-					'link'        => add_query_arg( 'mp_from_cart_page', 1, get_permalink() )
+					'link'        => esc_url( add_query_arg( 'mp_from_cart_page', 1, get_permalink() ) )
 				),
 				'',
 				dirname( __FILE__ ) . '/templates/'
@@ -385,9 +387,9 @@ class WC_Payex_Payment {
 			wc_get_template(
 				'masterpass/product-button.php',
 				array(
-					'image'       => plugins_url( '/assets/images/masterpass-button.png', __FILE__ ),
+					'image'       => esc_url( plugins_url( '/assets/images/masterpass-button.png', __FILE__ ) ),
 					'description' => $mp_settings['description'],
-					'link'        => add_query_arg( 'mp_from_product_page', 1, get_permalink() )
+					'link'        => esc_url( add_query_arg( 'mp_from_product_page', 1, get_permalink() ) )
 				),
 				'',
 				dirname( __FILE__ ) . '/templates/'
@@ -417,10 +419,10 @@ class WC_Payex_Payment {
 	 */
 	public function check_payment_method_changed() {
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		if (isset($gateways['payex'])) {
+		if ( isset( $gateways['payex'] ) ) {
 			/** @var WC_Gateway_Payex_Payment $gateway */
 			$gateway = $gateways['payex'];
-			if ($gateway->enabled === 'yes') {
+			if ( $gateway->enabled === 'yes' ) {
 				$gateway->check_payment_method_changed();
 			}
 		}
@@ -428,6 +430,7 @@ class WC_Payex_Payment {
 
 	/**
 	 * Hook before_checkout_billing_form
+	 *
 	 * @param $checkout
 	 */
 	public function before_checkout_billing_form( $checkout ) {
@@ -452,13 +455,13 @@ class WC_Payex_Payment {
 	public function ajax_payex_process_ssn() {
 		// Init PayEx
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		if ( ! $gateways[ 'payex_factoring' ] ) {
+		if ( ! $gateways['payex_factoring'] ) {
 			wp_send_json_error( array( 'message' => __( 'Financing Invoice method is inactive', 'woocommerce-gateway-payex-payment' ) ) );
 			exit();
 		}
 
 		/** @var WC_Gateway_Payex_Factoring $gateway */
-		$gateway = $gateways[ 'payex_factoring' ];
+		$gateway = $gateways['payex_factoring'];
 
 		if ( empty( $_POST['billing_country'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'Please select country', 'woocommerce-gateway-payex-payment' ) ) );
@@ -477,12 +480,12 @@ class WC_Payex_Payment {
 		$params = array(
 			'accountNumber' => '',
 			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
-			'ssn' => trim($_POST['social_security_number']),
-			'zipcode' => trim($_POST['billing_postcode']),
-			'countryCode' => trim($_POST['billing_country']),
-			'ipAddress' => trim($_SERVER['REMOTE_ADDR'])
+			'ssn'           => trim( $_POST['social_security_number'] ),
+			'zipcode'       => trim( $_POST['billing_postcode'] ),
+			'countryCode'   => trim( $_POST['billing_country'] ),
+			'ipAddress'     => trim( $_SERVER['REMOTE_ADDR'] )
 		);
-		$result = $gateway->getPx()->GetAddressByPaymentMethod($params);
+		$result = $gateway->getPx()->GetAddressByPaymentMethod( $params );
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 			if ( preg_match( '/\bInvalid parameter:SocialSecurityNumber\b/i', $result['description'] ) ) {
 				wp_send_json_error( array( 'message' => __( 'Invalid Social Security Number', 'woocommerce-gateway-payex-payment' ) ) );
@@ -495,13 +498,13 @@ class WC_Payex_Payment {
 
 		// Parse name field
 		$parser = new \FullNameParser();
-		$name = $parser->parse_name($result['name']);
+		$name   = $parser->parse_name( $result['name'] );
 
 		$output = array(
 			'first_name' => $name['fname'],
 			'last_name'  => $name['lname'],
 			'address_1'  => $result['streetAddress'],
-			'address_2'  => ! empty($result['coAddress']) ? 'c/o ' . $result['coAddress'] : '',
+			'address_2'  => ! empty( $result['coAddress'] ) ? 'c/o ' . $result['coAddress'] : '',
 			'postcode'   => $result['zipCode'],
 			'city'       => $result['city'],
 			'country'    => $result['countryCode']
