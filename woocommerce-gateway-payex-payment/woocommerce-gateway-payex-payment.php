@@ -64,6 +64,7 @@ class WC_Payex_Payment {
 		if ( version_compare( get_option( 'woocommerce_payex_version', '1.0.0' ), '2.0.0', '<' ) ) {
 			add_action( 'admin_notices', __CLASS__ . '::upgrade_notice' );
 		}
+		add_action( 'admin_notices', __CLASS__ . '::admin_notices' );
 
 		// Add SSN Checkout Field
 		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'before_checkout_billing_form' ) );
@@ -116,6 +117,30 @@ class WC_Payex_Payment {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
+	}
+
+	/**
+	 * Admin Notices
+	 */
+	public static function admin_notices() {
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$list = array(
+			'payex', 'payex_bankdebit', 'payex_invoice',
+			'payex_factoring', 'payex_wywallet', 'payex_masterpass',
+			'payex_swish'
+		);
+
+		foreach ($list as $item) {
+			if ( isset( $available_gateways[$item] ) ) {
+				$gateway = $available_gateways[$item];
+				$settings = $gateway->settings;
+				if ( empty( $settings['account_no'] ) || empty( $settings['encrypted_key'] ) ) {
+					echo '<div class="error"><p>' . sprintf( __( 'PayEx Payments for WooCommerce is almost ready. To get started <a href="%s">connect your PayEx account</a>.', 'woocommerce-gateway-payex-payment' ), esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) ) ) . '</p></div>';
+					break;
+				}
+			}
+		}
 	}
 
 	/**
