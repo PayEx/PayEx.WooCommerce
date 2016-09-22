@@ -11,12 +11,6 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Requires at least: 3.1
 */
 
-require 'plugin-update-checker/plugin-update-checker.php';
-$myUpdateChecker = PucFactory::buildUpdateChecker(
-	'http://payex.aait.se/application/meta/check?key=vFoib9ZAZGWmyC205pAidnc',
-	__FILE__
-);
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
