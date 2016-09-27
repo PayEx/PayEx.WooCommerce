@@ -8,6 +8,8 @@ php:
   - hhvm
 env:
   - WOO_VERSION="2.6.4" WP_VERSION=latest
+  - WOO_VERSION="2.5.5" WP_VERSION=4.5
+  - WOO_VERSION="2.4.13" WP_VERSION=4.4
 
 matrix:
   fast_finish: true
