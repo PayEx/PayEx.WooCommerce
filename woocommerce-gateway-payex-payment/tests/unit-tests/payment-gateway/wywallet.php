@@ -92,7 +92,7 @@ class WC_Tests_Payment_WyWallet extends WC_Payment_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Set product is virtual
-		update_post_meta( $product->get_id(), '_virtual', 'yes' );
+		update_post_meta( $product->id, '_virtual', 'yes' );
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->id, 1 );
