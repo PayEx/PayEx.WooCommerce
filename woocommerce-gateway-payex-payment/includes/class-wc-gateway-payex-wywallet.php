@@ -6,7 +6,7 @@ class WC_Gateway_Payex_Wywallet extends WC_Gateway_Payex_Abstract {
 	 * Init
 	 */
 	public function __construct() {
-		$this->id           = 'woocommerce-gateway-payex-payment';
+		$this->id           = 'payex_wywallet';
 		$this->has_fields   = false;
 		$this->method_title = __( 'PayEx WyWallet', 'woocommerce-gateway-payex-payment' );
 		$this->icon         = apply_filters( 'woocommerce_payex_wywallet_icon', plugins_url( '/assets/images/payex.gif', dirname( __FILE__ ) ) );
