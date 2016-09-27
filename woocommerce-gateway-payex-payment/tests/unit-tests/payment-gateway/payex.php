@@ -1,75 +1,29 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../../../../woocommerce/includes/class-wc-payment-gateways.php';
-require_once dirname(__FILE__) . '/../../../woocommerce-gateway-payex-payment.php';
+require_once dirname( __FILE__ ) . '/../../includes/class-wc-payement-unit-test-case.php';
 
-class WC_Tests_Payment_Payex extends WC_Unit_Test_Case {
-
-	/** @var  WC_Payex_Payment */
-	protected $plugin;
-
+class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	/**
-	 * Last AJAX response
-	 * @var string
+	 * @var WC_Payex_Payment
 	 */
-	protected $_last_response = '';
+	protected $object;
 
 	/**
 	 * Setup test case.
 	 */
 	public function setUp() {
-
 		parent::setUp();
+		// Init PayEx Payments plugin
+		$this->object = new WC_Payex_Payment();
+		$this->object->init();
+		$this->object->create_credit_card_post_type();
 
 		// Add PayEx to PM List
 		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'payment_gateways' ) );
-
-		// Init PayEx Payments plugin
-		$this->plugin = new WC_Payex_Payment();
-		$this->plugin->init();
-		$this->plugin->create_credit_card_post_type();
 	}
 
 	/**
-	 * Tear down the test fixture.
-	 * Reset $_POST, remove the wp_die() override
-	 */
-	public function tearDown() {
-		parent::tearDown();
-
-		$_POST = array();
-		$_GET = array();
-
-		remove_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1 );
-	}
-
-	/**
-	 * Return our callback handler
-	 * @return callback
-	 */
-	public function getDieHandler() {
-		return array( $this, 'dieHandler' );
-	}
-
-	/**
-	 * @param $message
-	 *
-	 * @throws Exception
-	 */
-	public function dieHandler( $message ) {
-		$this->_last_response .= ob_get_clean();
-		if ( '' === $this->_last_response ) {
-			if ( is_scalar( $message ) ) {
-				throw new \Exception( (string) $message );
-			} else {
-				throw new \Exception( '0' );
-			}
-		} else {
-			throw new \Exception( $message, 200 );
-		}
-	}
-
-	/**
+	 * Register Payment Gateway and inject settings
 	 * @param $gateways
 	 *
 	 * @return mixed
@@ -93,64 +47,10 @@ class WC_Tests_Payment_Payex extends WC_Unit_Test_Case {
 	/**
 	 * Test PayEx is available
 	 */
-	public function test_wc_payment_payex() {
+	public function test_wc_payment() {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		$this->assertArrayHasKey( 'payex', $payment_gateways );
 		$this->assertInstanceOf( 'WC_Gateway_Payex_Payment', $payment_gateways['payex'] );
-	}
-
-	/**
-	 * Test PayEx Bankdebit is available
-	 */
-	public function test_wc_payment_payex_bankdebit() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex_bankdebit', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Bankdebit', $payment_gateways['payex_bankdebit'] );
-	}
-
-	/**
-	 * Test PayEx Factoring is available
-	 */
-	public function test_wc_payment_payex_factoring() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex_factoring', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Factoring', $payment_gateways['payex_factoring'] );
-	}
-
-	/**
-	 * Test PayEx Invoice is available
-	 */
-	public function test_wc_payment_payex_invoice() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex_invoice', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Invoice', $payment_gateways['payex_invoice'] );
-	}
-
-	/**
-	 * Test PayEx MasterPass is available
-	 */
-	public function test_wc_payment_payex_masterpass() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex_masterpass', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_MasterPass', $payment_gateways['payex_masterpass'] );
-	}
-
-	/**
-	 * Test PayEx Swish is available
-	 */
-	public function test_wc_payment_payex_swish() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex_swish', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Swish', $payment_gateways['payex_swish'] );
-	}
-
-	/**
-	 * Test PayEx WyWallet is available
-	 */
-	public function test_wc_payment_payex_wywallet() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex_wywallet', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Wywallet', $payment_gateways['payex_wywallet'] );
 	}
 
 	/**
@@ -219,7 +119,7 @@ class WC_Tests_Payment_Payex extends WC_Unit_Test_Case {
 		// Check Transaction Id
 		$this->assertEquals( '123456', $order->get_transaction_id() );
 
-		$this->plugin->capture_payment($order->id);
+		$this->object->capture_payment($order->id);
 
 		// Check Order Status
 		$this->assertEquals( 'on-hold', $order->get_status() );
@@ -243,7 +143,7 @@ class WC_Tests_Payment_Payex extends WC_Unit_Test_Case {
 		// Check Transaction Id
 		$this->assertEquals( '123456', $order->get_transaction_id() );
 
-		$this->plugin->cancel_payment($order->id);
+		$this->object->cancel_payment($order->id);
 
 		// Check Order Status
 		$this->assertEquals( 'on-hold', $order->get_status() );
@@ -261,10 +161,6 @@ class WC_Tests_Payment_Payex extends WC_Unit_Test_Case {
 		if ( ! defined( 'DOING_AJAX' ) ) {
 			define( 'DOING_AJAX', true );
 		}
-
-		// @todo Fix "Test code or tested code did not (only) close its own output buffers"
-		// Ajax Die Handler
-		add_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1, 1 );
 
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
