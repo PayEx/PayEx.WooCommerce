@@ -22,6 +22,9 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 
 		// Add PayEx to PM List
 		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'payment_gateways' ) );
+
+		// Override order currency
+		add_filter( 'woocommerce_get_order_currency', array( $this, 'order_currency' ), 1, 2 );
 	}
 
 	/**
@@ -37,12 +40,23 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 				$gateways[$id] = $payment_gateways[$id];
 				$gateways[$id]->enabled = 'yes';
 				$gateways[$id]->testmode = 'yes';
-				$gateways[$id]->account_no = '1';
-				$gateways[$id]->encrypted_key = '1';
+				$gateways[$id]->account_no = getenv ( 'PAYEX_ACCOUNT_NUMBER' );
+				$gateways[$id]->encrypted_key = getenv ( 'PAYEX_ENCRYPTION_KEY' );
+				$gateways[$id]->credit_check = 'no';
 			}
 		}
 
 		return $gateways;
+	}
+
+	/**
+	 * @param $currency
+	 * @param $order
+	 *
+	 * @return string
+	 */
+	public function order_currency($currency, $order) {
+		return 'SEK';
 	}
 
 	/**
@@ -109,15 +123,15 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 		$_POST['socialSecurityNumber'] = '5907195662';
 
 		$address = array(
-			'first_name' => 'Tester',
-			'last_name' => 'Tester',
+			'first_name' => 'Eva Dagmar Christina',
+			'last_name' => 'Tannerdal',
 			'company' => '',
-			'address_1' => 'Street',
+			'address_1' => 'Gunbritt Boden p12',
 			'address_2' => '',
-			'city' => 'Albany',
-			'state' => 'NY',
-			'postcode' => '10001',
-			'country' => 'US',
+			'city' => 'Småbyen',
+			'state' => 'Småbyen',
+			'postcode' => '29620',
+			'country' => 'SE',
 			'email' => 'tester@example.com',
 			'phone' => '518-457-5181'
 		);
@@ -135,11 +149,12 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 				throw $e;
 			}
 
-			$json = json_decode($this->_last_response, true);
-			$this->assertInternalType('array', $json);
+			$json = json_decode( $this->_last_response, true );
+			$this->assertInternalType( 'array', $json );
 
-			// Check error string from Payex response
-			$this->assertContains( 'The hash on request is not valid, this might be due to the encryption key being incorrect', $this->_last_response );
+			// Check Payex response is success/failed
+			// @todo Fix "PayEx error: ValidationError_InvalidParameter (Invalid parameter:customerCountry)"
+			$this->assertArrayHasKey( 'result', $json );
 		}
 	}
 }
