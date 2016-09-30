@@ -140,7 +140,5 @@ class WC_Tests_Payment_Bankdebit extends WC_Payment_Unit_Test_Case {
 			// Check error string from Payex response
 			$this->assertContains( 'The hash on request is not valid, this might be due to the encryption key being incorrect', $this->_last_response );
 		}
-
-		$this->assertTrue( true );
 	}
 }
