@@ -17,15 +17,14 @@ matrix:
     - php: hhvm
 
 install:
-  - mkdir PayEx.WooCommerce
-  - mv woocommerce-gateway-payex-payment PayEx.WooCommerce/
+  - cd ..
   - wget https://github.com/woothemes/woocommerce/archive/$WOO_VERSION.tar.gz -O woocommerce.tar.gz
   - tar zxf ./woocommerce.tar.gz
   - mv woocommerce-*/ woocommerce/
   - cd woocommerce/
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - cd ..
-  - cd PayEx.WooCommerce/woocommerce-gateway-payex-payment
+  - cd PayEx.WooCommerce
 script:
   - phpunit
 
