@@ -1,4 +1,4 @@
-# WooCommerce PayEx Payments Gateway
+# WooCommerce PayEx Payments Gateway [![Build Status](https://travis-ci.org/PayEx/PayEx.WooCommerce.svg?branch=master)](https://travis-ci.org/PayEx/PayEx.WooCommerce)
 
 This plugin provides the PayEx Payment Gateway for WooCommerce.
 
