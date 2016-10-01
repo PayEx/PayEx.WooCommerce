@@ -36,7 +36,7 @@ class WC_Payex_Credit_Cards {
 	 */
 	public function add_scripts() {
 		wp_enqueue_script( 'wc-payex-credit-cards', plugins_url( 'assets/js/credit-cards.js', dirname( __FILE__ ) ), array(), false, true );
-		wp_localize_script( 'wc-payex-credit-cards', 'Payex_CC', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( 'wc-payex-credit-cards', 'Payex_CC', array( 'ajaxurl' => esc_url( admin_url( 'admin-ajax.php' ) ) ) );
 	}
 
 	/**

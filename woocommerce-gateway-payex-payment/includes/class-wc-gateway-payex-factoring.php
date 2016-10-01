@@ -36,16 +36,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$this->fee            = isset( $this->settings['fee'] ) ? (float) $this->settings['fee'] : 0;
 		$this->fee_is_taxable = isset( $this->settings['fee_is_taxable'] ) ? $this->settings['fee_is_taxable'] : 'no';
 		$this->fee_tax_class  = isset( $this->settings['fee_tax_class'] ) ? $this->settings['fee_tax_class'] : 'standard';
-
-		// Get SSN Field options
-		$this->ssn_options = wp_parse_args( get_option( 'woocommerce_payex_addons_ssn_check', array() ), array(
-			'ssn_enabled' => false,
-		) );
-
-		// Use SSN Field as primary
-		if ( $this->ssn_options['ssn_enabled'] && isset($_POST['payex_ssn']) ) {
-			$_POST['social-security-number'] = $_POST['payex_ssn'];
-		}
+		$this->checkout_field = isset( $this->settings['checkout_field'] ) ? $this->settings['checkout_field'] : 'no';
 
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
@@ -168,6 +159,12 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 				'description' => __( 'Tax class of fee.', 'woocommerce-gateway-payex-payment' ),
 				'default'     => 'standard'
 			),
+			'checkout_field' => array(
+				'title'   => __( 'SSN Field on Checkout page', 'woocommerce-gateway-payex-payment' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'SSN Field on Checkout page', 'woocommerce-gateway-payex-payment' ),
+				'default' => 'no'
+			),
 		);
 	}
 
@@ -186,7 +183,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			<div class="clear"></div>
 		<?php endif; ?>
 
-		<?php if ( ! $this->ssn_options['ssn_enabled'] ): ?>
+		<?php if ( $this->checkout_field !== 'yes' ): ?>
 			<label for="social-security-number"><?php echo __( 'Social Security Number:', 'woocommerce-gateway-payex-payment' ); ?></label>
 			<input type="text" name="social-security-number" id="social-security-number" value="" autocomplete="off">
 		<?php endif; ?>
@@ -213,7 +210,9 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			$this->add_message( __( 'Please specify country.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
 
-		if ( empty( $_POST['social-security-number'] ) ) {
+		if ( ( $this->checkout_field !== 'yes' && empty( $_POST['social-security-number'] ) ) ||
+		     ( $this->checkout_field === 'yes' && empty( $_POST['payex_ssn'] ) )
+		) {
 			$this->add_message( __( 'Please enter your Social Security Number and confirm your order.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
 	}
@@ -231,7 +230,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$customer_id = (int) $order->get_user_id();
 		$amount      = $order->get_total();
 		$currency    = $order->get_order_currency();
-		$ssn         = ! empty( $_POST['social-security-number'] ) ? $_POST['social-security-number'] : '';
+		$ssn         = $this->checkout_field !== 'yes' ? $_POST['social-security-number'] : $_POST['payex_ssn'];
 
 		// Selected Payment Mode
 		if ( $this->mode === 'SELECT' ) {
