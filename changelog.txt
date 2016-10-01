@@ -1,3 +1,11 @@
+Version 2.1.0
+* SSN addon moved into Factoring module
+* Removed Update Component
+* Use libraries from composer
+* Admin notice of unconfigured gateways
+* Code bugfixes
+* Added Unit Tests
+
 Version 2.0.4
 * Fixed SSN addon problem
 * Remove SSN validation in FinancingInvoice/PartPayment

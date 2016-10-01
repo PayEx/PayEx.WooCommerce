@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce PayEx Payments Gateway
 Plugin URI: http://payex.com/
 Description: Provides a Credit Card Payment Gateway through PayEx for WooCommerce.
-Version: 2.0.4
+Version: 2.1.0
 Author: AAIT Team
 Author URI: http://aait.se/
 License: GNU General Public License v3.0
