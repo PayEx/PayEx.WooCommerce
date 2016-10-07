@@ -90,7 +90,7 @@ class WC_Payex_Payment {
 	 */
 	public function plugin_action_links( $links ) {
 		$plugin_links = array(
-			'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc_gateway_payex_payment' ) ) . '">' . __( 'PayEx Settings', 'woocommerce-gateway-payex-payment' ) . '</a>'
+			'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=payex' ) ) . '">' . __( 'Settings', 'woocommerce-gateway-payex-payment' ) . '</a>'
 		);
 
 		return array_merge( $plugin_links, $links );
