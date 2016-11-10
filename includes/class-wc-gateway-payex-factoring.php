@@ -210,6 +210,10 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			$this->add_message( __( 'Please specify country.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
 
+		if ( ! in_array( mb_strtoupper( $_POST['billing_country'], 'UTF-8' ) , array('SE', 'NO', 'FI') ) ) {
+			$this->add_message( __( 'This country is not supported by the payment system.', 'woocommerce-gateway-payex-payment' ), 'error' );
+		}
+
 		if ( ( $this->checkout_field !== 'yes' && empty( $_POST['social-security-number'] ) ) ||
 		     ( $this->checkout_field === 'yes' && empty( $_POST['payex_ssn'] ) )
 		) {
@@ -286,7 +290,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 					'zipCode' => $order->billing_postcode,
 					'city' => $order->billing_city,
 					'countryCode' => $order->billing_country,
-					'paymentMethod' => $order->billing_country === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
+					'paymentMethod' => 'PXFINANCINGINVOICE' . mb_strtoupper( $order->billing_country, 'UTF-8' ),
 					'email' => $order->billing_email,
 					'msisdn' => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
 					'ipAddress' => $_SERVER['REMOTE_ADDR']
@@ -305,7 +309,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 					'zipCode' => $order->billing_postcode,
 					'city' => $order->billing_city,
 					'countryCode' => $order->billing_country,
-					'paymentMethod' => $order->billing_country === 'SE' ? 'PXCREDITACCOUNTSE' : 'PXCREDITACCOUNTNO',
+					'paymentMethod' => 'PXCREDITACCOUNT' . mb_strtoupper( $order->billing_country, 'UTF-8' ),
 					'email' => $order->billing_email,
 					'msisdn' => ( substr( $order->billing_phone, 0, 1 ) === '+' ) ? $order->billing_phone : '+' . $order->billing_phone,
 					'ipAddress' => $_SERVER['REMOTE_ADDR']
