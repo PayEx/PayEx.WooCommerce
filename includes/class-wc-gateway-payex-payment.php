@@ -173,14 +173,13 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Payment View', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'select',
 				'options'     => array(
-					'PX'          => 'Payment Menu',
 					'CREDITCARD'  => 'Credit Card',
 					'INVOICE'     => 'Invoice',
 					'DIRECTDEBIT' => 'Direct Debit',
 					'PAYPAL'      => 'PayPal',
 				),
 				'description' => __( 'Default payment method.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => 'PX'
+				'default'     => 'CREDITCARD'
 			),
 			'language'             => array(
 				'title'       => __( 'Language', 'woocommerce-gateway-payex-payment' ),
@@ -467,9 +466,6 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 		// Prepare additional values
 		$additional = array();
-		if ( $this->payment_view === 'PX' ) {
-			$additional[] = 'PAYMENTMENU=TRUE';
-		}
 
 		// Set Responsive Mode
 		if ( $this->responsive === 'yes' ) {
