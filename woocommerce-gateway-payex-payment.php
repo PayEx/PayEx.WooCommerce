@@ -548,7 +548,11 @@ class WC_Payex_Payment {
 	 * @return array
 	 */
 	public function add_email_classes($emails) {
-		$emails['WC_Email_Payex_Card_Expiring'] = include( dirname( __FILE__ ) . '/includes/emails/class-wc-email-payex-card-expiring.php' );
+		if ( ! class_exists( 'WC_Email_Payex_Card_Expiring', false ) ) {
+			include( dirname( __FILE__ ) . '/includes/emails/class-wc-email-payex-card-expiring.php' );
+		}
+
+		$emails['WC_Email_Payex_Card_Expiring'] = new WC_Email_Payex_Card_Expiring();
 		return $emails;
 	}
 
