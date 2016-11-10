@@ -70,6 +70,15 @@ class WC_Payex_Payment {
 		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'before_checkout_billing_form' ) );
 		add_action( 'wp_ajax_payex_process_ssn', array( $this, 'ajax_payex_process_ssn' ) );
 		add_action( 'wp_ajax_nopriv_payex_process_ssn', array( $this, 'ajax_payex_process_ssn' ) );
+
+		// Add Email Classes
+		add_filter( 'woocommerce_email_classes', array( $this, 'add_email_classes' ), 10, 1 );
+
+		// Init Cron Tasks
+		add_action( 'wp', __CLASS__ . '::add_cron_tasks' );
+
+		// Cron Tasks Actions
+		add_action( 'payex_check_cards', __CLASS__ . '::check_cards' );
 	}
 
 	/**
@@ -530,6 +539,71 @@ class WC_Payex_Payment {
 		);
 		wp_send_json_success( $output );
 		exit();
+	}
+
+	/**
+	 * Add Email Classes
+	 * @param $emails
+	 *
+	 * @return array
+	 */
+	public function add_email_classes($emails) {
+		$emails['WC_Email_Payex_Card_Expiring'] = include( dirname( __FILE__ ) . '/includes/emails/class-wc-email-payex-card-expiring.php' );
+		return $emails;
+	}
+
+	/**
+	 * Init Cron Tasks
+	 */
+	public static function add_cron_tasks() {
+		if ( ! wp_next_scheduled( 'payex_check_cards' ) ) {
+			wp_schedule_event( current_time( 'timestamp' ), 'daily', 'payex_check_cards' );
+		}
+	}
+
+	/**
+	 * Cron Task: Check Cards
+	 */
+	public static function check_cards() {
+		// Check notifications are enabled
+		$card_expiring_settings = get_option( 'woocommerce_payex_card_expiring_settings', array(
+			'enabled' => 'yes',
+			'notifications_days' => '30'
+		) );
+		if ( isset( $card_expiring_settings['enabled'] ) && $card_expiring_settings['enabled'] !== 'yes' ) {
+			return;
+		}
+
+		$notifications_days = (int) $card_expiring_settings['notifications_days'];
+
+		// Date to check
+		$check = time() + $notifications_days * 24 * 60 * 60;
+
+		// Get users
+		/** @var WP_User $user */
+		foreach ( get_users() as $user ) {
+			// Get Cards
+			$args  = array(
+				'post_type'   => 'payex_credit_card',
+				'author'      => $user->ID,
+				'numberposts' => -1,
+				'orderby'     => 'post_date',
+				'order'       => 'ASC',
+			);
+			$cards = get_posts( $args );
+			foreach ($cards as $card) {
+				$card_meta = get_post_meta( $card->ID, '_payex_card', true);
+
+				// Check reminder was sent
+				if ( empty( $card_meta['reminder_expiring_sent'] ) ) {
+					// Check is expiring
+					$expire_date = strtotime( $card_meta['expire_date'] );
+					if ( $check >= $expire_date ) {
+						do_action('payex_card_expiring_mail', $card->ID);
+					}
+				}
+			}
+		}
 	}
 }
 
