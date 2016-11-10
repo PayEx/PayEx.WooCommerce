@@ -1,3 +1,8 @@
+Version 2.1.1
+* Implemented Card Expiring Reminder
+* Remove Payment Menu option
+* Implemented Financing Invoice FI
+
 Version 2.1.0
 * SSN addon moved into Factoring module
 * Removed Update Component
