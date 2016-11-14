@@ -4,12 +4,17 @@
 
     function process_ssn() {
         var social_security_number = $('.payex-ssn-class input').val();
-        var billing_country = $('#billing_country').val();
-        var billing_postcode = $('#billing_postcode').val();
+        var billing_country = $('[name="payex_ssn_country"]').val();
+        var billing_postcode = $('[name="payex_ssn_zip"]').val();
 
         // wc_checkout_params is required to continue, ensure the object exists
         if (typeof wc_checkout_params === 'undefined')
             return false;
+
+        if ($.trim(social_security_number).length === 0) {
+            alert(WC_Payex_Addons_SSN.text_require_ssn);
+            return false;
+        }
 
         if (xhr) {
             xhr.abort();
@@ -97,6 +102,31 @@
     $(document).ready(function () {
         $(document.body).on('click', 'input[name="woocommerce_checkout_payex_ssn"]', function () {
             $('body').trigger('process_ssn');
+        });
+
+        // Select2 Enhancement if it exists
+        if ($().select2) {
+            $( 'select[name="payex_ssn_country"]' ).select2({
+                placeholderOption: 'first',
+                width: '100%'
+            });
+        }
+
+        $(document.body).on('keyup', 'input[name="payex_ssn"]', function () {
+            var field = $('input[name="payex_ssn"]');
+            if (field.val() !== '') {
+                $('.payex-ssn-zip-class').show();
+                $('.payex-ssn-country-class').show();
+            } else {
+                $('.payex-ssn-zip-class').hide();
+                $('.payex-ssn-country-class').hide();
+            }
+        });
+
+        $(document.body).on('keyup', 'input[name="payex_ssn_zip"]', function () {
+            var value = $('input[name="payex_ssn_zip"]').val();
+            $('input[name="billing_postcode"]').val(value);
+            $('input[name="shipping_postcode"]').val(value);
         });
     });
 })(jQuery);

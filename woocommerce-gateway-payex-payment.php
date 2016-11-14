@@ -79,6 +79,9 @@ class WC_Payex_Payment {
 
 		// Cron Tasks Actions
 		add_action( 'payex_check_cards', __CLASS__ . '::check_cards' );
+
+		// Add Countries for SSN field
+		add_filter( 'woocommerce_payex_countries_ssn', array( $this, 'add_countries_ssn' ), 10, 1 );
 	}
 
 	/**
@@ -196,7 +199,18 @@ class WC_Payex_Payment {
 
 		$factoring_settings = get_option( 'woocommerce_payex_factoring_settings' );
 		if ( isset( $factoring_settings['checkout_field'] ) && $factoring_settings['checkout_field'] === 'yes' ) {
-			wp_enqueue_script( 'wc-payex-addons-ssn', plugins_url( '/assets/js/ssn.js', __FILE__ ), array( 'wc-checkout' ), false, true );
+			wp_enqueue_style( 'wc-payex-addons-ssn', plugins_url( '/assets/css/ssn.css', __FILE__ ), array(), false, 'all' );
+
+			wp_register_script( 'wc-payex-addons-ssn', plugins_url( '/assets/js/ssn.js', __FILE__ ), array( 'wc-checkout' ), false, true );
+
+			// Localize the script with new data
+			$translation_array = array(
+				'text_require_ssn' => __( 'Please enter Social Security Number', 'woocommerce-gateway-payex-payment' ),
+			);
+			wp_localize_script( 'wc-payex-addons-ssn', 'WC_Payex_Addons_SSN', $translation_array );
+
+			// Enqueued script with localized data
+			wp_enqueue_script( 'wc-payex-addons-ssn' );
 		}
 	}
 
@@ -472,6 +486,23 @@ class WC_Payex_Payment {
 				'placeholder' => __( 'Social Security Number', 'woocommerce-gateway-payex-payment' ),
 			), $checkout->get_value( 'payex_ssn' ) );
 
+			woocommerce_form_field( 'payex_ssn_zip', array(
+				'type'        => 'text',
+				'class'       => array( 'payex-ssn-zip-class form-row-wide' ),
+				'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
+			), $checkout->get_value( 'billing_postcode' ) );
+
+			woocommerce_form_field( 'payex_ssn_country', array(
+				'type'        => 'select',
+				'class'       => array( 'payex-ssn-country-class form-row-wide' ),
+				'label'       => __( 'Country', 'woocommerce' ),
+				'options'     => wp_parse_args(
+					apply_filters( 'woocommerce_payex_countries_ssn', $checkout ),
+					array( '' => '' )
+				),
+				'input_class' => array( 'country_select' )
+			), $checkout->get_value( 'billing_country' ) );
+
 			echo '<input type="button" class="button alt" name="woocommerce_checkout_payex_ssn" id="payex_ssn_button" value="' . __( 'Get Profile', 'woocommerce-gateway-payex-payment' ) . '" />';
 			echo '</div>';
 		}
@@ -507,7 +538,7 @@ class WC_Payex_Payment {
 		// Call PxOrder.GetAddressByPaymentMethod
 		$params = array(
 			'accountNumber' => '',
-			'paymentMethod' => $_POST['billing_country'] === 'SE' ? 'PXFINANCINGINVOICESE' : 'PXFINANCINGINVOICENO',
+			'paymentMethod' => 'PXFINANCINGINVOICE' . mb_strtoupper( $_POST['billing_country'], 'UTF-8' ),
 			'ssn'           => trim( $_POST['social_security_number'] ),
 			'zipcode'       => trim( $_POST['billing_postcode'] ),
 			'countryCode'   => trim( $_POST['billing_country'] ),
@@ -608,6 +639,21 @@ class WC_Payex_Payment {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add Countries for SSN Field
+	 * @param $checkout
+	 *
+	 * @return array
+	 */
+	public function add_countries_ssn($checkout) {
+		$countries = array(
+			'SE' => __( 'Sweden', 'woocommerce' ),
+			'NO' => __( 'Norway', 'woocommerce' ),
+		);
+
+		return $countries;
 	}
 }
 
