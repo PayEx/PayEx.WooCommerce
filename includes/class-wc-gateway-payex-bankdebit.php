@@ -210,7 +210,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		$customer_id = (int) $order->get_user_id();
 		$amount      = $order->get_total();
 		$currency    = $order->get_order_currency();
-		$bank_id     = ! empty( $_POST['bank_id'] ) ? $_POST['bank_id'] : 'NB';
+		$bank_id     = ! empty( $_POST['bank_id'] ) ? wc_clean( $_POST['bank_id'] ) : 'NB';
 
 		// Additional Values
 		$additional  = array();

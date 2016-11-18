@@ -234,11 +234,11 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$customer_id = (int) $order->get_user_id();
 		$amount      = $order->get_total();
 		$currency    = $order->get_order_currency();
-		$ssn         = $this->checkout_field !== 'yes' ? $_POST['social-security-number'] : $_POST['payex_ssn'];
+		$ssn         = $this->checkout_field !== 'yes' ? wc_clean( $_POST['social-security-number'] ) : $_POST['payex_ssn'];
 
 		// Selected Payment Mode
 		if ( $this->mode === 'SELECT' ) {
-			$this->mode = $_POST['factoring-menu'];
+			$this->mode = wc_clean( $_POST['factoring-menu'] );
 		}
 
 		// Init PayEx

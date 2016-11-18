@@ -538,10 +538,10 @@ class WC_Payex_Payment {
 		// Call PxOrder.GetAddressByPaymentMethod
 		$params = array(
 			'accountNumber' => '',
-			'paymentMethod' => 'PXFINANCINGINVOICE' . mb_strtoupper( $_POST['billing_country'], 'UTF-8' ),
-			'ssn'           => trim( $_POST['social_security_number'] ),
-			'zipcode'       => trim( $_POST['billing_postcode'] ),
-			'countryCode'   => trim( $_POST['billing_country'] ),
+			'paymentMethod' => 'PXFINANCINGINVOICE' . mb_strtoupper( wc_clean( $_POST['billing_country'] ), 'UTF-8' ),
+			'ssn'           => trim( wc_clean( $_POST['social_security_number'] ) ),
+			'zipcode'       => trim( wc_clean( $_POST['billing_postcode'] ) ),
+			'countryCode'   => trim( wc_clean( $_POST['billing_country'] ) ),
 			'ipAddress'     => trim( $_SERVER['REMOTE_ADDR'] )
 		);
 		$result = $gateway->getPx()->GetAddressByPaymentMethod( $params );

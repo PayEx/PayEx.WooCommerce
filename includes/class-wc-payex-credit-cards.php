@@ -46,7 +46,7 @@ class WC_Payex_Credit_Cards {
 		if ( ! check_ajax_referer( 'set_default_nonce', 'nonce', false ) ) {
 			exit( 'No naughty business' );
 		}
-		$card_id = $_POST['id'];
+		$card_id = wc_clean( $_POST['id'] );
 
 		$cards = $this->get_saved_cards();
 		foreach ( $cards as $card ) {
@@ -75,7 +75,7 @@ class WC_Payex_Credit_Cards {
 			exit( 'No naughty business' );
 		}
 
-		$card_id = $_POST['id'];
+		$card_id = wc_clean( $_POST['id'] );
 		try {
 			$card = get_post( $card_id );
 			if ( ! $card ) {

@@ -308,7 +308,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Get Transaction Details
-		$transactionId = $_POST['transactionNumber'];
+		$transactionId = wc_clean( $_POST['transactionNumber'] );
 
 		// Call PxOrder.GetTransactionDetails2
 		$params  = array(
@@ -642,7 +642,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		if ( is_user_logged_in() && $this->save_cards === 'yes' && $this->payment_view === 'CREDITCARD' ) {
 			if ( isset( $_POST['payex-credit-card'] ) && abs( $_POST['payex-credit-card'] ) > 0 ) {
 				// Get Agreement Reference of Selected Card
-				$card = get_post( $_POST['payex-credit-card'] );
+				$card = get_post( wc_clean( $_POST['payex-credit-card'] ) );
 				if ( $card->post_author != $order->get_user_id() ) {
 					$this->add_message( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
 

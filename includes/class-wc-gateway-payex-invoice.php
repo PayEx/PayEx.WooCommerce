@@ -303,10 +303,10 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				// Call PxVerification.CreditCheckPrivate
 				$params = array(
 					'accountNumber'        => '',
-					'countryCode'          => $_POST['billing_country'],
-					'socialSecurityNumber' => $_POST['socialSecurityNumber'],
-					'firstName'            => $_POST['billing_first_name'],
-					'lastName'             => $_POST['billing_last_name'],
+					'countryCode'          => wc_clean( $_POST['billing_country'] ),
+					'socialSecurityNumber' => wc_clean( $_POST['socialSecurityNumber'] ),
+					'firstName'            => wc_clean( $_POST['billing_first_name'] ),
+					'lastName'             => wc_clean( $_POST['billing_last_name'] ),
 					'amount'               => round( WC()->cart->total * 100 ),
 					'clientIPAddress'      => $_SERVER['REMOTE_ADDR']
 				);
@@ -328,8 +328,8 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 				// Call PxVerification.CreditCheckCorporate
 				$params = array(
 					'accountNumber'      => '',
-					'countryCode'        => $_POST['billing_country'],
-					'organizationNumber' => $_POST['organizationNumber'],
+					'countryCode'        => wc_clean( $_POST['billing_country'] ),
+					'organizationNumber' => wc_clean( $_POST['organizationNumber'] ),
 					'amount'             => round( WC()->cart->total * 100 )
 				);
 				$status = $this->getPx()->CreditCheckCorporate2( $params );
@@ -631,7 +631,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 					'postalCode'           => $credit_data['postCode'],
 					'city'                 => $credit_data['city'],
 					'country'              => $order->shipping_country,
-					'socialSecurityNumber' => $_POST['socialSecurityNumber'],
+					'socialSecurityNumber' => wc_clean( $_POST['socialSecurityNumber'] ),
 					'phoneNumber'          => '',
 					'email'                => $order->billing_email,
 					'productCode'          => '0001',
@@ -657,7 +657,7 @@ class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
 					'postalCode'         => $credit_data['postCode'],
 					'city'               => $credit_data['city'],
 					'country'            => $order->shipping_country,
-					'organizationNumber' => $_POST['organizationNumber'],
+					'organizationNumber' => wc_clean( $_POST['organizationNumber'] ),
 					'phoneNumber'        => '',
 					'email'              => $order->billing_email,
 					'productCode'        => '0001',
