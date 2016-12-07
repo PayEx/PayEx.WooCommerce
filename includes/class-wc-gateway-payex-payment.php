@@ -66,7 +66,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$this->testmode             = isset( $this->settings['testmode'] ) ? $this->settings['testmode'] : 'yes';
 		$this->checkout_info        = isset( $this->settings['checkout_info'] ) ? $this->settings['checkout_info'] : 'yes';
 		$this->responsive           = isset( $this->settings['responsive'] ) ? $this->settings['responsive'] : 'no';
-		$this->save_cards           = isset( $this->settings['save_cards'] ) ? $this->settings['save_cards'] : 'yes';
+		$this->save_cards           = isset( $this->settings['save_cards'] ) ? $this->settings['save_cards'] : 'no';
 		$this->agreement_max_amount = isset( $this->settings['agreement_max_amount'] ) ? $this->settings['agreement_max_amount'] : 0;
 		$this->agreement_url        = isset( $this->settings['agreement_url'] ) ? $this->settings['agreement_url'] : '';
 		$this->debug                = isset( $this->settings['debug'] ) ? $this->settings['debug'] : 'no';
@@ -223,7 +223,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'label'       => __( 'Allow logged in customers to save credit card profiles to use for future purchases', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'checkbox',
 				'description' => '',
-				'default'     => 'yes',
+				'default'     => 'no',
 			),
 			'agreement_max_amount' => array(
 				'title'       => __( 'Max amount per transaction', 'woocommerce-gateway-payex-payment' ),
