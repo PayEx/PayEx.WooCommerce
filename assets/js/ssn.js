@@ -64,8 +64,6 @@
                             $('#billing_country').val(value).change();
                         }
                     }
-
-                    $('input[name="' + index + '"]').prop('readonly', true);
                 });
 
                 // Process Shipping
@@ -85,8 +83,6 @@
                             $('#shipping_country').val(value).change();
                         }
                     }
-
-                    $('input[name="' + index + '"]').prop('readonly', true);
                 });
 
                 $('#customer_details').unblock();
@@ -98,6 +94,23 @@
     $('body').bind('process_ssn', function () {
         process_ssn();
     });
+
+    $(document.body).on('update_checkout', function () {
+        // Lock fields when "Financing Invoice" selected
+        var payment_method = $('#order_review').find('input[name="payment_method"]:checked').val();
+        var fields = ['first_name', 'last_name', 'address_1', 'address_2', 'postcode', 'city', 'country'];
+        $.each(fields, function (index, field) {
+            var billing_field = 'billing_' + field;
+            var shipping_field = 'shipping_' + field;
+            if (payment_method === 'payex_invoice') {
+                $('[name="' + billing_field + '"]').prop('readonly', true);
+                $('[name="' + shipping_field + '"]').prop('readonly', true);
+            } else {
+                $('[name="' + billing_field + '"]').prop('readonly', false);
+                $('[name="' + shipping_field + '"]').prop('readonly', false);
+            }
+        });
+	});
 
     $(document).ready(function () {
         $(document.body).on('click', 'input[name="woocommerce_checkout_payex_ssn"]', function () {
