@@ -65,6 +65,7 @@ class WC_Payex_Payment {
 			add_action( 'admin_notices', __CLASS__ . '::upgrade_notice' );
 		}
 		add_action( 'admin_notices', __CLASS__ . '::admin_notices' );
+		add_action( 'admin_notices', __CLASS__ . '::check_backward_compatibility', 40 );
 
 		// Add SSN Checkout Field
 		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'before_checkout_billing_form' ) );
@@ -175,6 +176,66 @@ class WC_Payex_Payment {
 	}
 
 	/**
+	 * Check for backward compatibility with woocommerce-gateway-payex
+	 */
+	public static function check_backward_compatibility() {
+		if ( current_user_can( 'update_plugins' ) ) {
+			// Check is already migrated
+			if ( get_option( 'woocommerce_payex_migrated' ) !== false ) {
+				return;
+			}
+
+			// Check woocommerce-gateway-payex is active
+			if ( ! in_array( 'woocommerce-gateway-payex/gateway-payex.php', get_option( 'active_plugins' ) ) ) {
+				return;
+			}
+
+			// Check payex settings is unconfigured yet
+			$settings = get_option( 'woocommerce_payex_settings' );
+			if ( $settings !== false ) {
+				return;
+			}
+
+			// Check settings of woocommerce-gateway-payex plugin
+			$settings = get_option( 'woocommerce_payex_pm_settings' );
+			if ( $settings === false ) {
+				return;
+			}
+
+			// Check account_no and encrypted_key are configured
+			if ( empty( $settings['account_no'] ) || empty( $settings['encrypted_key'] ) ) {
+				return;
+			}
+
+			?>
+			<div id="message" class="updated woocommerce-message">
+				<p class="main">
+					<strong><?php echo esc_html__( 'Data migration.', 'woocommerce-gateway-payex-payment' ); ?></strong>
+				</p>
+				<p>
+					<?php
+					echo esc_html__( 'We have detected that you are using the plugin "Woocommerce-gateway-payex" by Krokodil. That plugin is deprecated.', 'woocommerce-gateway-payex-payment' );
+					echo '<br />';
+					echo esc_html__( 'You can migrate settings and convert orders into PayEx official WooCommerce PayEx Payments Gateway by clicking this button.', 'woocommerce-gateway-payex-payment' );
+					echo '<br />';
+					echo esc_html__( 'We always recommend a backup before performing the migration. (Note, if you run the plugin Woocommerce Subscription 1.x the migration will not work. It only works for Woocommerce Subscription 2.x).', 'woocommerce-gateway-payex-payment' );
+					echo '<br />';
+					echo esc_html__( 'This process will also deactivate your old plugin. The two plugins cannot run at the same time.', 'woocommerce-gateway-payex-payment' );
+					echo '<br />';
+					echo esc_html__( 'Please backup database and click "Upgrade" button to continue.', 'woocommerce-gateway-payex-payment' );
+					?>
+				</p>
+				<p class="submit">
+					<a class="button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-payex-migrate' ) ); ?>">
+						<?php echo esc_html__( 'Upgrade', 'woocommerce-gateway-payex-payment' ); ?>
+					</a>
+				</p>
+			</div>
+			<?php
+		}
+	}
+
+	/**
 	 * Upgrade Page
 	 */
 	public static function upgrade_page() {
@@ -187,6 +248,105 @@ class WC_Payex_Payment {
 		WC_Payex_Update::update();
 
 		echo esc_html__( 'Upgrade finished.', 'woocommerce-gateway-payex-payment' );
+	}
+
+	/**
+	 * Migrate Page
+	 */
+	public static function migrate_page() {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+
+		// Check is already migrated
+		if ( get_option( 'woocommerce_payex_migrated' ) !== false ) {
+			return;
+		}
+
+		// Copy settings
+		$settings = get_option( 'woocommerce_payex_pm_settings' );
+		if ( $settings ) {
+			$new_settings = array(
+				'enabled' => $settings['enabled'],
+				'title' => $settings['title'],
+				'description' => $settings['description'],
+				'account_no' => $settings['account_no'],
+				'encrypted_key' => $settings['encrypted_key'],
+				'testmode' => $settings['testmode'],
+				'debug' => $settings['debug'],
+				'purchase_operation' => $settings['purchase_operation'],
+				'checkout_info' => $settings['send_order_lines'],
+				'payment_view' => 'CREDITCARD',
+				'language' => 'en-US',
+				'responsive' => 'no',
+				'save_cards' => 'no',
+				'agreement_max_amount' => '1000',
+				'agreement_url' => get_site_url()
+			);
+
+			update_option( 'woocommerce_payex_settings', $new_settings, true );
+		}
+
+		// Convert orders data
+		$orders = get_posts( array(
+			'numberposts'      => -1,
+			'orderby'          => 'ID',
+			'order'            => 'ASC',
+			'meta_key'         => '_payment_method',
+			'meta_value'       => 'payex_pm',
+			'post_type'        => 'shop_order',
+			'post_status'      => 'any',
+			'post_parent'      => 0,
+			'suppress_filters' => true,
+		));
+
+		foreach ($orders as $order) {
+			$order = wc_get_order( $order->ID );
+
+			if ( version_compare(WC_Subscriptions::$version, '2.0.0', '<') &&
+			     WC_Subscriptions_Order::order_contains_subscription( $order )
+			) {
+				// Change payment method
+				update_post_meta( $order->id, '_recurring_payment_method', 'payex' );
+
+				// Copy agreement reference
+				$agreement  = get_post_meta( $order->id, '_payex_agreement_reference', true );
+				if ( ! empty( $agreement ) ) {
+					continue;
+				}
+
+				$agreement  = get_post_meta( $order->id, 'payex_agreement_ref', true );
+				if ( ! empty( $agreement ) ) {
+					update_post_meta( $order->id, '_payex_agreement_reference', $agreement );
+				}
+			}
+
+			// Change payment method
+			update_post_meta( $order->id, '_payment_method', 'payex' );
+
+			// Migration flag
+			update_post_meta( $order->id, '_is_migrated_payex', true );
+		}
+
+		// Deactivate plugin
+		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		deactivate_plugins( 'woocommerce-gateway-payex/gateway-payex.php' );
+
+		// Migration flag
+		delete_option( 'woocommerce_payex_migrated' );
+		add_option( 'woocommerce_payex_migrated', true );
+
+		echo esc_html__( 'Migration finished.', 'woocommerce-gateway-payex-payment' );
+		?>
+		<script type="application/javascript">
+			window.onload = function() {
+				setTimeout(function () {
+					window.location.href = '<?php echo esc_url( admin_url( 'index.php' ) ); ?>';
+				}, 3000);
+			}
+		</script>
+
+        <?php
 	}
 
 	/**
@@ -221,7 +381,7 @@ class WC_Payex_Payment {
 	public function register_gateway( $methods ) {
 		$methods[] = 'WC_Gateway_Payex_Payment';
 		$methods[] = 'WC_Gateway_Payex_Bankdebit';
-		$methods[] = 'WC_Gateway_Payex_Invoice';
+		$methods[] = 'WC_Gateway_Payex_InvoiceLedgerService';
 		$methods[] = 'WC_Gateway_Payex_Factoring';
 		$methods[] = 'WC_Gateway_Payex_Wywallet';
 		$methods[] = 'WC_Gateway_Payex_MasterPass';
@@ -399,6 +559,13 @@ class WC_Payex_Payment {
 		$hookname = get_plugin_page_hookname( 'wc-payex-upgrade', '' );
 		if ( ! empty( $hookname ) ) {
 			add_action( $hookname, __CLASS__ . '::upgrade_page' );
+		}
+		$_registered_pages[ $hookname ] = true;
+
+		// Add Plugin migrate Page
+		$hookname = get_plugin_page_hookname( 'wc-payex-migrate', '' );
+		if ( ! empty( $hookname ) ) {
+			add_action( $hookname, __CLASS__ . '::migrate_page' );
 		}
 		$_registered_pages[ $hookname ] = true;
 	}
