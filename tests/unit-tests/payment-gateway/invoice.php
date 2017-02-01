@@ -65,7 +65,7 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 	public function test_wc_payment_payex() {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		$this->assertArrayHasKey( 'payex_invoice', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Invoice', $payment_gateways['payex_invoice'] );
+		$this->assertInstanceOf( 'WC_Gateway_Payex_InvoiceLedgerService', $payment_gateways['payex_invoice'] );
 	}
 
 	/**
