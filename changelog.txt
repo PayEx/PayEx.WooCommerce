@@ -1,3 +1,6 @@
+Version 2.1.5
+* Migration for woocommerce-gateway-payex plugin
+
 Version 2.1.4
 * Implemented MobilePay Online payment method
 
