@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
 
-class WC_Gateway_Payex_Invoice extends WC_Gateway_Payex_Abstract {
+class WC_Gateway_Payex_InvoiceLedgerService extends WC_Gateway_Payex_Abstract {
 	/**
 	 * Init
 	 */
