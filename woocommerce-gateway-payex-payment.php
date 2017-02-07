@@ -214,15 +214,11 @@ class WC_Payex_Payment {
 				</p>
 				<p>
 					<?php
-					echo esc_html__( 'We have detected that you are using the plugin "Woocommerce-gateway-payex" by Krokodil. That plugin is deprecated.', 'woocommerce-gateway-payex-payment' );
+					echo esc_html__( 'We\'ve detected that you\'ve used an older version of the WooCommerce PayEx integration.', 'woocommerce-gateway-payex-payment' );
 					echo '<br />';
-					echo esc_html__( 'You can migrate settings and convert orders into PayEx official WooCommerce PayEx Payments Gateway by clicking this button.', 'woocommerce-gateway-payex-payment' );
+					echo esc_html__( 'Click the "Upgrade" button below to setup this new integration with your existing PayEx details', 'woocommerce-gateway-payex-payment' );
 					echo '<br />';
-					echo esc_html__( 'We always recommend a backup before performing the migration. (Note, if you run the plugin Woocommerce Subscription 1.x the migration will not work. It only works for Woocommerce Subscription 2.x).', 'woocommerce-gateway-payex-payment' );
-					echo '<br />';
-					echo esc_html__( 'This process will also deactivate your old plugin. The two plugins cannot run at the same time.', 'woocommerce-gateway-payex-payment' );
-					echo '<br />';
-					echo esc_html__( 'Please backup database and click "Upgrade" button to continue.', 'woocommerce-gateway-payex-payment' );
+					echo esc_html__( 'Please be sure to backup your website before doing this. Thank you for choosing PayEx!', 'woocommerce-gateway-payex-payment' );
 					?>
 				</p>
 				<p class="submit">
