@@ -404,10 +404,10 @@ class WC_Payex_Payment {
 		}
 
 		$current         = WC()->session->get( 'chosen_payment_method', $default );
-		$current_gateway = $available_gateways[ $current ];
+		$current_gateway = array_key_exists( $current, $available_gateways ) ? $available_gateways[ $current ] : null;
 
 		// Fee feature in Invoice and Factoring modules
-		if ( ! in_array( $current_gateway->id, array( 'payex_invoice', 'payex_factoring' ) ) ) {
+		if ( ! $current_gateway || ! in_array( $current_gateway->id, array( 'payex_invoice', 'payex_factoring' ) ) ) {
 			return;
 		}
 
