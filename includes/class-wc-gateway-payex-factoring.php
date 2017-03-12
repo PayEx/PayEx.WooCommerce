@@ -463,6 +463,6 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			$OrderLines->appendChild( $OrderLine );
 		}
 
-		return str_replace( "\n", '', $dom->saveXML() );
+		return str_replace( "\n", '', html_entity_decode( $dom->saveXML(), ENT_COMPAT|ENT_XHTML, 'UTF-8' ) );
 	}
 }
