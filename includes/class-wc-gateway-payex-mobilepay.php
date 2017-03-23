@@ -11,7 +11,7 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 		$this->id           = 'payex_mobilepay';
 		$this->has_fields   = TRUE;
 		$this->method_title = __( 'MobilePay Online', 'woocommerce-gateway-payex-payment' );
-		$this->icon         = apply_filters( 'woocommerce_payex_payment_icon', plugins_url( '/assets/images/mobilepay_online.png', dirname( __FILE__ ) ) );
+		$this->icon         = apply_filters( 'woocommerce_payex_mobilepay_icon', plugins_url( '/assets/images/mobilepay_online.png', dirname( __FILE__ ) ) );
 		$this->supports     = array(
 			'products',
 			'refunds',
