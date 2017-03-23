@@ -12,7 +12,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		$this->id           = 'payex_swish';
 		$this->has_fields   = true;
 		$this->method_title = __( 'Swish (via PayEx)', 'woocommerce-gateway-payex-payment' );
-		$this->icon         = apply_filters( 'woocommerce_payex_payment_icon', plugins_url( '/assets/images/swish.png', dirname( __FILE__ ) ) );
+		$this->icon         = apply_filters( 'woocommerce_payex_swish_icon', plugins_url( '/assets/images/swish.png', dirname( __FILE__ ) ) );
 		$this->supports     = array(
 			'products',
 			'refunds',
