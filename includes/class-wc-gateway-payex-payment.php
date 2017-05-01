@@ -67,7 +67,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$this->checkout_info        = isset( $this->settings['checkout_info'] ) ? $this->settings['checkout_info'] : 'yes';
 		$this->responsive           = isset( $this->settings['responsive'] ) ? $this->settings['responsive'] : 'no';
 		$this->save_cards           = isset( $this->settings['save_cards'] ) ? $this->settings['save_cards'] : 'no';
-		$this->agreement_max_amount = isset( $this->settings['agreement_max_amount'] ) ? $this->settings['agreement_max_amount'] : 0;
+		$this->agreement_max_amount = isset( $this->settings['agreement_max_amount'] ) ? $this->settings['agreement_max_amount'] : '100000';
 		$this->agreement_url        = isset( $this->settings['agreement_url'] ) ? $this->settings['agreement_url'] : '';
 		$this->debug                = isset( $this->settings['debug'] ) ? $this->settings['debug'] : 'no';
 
@@ -229,7 +229,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Max amount per transaction', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This option use with WC Subscriptions plugin. One single transaction can never be greater than this amount.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( '1000', 'woocommerce-gateway-payex-payment' )
+				'default'     => __( '100000', 'woocommerce-gateway-payex-payment' )
 			),
 			'agreement_url'        => array(
 				'title'       => __( 'Agreement URL', 'woocommerce-gateway-payex-payment' ),
@@ -339,8 +339,8 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Save Transaction
-		update_post_meta( $order->id, '_transaction_id', $transactionId );
-		update_post_meta( $order->id, '_payex_transaction_status', $transactionStatus );
+		update_post_meta( $order->get_id(), '_transaction_id', $transactionId );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus );
 
 		/* 0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */
 		switch ( $transactionStatus ) {
@@ -370,7 +370,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 						break;
 					case 4:
 						// Cancel
-						$order->cancel_order();
+						$order->update_status( 'cancelled' );
 						break;
 					case 5:
 					default:
@@ -391,7 +391,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			case 4;
 				// Cancel
 				// Set Order Status
-				$order->cancel_order();
+				$order->update_status( 'cancelled' );
 				$this->log( 'TC: OrderId ' . $order_id . ' canceled', $order_id );
 				break;
 			case 5:
@@ -434,7 +434,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	 *
 	 * @param int $order_id
 	 *
-	 * @return array|void
+	 * @return array|false
 	 */
 	public function process_payment( $order_id ) {
 		// Init PayEx
@@ -446,22 +446,21 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		if ( self::order_contains_subscription( $order ) ) {
 			// Payment View
 			if ( $this->payment_view !== 'CREDITCARD' ) {
-				$this->add_message( sprintf( __( 'PayEx Recurring Payments don\'t work with WC Subscriptions in "%s" mode. Please set "Credit Card" mode.', 'woocommerce-gateway-payex-payment' ), $this->payment_view ), 'error' );
+				wc_add_notice( sprintf( __( 'PayEx Recurring Payments don\'t work with WC Subscriptions in "%s" mode. Please set "Credit Card" mode.', 'woocommerce-gateway-payex-payment' ), $this->payment_view ), 'error' );
 
 				return false;
 			}
 
 			// Store Cards
 			if ( $this->save_cards !== 'yes' ) {
-				$this->add_message( __( 'PayEx Recurring Payments don\'t work  WC Subscriptions without Store Cards option.', 'woocommerce-gateway-payex-payment' ), 'error' );
+				wc_add_notice( __( 'PayEx Recurring Payments don\'t work  WC Subscriptions without Store Cards option.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 				return false;
 			}
 		}
 
-		$customer_id = $order->get_user_id();
 		$amount      = $order->get_total();
-		$currency    = $order->get_order_currency();
+		$currency    = $order->get_currency();
 		$agreement   = '';
 
 		// Prepare additional values
@@ -484,7 +483,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				// Create Recurring Agreement
 				$agreement = $this->create_agreement();
 				if ( ! $agreement ) {
-					$this->add_message( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
+					wc_add_notice( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
@@ -497,10 +496,10 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 					'purchaseOperation' => $this->purchase_operation,
 					'price'             => round( $order->get_total() * 100 ),
 					'priceArgList'      => '',
-					'currency'          => $order->get_order_currency(),
+					'currency'          => $order->get_currency(),
 					'vat'               => 0,
-					'orderID'           => $order->id,
-					'productNumber'     => $order->id,
+					'orderID'           => $order->get_id(),
+					'productNumber'     => $order->get_id(),
 					'description'       => $this->description,
 					'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 					'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -515,7 +514,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				$result = $this->getPx()->Initialize8( $params );
 				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 					$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+					wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 					return false;
 				}
@@ -531,12 +530,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				$card_id = $_POST['payex-credit-card'];
 				$card    = get_post( $card_id );
 				if ( $card->post_author != $order->get_user_id() ) {
-					$this->add_message( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
+					wc_add_notice( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
 
-				update_post_meta( $order->id, '_payex_card_id', $card_id );
+				update_post_meta( $order->get_id(), '_payex_card_id', $card_id );
 
 				return array(
 					'result'   => 'success',
@@ -545,7 +544,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			}
 
 			// Default action
-			$this->add_message( __( 'Unable to change the payment method', 'woocommerce-gateway-payex-payment' ) );
+			wc_add_notice( __( 'Unable to change the payment method', 'woocommerce-gateway-payex-payment' ) );
 
 			return false;
 		} elseif ( $this->order_contains_subscription($order) && $order->get_total() == 0 ) {
@@ -555,7 +554,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				// Create Recurring Agreement
 				$agreement = $this->create_agreement();
 				if ( ! $agreement ) {
-					$this->add_message( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
+					wc_add_notice( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
@@ -568,10 +567,10 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 					'purchaseOperation' => $this->purchase_operation,
 					'price'             => round( $order->get_total() * 100 ),
 					'priceArgList'      => '',
-					'currency'          => $order->get_order_currency(),
+					'currency'          => $order->get_currency(),
 					'vat'               => 0,
-					'orderID'           => $order->id,
-					'productNumber'     => $order->id,
+					'orderID'           => $order->get_id(),
+					'productNumber'     => $order->get_id(),
 					'description'       => $this->description,
 					'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 					'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -586,7 +585,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				$result = $this->getPx()->Initialize8( $params );
 				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 					$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+					wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 					return false;
 				}
@@ -603,13 +602,13 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				$card      = get_post( $card_id );
 				$card_meta = get_post_meta( $card->ID, '_payex_card', true );
 				if ( $card->post_author != $order->get_user_id() ) {
-					$this->add_message( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
+					wc_add_notice( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
 
 				// Set Card ID
-				update_post_meta( $order->id, '_payex_card_id', $card_id );
+				update_post_meta( $order->get_id(), '_payex_card_id', $card_id );
 
 				// Payment success
 				$order->payment_complete();
@@ -627,12 +626,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			}
 
 			// Default action
-			$this->add_message( __( 'Unable to process payment', 'woocommerce-gateway-payex-payment' ) );
+			wc_add_notice( __( 'Unable to process payment', 'woocommerce-gateway-payex-payment' ) );
 
 			return false;
 		} elseif ( $order->get_total() == 0 ) {
 			// Allow empty order amount for "Payment Change" and "Subscription trial period" only
-			$this->add_message( __( 'Sorry, order total must be greater than zero.', 'woocommerce-gateway-payex-payment' ), 'error' );
+			wc_add_notice( __( 'Sorry, order total must be greater than zero.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 			return false;
 		}
@@ -644,7 +643,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				// Get Agreement Reference of Selected Card
 				$card = get_post( wc_clean( $_POST['payex-credit-card'] ) );
 				if ( $card->post_author != $order->get_user_id() ) {
-					$this->add_message( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
+					wc_add_notice( __( 'You are not the owner of this card.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
@@ -658,9 +657,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 					'accountNumber'     => '',
 					'agreementRef'      => $agreement,
 					'price'             => round( $amount * 100 ),
-					'productNumber'     => $customer_id,
+					'productNumber'     => $order->get_id(),
 					'description'       => $this->description,
-					'orderId'           => $order->id,
+					'orderId'           => $order->get_id(),
 					'purchaseOperation' => $this->purchase_operation,
 					'currency'          => $currency
 				);
@@ -668,7 +667,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				if ( $result['errorCodeSimple'] !== 'OK' ) {
 					$this->log( 'PxAgreement.AutoPay3:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+					wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 					return false;
 				}
@@ -686,7 +685,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				}
 
 				// Save meta
-				add_post_meta( $order->id, '_payex_card_id', $card->ID );
+				add_post_meta( $order->get_id(), '_payex_card_id', $card->ID );
 
 				return array(
 					'result'   => 'success',
@@ -696,7 +695,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				// Create Recurring Agreement
 				$agreement = $this->create_agreement();
 				if ( ! $agreement ) {
-					$this->add_message( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
+					wc_add_notice( __( 'Failed to create agreement reference', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 					return false;
 				}
@@ -711,8 +710,8 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			'priceArgList'      => '',
 			'currency'          => $currency,
 			'vat'               => 0,
-			'orderID'           => $order->id,
-			'productNumber'     => $customer_id, // Customer Id
+			'orderID'           => $order->get_id(),
+			'productNumber'     => $order->get_id(),
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -728,7 +727,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 			$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 			$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+			wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return false;
 		}
@@ -738,192 +737,44 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 		if ( $this->checkout_info === 'yes' ) {
 			// add Order Lines
-			$i = 1;
-			foreach ( $order->get_items() as $order_item ) {
-				$price        = $order->get_line_subtotal( $order_item, false, false );
-				$priceWithTax = $order->get_line_subtotal( $order_item, true, false );
-				$tax          = $priceWithTax - $price;
-				$taxPercent   = ( $tax > 0 ) ? round( 100 / ( $price / $tax ) ) : 0;
-
+			$items = $this->get_order_items( $order );
+			foreach ($items as $id => $item) {
 				// Call PxOrder.AddSingleOrderLine2
 				$params = array(
 					'accountNumber'    => '',
 					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => $order_item['name'],
+					'itemNumber'       => $id,
+					'itemDescription1' => $item['name'],
 					'itemDescription2' => '',
 					'itemDescription3' => '',
 					'itemDescription4' => '',
 					'itemDescription5' => '',
-					'quantity'         => $order_item['qty'],
-					'amount'           => (int) ( 100 * $priceWithTax ),
+					'quantity'         => $item['qty'],
+					'amount'           => (int) ( 100 * $item['price_with_tax'] ),
 					//must include tax
-					'vatPrice'         => (int) ( 100 * $tax ),
-					'vatPercent'       => (int) ( 100 * $taxPercent )
+					'vatPrice'         => (int) ( 100 * $item['tax_price'] ),
+					'vatPercent'       => (int) ( 100 * $item['tax_percent'] )
 				);
 				$result = $this->getPx()->AddSingleOrderLine2( $params );
 				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-					return false;
-				}
-
-				$i ++;
-			};
-
-			// Add Shipping Line
-			if ( (float) $order->order_shipping > 0 ) {
-				$taxPercent = ( $order->order_shipping_tax > 0 ) ? round( 100 / ( $order->order_shipping / $order->order_shipping_tax ) ) : 0;
-
-				$params = array(
-					'accountNumber'    => '',
-					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => ! empty( $order->shipping_method_title ) ? $order->shipping_method_title : __( 'Shipping', 'woocommerce-gateway-payex-payment' ),
-					'itemDescription2' => '',
-					'itemDescription3' => '',
-					'itemDescription4' => '',
-					'itemDescription5' => '',
-					'quantity'         => 1,
-					'amount'           => (int) ( 100 * ( $order->order_shipping + $order->order_shipping_tax ) ),
-					//must include tax
-					'vatPrice'         => (int) ( 100 * $order->order_shipping_tax ),
-					'vatPercent'       => (int) ( 100 * $taxPercent )
-				);
-				$result = $this->getPx()->AddSingleOrderLine2( $params );
-				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-					return false;
-				}
-
-				$i ++;
-			}
-
-			// Add fee lines
-			foreach ( $order->get_fees() as $fee ) {
-				$taxPercent = ( $fee['line_tax'] > 0 ) ? round( 100 / ( $fee['line_total'] / $fee['line_tax'] ) ) : 0;
-
-				$params = array(
-					'accountNumber'    => '',
-					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => $fee['name'],
-					'itemDescription2' => '',
-					'itemDescription3' => '',
-					'itemDescription4' => '',
-					'itemDescription5' => '',
-					'quantity'         => 1,
-					'amount'           => (int) ( 100 * ( $fee['line_total'] + $fee['line_tax'] ) ), //must include tax
-					'vatPrice'         => (int) ( 100 * $fee['line_tax'] ),
-					'vatPercent'       => (int) ( 100 * $taxPercent )
-				);
-				$result = $this->getPx()->AddSingleOrderLine2( $params );
-				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-					return false;
-				}
-
-				$i ++;
-			}
-
-			// Add discount line
-			if ( $order->get_total_discount( false ) > 0 ) {
-				$params = array(
-					'accountNumber'    => '',
-					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => __( 'Discount', 'woocommerce-gateway-payex-payment' ),
-					'itemDescription2' => '',
-					'itemDescription3' => '',
-					'itemDescription4' => '',
-					'itemDescription5' => '',
-					'quantity'         => 1,
-					'amount'           => - 1 * (int) ( $order->get_total_discount( false ) * 100 ),
-					'vatPrice'         => 0,
-					'vatPercent'       => 0
-				);
-				$result = $this->getPx()->AddSingleOrderLine2( $params );
-				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+					wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 					return false;
 				}
 			}
 
-			// Add Order Address
-			$countries = WC()->countries->countries;
-			$states    = WC()->countries->states;
-
-			// Call PxOrder.AddOrderAddress2
-			$params = array(
-				'accountNumber'      => '',
-				'orderRef'           => $orderRef,
-				'billingFirstName'   => $order->billing_first_name,
-				'billingLastName'    => $order->billing_last_name,
-				'billingAddress1'    => $order->billing_address_1,
-				'billingAddress2'    => $order->billing_address_2,
-				'billingAddress3'    => '',
-				'billingPostNumber'  => $order->billing_postcode,
-				'billingCity'        => $order->billing_city,
-				'billingState'       => isset( $states[ $order->billing_country ][ $order->billing_state ] ) ? $states[ $order->billing_country ][ $order->billing_state ] : $order->billing_state,
-				'billingCountry'     => isset( $countries[ $order->billing_country ] ) ? $countries[ $order->billing_country ] : $order->billing_country,
-				'billingCountryCode' => $order->billing_country,
-				'billingEmail'       => $order->billing_email,
-				'billingPhone'       => $order->billing_phone,
-				'billingGsm'         => '',
-			);
-
-			$shipping_params = array(
-				'deliveryFirstName'   => '',
-				'deliveryLastName'    => '',
-				'deliveryAddress1'    => '',
-				'deliveryAddress2'    => '',
-				'deliveryAddress3'    => '',
-				'deliveryPostNumber'  => '',
-				'deliveryCity'        => '',
-				'deliveryState'       => '',
-				'deliveryCountry'     => '',
-				'deliveryCountryCode' => '',
-				'deliveryEmail'       => '',
-				'deliveryPhone'       => '',
-				'deliveryGsm'         => '',
-			);
-
-			if ( WC()->cart->needs_shipping() ) {
-				$shipping_params = array(
-					'deliveryFirstName'   => $order->shipping_first_name,
-					'deliveryLastName'    => $order->shipping_last_name,
-					'deliveryAddress1'    => $order->shipping_address_1,
-					'deliveryAddress2'    => $order->shipping_address_2,
-					'deliveryAddress3'    => '',
-					'deliveryPostNumber'  => $order->shipping_postcode,
-					'deliveryCity'        => $order->shipping_city,
-					'deliveryState'       => isset( $states[ $order->shipping_country ][ $order->shipping_state ] ) ? $states[ $order->shipping_country ][ $order->shipping_state ] : $order->shipping_state,
-					'deliveryCountry'     => isset( $countries[ $order->shipping_country ] ) ? $countries[ $order->shipping_country ] : $order->shipping_country,
-					'deliveryCountryCode' => $order->shipping_country,
-					'deliveryEmail'       => $order->billing_email,
-					'deliveryPhone'       => $order->billing_phone,
-					'deliveryGsm'         => '',
-				);
-			}
-
-			$params += $shipping_params;
-
+			// Add Order Address Info
+			$params = array_merge( array(
+				'accountNumber' => '',
+				'orderRef' => $orderRef
+			), $this->get_address_info( $order ) );
 			$result = $this->getPx()->AddOrderAddress2( $params );
 			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 				$this->log( 'PxOrder.AddOrderAddress2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 				$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return false;
 			}
@@ -947,7 +798,8 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 		// Validate Payment Method
 		$order = $this->get_order_by_order_key( $_GET['key'] );
-		if ( $order && $order->payment_method !== $this->id ) {
+		$payment_method = $this->is_wc3() ? $order->get_payment_method() : $order->payment_method;
+		if ( $order && $payment_method !== $this->id ) {
 			return;
 		}
 
@@ -969,7 +821,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			$result = $this->getPx()->Complete( $params );
 			if ( $result['errorCodeSimple'] !== 'OK' ) {
 				$this->log( 'PxOrder.Complete:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
@@ -991,15 +843,15 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			$result = $this->getPx()->GetTransactionDetails2( $params );
 			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 				$this->log( 'PxOrder.GetTransactionDetails2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
 		}
 
 		// Validate Order
-		if ( $order->id !== (int) $result['orderId'] ) {
-			$this->add_message( __( 'The transaction belongs to another order.', 'woocommerce-gateway-payex-payment' ), 'error' );
+		if ( $order->get_id() !== (int) $result['orderId'] ) {
+			wc_add_notice( __( 'The transaction belongs to another order.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 			return;
 		}
@@ -1014,7 +866,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Check transaction is already success
-		$transaction_status = get_post_meta( $order->id, '_payex_transaction_status', true );
+		$transaction_status = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
 		if ( in_array( $transaction_status, array( '0', '3', '6' ) ) ) {
 			return;
 		}
@@ -1024,15 +876,15 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Save Transaction
-		update_post_meta( $order->id, '_transaction_id', $result['transactionNumber'] );
-		update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 
 		// Save Agreement Reference
 		if ( ! empty( $result['agreementRef'] ) ) {
 			$agreement_status = $this->agreement_check( $result['agreementRef'] );
 			if ( $agreement_status === 1 ) {
 				// Save Credit Card
-				$this->agreement_save( $order->id, $result['agreementRef'], $result );
+				$this->agreement_save( $order->get_id(), $result['agreementRef'], $result );
 			}
 		}
 
@@ -1075,12 +927,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	/**
 	 * When a subscription payment is due.
 	 *
-	 * @param $amount_to_charge
-	 * @param $renewal_order
+	 * @param float $amount_to_charge
+	 * @param WC_Order $renewal_order
 	 */
 	public function scheduled_subscription_payment( $amount_to_charge, $renewal_order ) {
 		try {
-			$card_id = get_post_meta( $renewal_order->id, '_payex_card_id', true );
+			$card_id = get_post_meta( $renewal_order->get_id(), '_payex_card_id', true );
 			if ( empty( $card_id ) ) {
 				throw new Exception( 'Invalid Credit Card Id' );
 			}
@@ -1116,9 +968,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'price'             => round( $amount_to_charge * 100 ),
 				'productNumber'     => $renewal_order->get_user_id(),
 				'description'       => $this->description,
-				'orderId'           => $renewal_order->id,
+				'orderId'           => $renewal_order->get_id(),
 				'purchaseOperation' => $this->purchase_operation,
-				'currency'          => $renewal_order->order_currency
+				'currency'          => $renewal_order->get_currency()
 			);
 			$result = $this->getPx()->AutoPay3( $params );
 			if ( $result['errorCodeSimple'] !== 'OK' ) {
@@ -1127,11 +979,11 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			}
 
 			// Save Transaction
-			update_post_meta( $renewal_order->id, '_transaction_id', $result['transactionNumber'] );
-			update_post_meta( $renewal_order->id, '_payex_transaction_status', $result['transactionStatus'] );
+			update_post_meta( $renewal_order->get_id(), '_transaction_id', $result['transactionNumber'] );
+			update_post_meta( $renewal_order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 
 			// Save meta
-			add_post_meta( $renewal_order->id, '_payex_card_id', $card_id );
+			add_post_meta( $renewal_order->get_id(), '_payex_card_id', $card_id );
 
 			// Payment success
 			if ( in_array( $result['transactionStatus'], array( '0', '3', '6' ) ) ) {
@@ -1229,7 +1081,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	 * @return void
 	 */
 	public function update_failing_payment_method( $subscription, $renewal_order ) {
-		update_post_meta( $subscription->id, '_payex_card_id', get_post_meta( $renewal_order->id, '_payex_card_id', true ) );
+		update_post_meta( $subscription->get_id(), '_payex_card_id', get_post_meta( $renewal_order->get_id(), '_payex_card_id', true ) );
 	}
 
 	/**
@@ -1247,7 +1099,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$payment_meta[ $this->id ] = array(
 			'post_meta' => array(
 				'_payex_card_id' => array(
-					'value' => get_post_meta( $subscription->id, '_payex_card_id', true ),
+					'value' => get_post_meta( $subscription->get_id(), '_payex_card_id', true ),
 					'label' => 'Saved Credit Card ID',
 				),
 			),
@@ -1280,12 +1132,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	 *
 	 * @access public
 	 *
-	 * @param int $resubscribe_order The order created for the customer to resubscribe to the old expired/cancelled subscription
+	 * @param WC_Order $resubscribe_order The order created for the customer to resubscribe to the old expired/cancelled subscription
 	 *
 	 * @return void
 	 */
 	public function delete_resubscribe_meta( $resubscribe_order ) {
-		delete_post_meta( $resubscribe_order->id, '_payex_card_id' );
+		delete_post_meta( $resubscribe_order->get_id(), '_payex_card_id' );
 	}
 
 	/**
@@ -1296,11 +1148,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	public function add_subscription_card_id( $order_id ) {
 		$subscriptions = wcs_get_subscriptions_for_order( $order_id, array( 'order_type' => 'parent' ) );
 		foreach ( $subscriptions as $subscription ) {
-			$card_id = get_post_meta( $subscription->id, '_payex_card_id', true );
+			/** @var WC_Subscription $subscription */
+			$card_id = get_post_meta( $subscription->get_id(), '_payex_card_id', true );
 
 			if ( empty( $card_id ) ) {
-				$order_card_id = get_post_meta( $subscription->order->id, '_payex_card_id', true );
-				add_post_meta( $subscription->id, '_payex_card_id', $order_card_id );
+				$order_card_id = get_post_meta( $subscription->order->get_id(), '_payex_card_id', true );
+				add_post_meta( $subscription->get_id(), '_payex_card_id', $order_card_id );
 			}
 		}
 	}
@@ -1315,11 +1168,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 	 */
 	public function maybe_render_subscription_payment_method( $payment_method_to_display, $subscription ) {
 		// bail for other payment methods
-		if ( $this->id !== $subscription->payment_method || ! $subscription->customer_user ) {
+		$payment_method = $this->is_wc3() ? $subscription->get_payment_method() : $subscription->payment_method;
+		if ( $this->id !== $payment_method || ! $subscription->get_user_id() ) {
 			return $payment_method_to_display;
 		}
 
-		$card_id = get_post_meta( $subscription->id, '_payex_card_id', true );
+		$card_id = get_post_meta( $subscription->get_id(), '_payex_card_id', true );
 		if ( empty( $card_id ) ) {
 			return $payment_method_to_display;
 		}
@@ -1370,7 +1224,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 			$result = $this->getPx()->Complete( $params );
 			if ( $result['errorCodeSimple'] !== 'OK' ) {
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
@@ -1395,9 +1249,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			$agreement_status = $this->agreement_check( $result['agreementRef'] );
 			if ( $agreement_status === 1 ) {
 				// Save Credit Card
-				$card_id = $this->agreement_save( $order->id, $result['agreementRef'], $result );
+				$card_id = $this->agreement_save( $order->get_id(), $result['agreementRef'], $result );
 				if ( abs( $card_id ) > 0 ) {
-					update_post_meta( $order->id, '_payex_card_id', $card_id );
+					update_post_meta( $order->get_id(), '_payex_card_id', $card_id );
 				}
 			}
 
