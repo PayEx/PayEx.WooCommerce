@@ -51,8 +51,13 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 
 		// MasterPass
 		add_action( 'woocommerce_checkout_init', array( $this, 'checkout_init' ) );
-		add_filter( 'default_checkout_country', array( $this, 'maybe_change_default_checkout_country' ) );
-		add_filter( 'default_checkout_postcode', array( $this, 'maybe_change_default_checkout_postcode' ) );
+		if ( $this->is_wc3() ) {
+			add_filter( 'default_checkout_billing_country', array( $this, 'maybe_change_default_checkout_country' ) );
+			add_filter( 'default_checkout_billing_postcode', array( $this, 'maybe_change_default_checkout_postcode' ) );
+		} else {
+			add_filter( 'default_checkout_country', array( $this, 'maybe_change_default_checkout_country' ) );
+			add_filter( 'default_checkout_postcode', array( $this, 'maybe_change_default_checkout_postcode' ) );
+		}
 		add_filter( 'woocommerce_form_field_args', array( $this, 'override_checkout_fields' ), 10, 3 );
 		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'filter_gateways' ), 1 );
 		add_filter( 'woocommerce_order_button_text', array( $this, 'set_order_button_text' ), 1 );
@@ -186,7 +191,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 *
 	 * @param int $order_id
 	 *
-	 * @return array|void
+	 * @return array|false
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -220,10 +225,10 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				'purchaseOperation' => $this->purchase_operation,
 				'price'             => round( $order->get_total() * 100 ),
 				'priceArgList'      => '',
-				'currency'          => $order->get_order_currency(),
+				'currency'          => $order->get_currency(),
 				'vat'               => 0,
-				'orderID'           => $order->id,
-				'productNumber'     => (int) $order->get_user_id(), // Customer Id
+				'orderID'           => $order->get_id(),
+				'productNumber'     => $order->get_id(),
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -239,7 +244,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 				$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 				$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
@@ -254,7 +259,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$params = array(
 			'accountNumber'   => '',
 			'orderRef'        => $orderRef,
-			'amount'          => round( $order->order_total * 100 ),
+			'amount'          => round( $order->get_total() * 100 ),
 			'vatAmount'       => 0,
 			'clientIPAddress' => $_SERVER['REMOTE_ADDR']
 		);
@@ -270,14 +275,14 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 
 			$this->log( 'PxOrder.FinalizeTransaction:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 			$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+			wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return false;
 		}
 
 		// Save Transaction
-		update_post_meta( $order->id, '_transaction_id', $result['transactionNumber'] );
-		update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 
 		/* Transaction statuses:
 		0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */
@@ -298,7 +303,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				break;
 			case 4:
 				// Cancel
-				$order->cancel_order();
+				$order->update_status( 'cancelled' );
 				break;
 			case 5:
 			default:
@@ -330,7 +335,8 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 
 		// Validate Payment Method
 		$order = $this->get_order_by_order_key( $_GET['key'] );
-		if ( $order && $order->payment_method !== $this->id ) {
+		$payment_method = $this->is_wc3() ? $order->get_payment_method() : $order->payment_method;
+		if ( $order && $payment_method !== $this->id ) {
 			return;
 		}
 
@@ -340,7 +346,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Check transaction is already success
-		$transaction_status = get_post_meta( $order->id, '_payex_transaction_status', true );
+		$transaction_status = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
 		if ( in_array( $transaction_status, array( '0', '3', '6' ) ) ) {
 			return;
 		}
@@ -395,7 +401,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 
 			$this->log( 'PxOrder.FinalizeTransaction:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 			$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+			wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return;
 		}
@@ -419,14 +425,14 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Check transaction is already success
-		$transaction_status = get_post_meta( $order->id, '_payex_transaction_status', true );
+		$transaction_status = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
 		if ( in_array( $transaction_status, array( '0', '3', '6' ) ) ) {
 			return;
 		}
 
 		// Save Transaction
-		update_post_meta( $order->id, '_transaction_id', $result['transactionNumber'] );
-		update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 
 		/* Transaction statuses:
 		0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */
@@ -447,7 +453,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				break;
 			case 4:
 				// Cancel
-				$order->cancel_order();
+				$order->update_status( 'cancelled' );
 				break;
 			case 5:
 			default:
@@ -495,10 +501,11 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * Set Country as Default value
 	 *
 	 * @param $value
+	 * @param $input
 	 *
 	 * @return mixed
 	 */
-	public function maybe_change_default_checkout_country( $value ) {
+	public function maybe_change_default_checkout_country( $value, $input = null ) {
 		$delivery_address = WC()->session->get( 'mp_delivery_address' );
 		if ( $delivery_address ) {
 			$value = $delivery_address['country'];
@@ -511,10 +518,11 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * Set PostCode as Default value
 	 *
 	 * @param $value
+	 * @param $input
 	 *
 	 * @return mixed
 	 */
-	public function maybe_change_default_checkout_postcode( $value ) {
+	public function maybe_change_default_checkout_postcode( $value, $input = null ) {
 		$delivery_address = WC()->session->get( 'mp_delivery_address' );
 		if ( $delivery_address ) {
 			$value = $delivery_address['postalCode'];
@@ -613,7 +621,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 *
 	 * @param $order_button_text
 	 *
-	 * @return string|void
+	 * @return string
 	 */
 	public function set_order_button_text( $order_button_text ) {
 		$delivery_address = WC()->session->get( 'mp_delivery_address' );
@@ -675,7 +683,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
 
-		$order_id = WC()->checkout()->create_order();
+		$order_id = WC()->checkout()->create_order( array() );
 		if ( is_wp_error( $order_id ) ) {
 			throw new Exception( $order_id->get_error_message() );
 		}
@@ -709,16 +717,16 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				'purchaseOperation' => $this->purchase_operation,
 				'price'             => round( $order->get_total() * 100 ),
 				'priceArgList'      => '',
-				'currency'          => $order->get_order_currency(),
+				'currency'          => $order->get_currency(),
 				'vat'               => 0,
-				'orderID'           => $order->id,
+				'orderID'           => $order->get_id(),
 				'productNumber'     => (int) $order->get_user_id(), // Customer Id
 				'description'       => $this->description,
 				'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 				'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
 				'additionalValues'  => $this->get_additional_values( $additional, $order ),
 				'externalID'        => '',
-				'returnUrl'         => WC()->cart->get_checkout_url(),
+				'returnUrl'         => wc_get_checkout_url(),
 				'view'              => 'CREDITCARD',
 				'agreementRef'      => '',
 				'cancelUrl'         => html_entity_decode( $order->get_cancel_order_url() ),
@@ -728,7 +736,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 				$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 				$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
@@ -748,7 +756,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	/**
 	 * Generate Shopping Cart XML
 	 *
-	 * @param $order
+	 * @param WC_Order $order
 	 *
 	 * @return mixed
 	 */
@@ -757,37 +765,16 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 		$ShoppingCart = $dom->createElement( 'ShoppingCart' );
 		$dom->appendChild( $ShoppingCart );
 
-		$ShoppingCart->appendChild( $dom->createElement( 'CurrencyCode', $order->get_order_currency() ) );
+		$ShoppingCart->appendChild( $dom->createElement( 'CurrencyCode', $order->get_currency() ) );
 		$ShoppingCart->appendChild( $dom->createElement( 'Subtotal', (int) ( 100 * $order->get_total() ) ) );
 
 		// Add Order Lines
-		foreach ( $order->get_items() as $order_item ) {
-			$price = $order->get_line_subtotal( $order_item, false, false );
-
+		$items = $this->get_order_items( $order );
+		foreach ( $items as $order_item ) {
 			$ShoppingCartItem = $dom->createElement( 'ShoppingCartItem' );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Description', $order_item['name'] ) );
+			$ShoppingCartItem->appendChild( $dom->createElement( 'Description', htmlentities( $order_item['name'] ) ) );
 			$ShoppingCartItem->appendChild( $dom->createElement( 'Quantity', $order_item['qty'] ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Value', (int) 100 * ( $price ) ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'ImageURL', '' ) );
-			$ShoppingCart->appendChild( $ShoppingCartItem );
-		}
-
-		// Add discount line
-		if ( $order->get_total_discount( false ) > 0 ) {
-			$ShoppingCartItem = $dom->createElement( 'ShoppingCartItem' );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Description', __( 'Discount', 'woocommerce-gateway-payex-payment' ) ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Quantity', 1 ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Value', (int) ( - 100 * $order->get_total_discount( false ) ) ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'ImageURL', '' ) );
-			$ShoppingCart->appendChild( $ShoppingCartItem );
-		}
-
-		// Add fee lines
-		foreach ( $order->get_fees() as $fee ) {
-			$ShoppingCartItem = $dom->createElement( 'ShoppingCartItem' );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Description', $fee['name'] ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Quantity', 1 ) );
-			$ShoppingCartItem->appendChild( $dom->createElement( 'Value', (int) ( 100 * $fee['line_total'] ) ) );
+			$ShoppingCartItem->appendChild( $dom->createElement( 'Value', (int) 100 * $order_item['price_with_tax'] ) );
 			$ShoppingCartItem->appendChild( $dom->createElement( 'ImageURL', '' ) );
 			$ShoppingCart->appendChild( $ShoppingCartItem );
 		}

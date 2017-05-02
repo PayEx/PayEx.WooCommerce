@@ -83,6 +83,9 @@ class WC_Payex_Payment {
 
 		// Add Countries for SSN field
 		add_filter( 'woocommerce_payex_countries_ssn', array( $this, 'add_countries_ssn' ), 10, 1 );
+
+		// WC_Order Compatibility for WC < 3.0
+		add_action( 'woocommerce_init', __CLASS__ . '::add_compatibility' );
 	}
 
 	/**
@@ -297,31 +300,32 @@ class WC_Payex_Payment {
 		));
 
 		foreach ($orders as $order) {
-			$order = wc_get_order( $order->ID );
+			$order_id = $order->ID;
+			$order = wc_get_order( $order_id );
 
 			if ( version_compare(WC_Subscriptions::$version, '2.0.0', '<') &&
 			     WC_Subscriptions_Order::order_contains_subscription( $order )
 			) {
 				// Change payment method
-				update_post_meta( $order->id, '_recurring_payment_method', 'payex' );
+				update_post_meta( $order_id, '_recurring_payment_method', 'payex' );
 
 				// Copy agreement reference
-				$agreement  = get_post_meta( $order->id, '_payex_agreement_reference', true );
+				$agreement  = get_post_meta( $order_id, '_payex_agreement_reference', true );
 				if ( ! empty( $agreement ) ) {
 					continue;
 				}
 
-				$agreement  = get_post_meta( $order->id, 'payex_agreement_ref', true );
+				$agreement  = get_post_meta( $order_id, 'payex_agreement_ref', true );
 				if ( ! empty( $agreement ) ) {
-					update_post_meta( $order->id, '_payex_agreement_reference', $agreement );
+					update_post_meta( $order_id, '_payex_agreement_reference', $agreement );
 				}
 			}
 
 			// Change payment method
-			update_post_meta( $order->id, '_payment_method', 'payex' );
+			update_post_meta( $order_id, '_payment_method', 'payex' );
 
 			// Migration flag
-			update_post_meta( $order->id, '_is_migrated_payex', true );
+			update_post_meta( $order_id, '_is_migrated_payex', true );
 		}
 
 		// Deactivate plugin
@@ -424,13 +428,13 @@ class WC_Payex_Payment {
 	/**
 	 * Allow processing/completed statuses for capture
 	 *
-	 * @param $statuses
-	 * @param $order
+	 * @param array $statuses
+	 * @param WC_Order $order
 	 *
 	 * @return array
 	 */
 	public function add_valid_order_statuses( $statuses, $order ) {
-		if ( strpos( $order->payment_method, 'payex' ) !== false ) {
+		if ( strpos( self::is_wc3() ? $order->get_payment_method() : $order->payment_method, 'payex' ) !== false ) {
 			$statuses = array_merge( $statuses, array( 'processing', 'completed' ) );
 		}
 
@@ -471,7 +475,7 @@ class WC_Payex_Payment {
 		// Get Payment Gateway
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		/** @var WC_Gateway_Payex_Abstract $gateway */
-		$gateway = $gateways[ $order->payment_method ];
+		$gateway = $gateways[ $order->get_payment_method() ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
 			// Get Additional Values
 			$additionalValues = '';
@@ -486,8 +490,8 @@ class WC_Payex_Payment {
 			$params = array(
 				'accountNumber'     => '',
 				'transactionNumber' => $order->get_transaction_id(),
-				'amount'            => round( 100 * $order->order_total ),
-				'orderId'           => $order->id,
+				'amount'            => round( 100 * $order->get_total() ),
+				'orderId'           => $order->get_id(),
 				'vatAmount'         => 0,
 				'additionalValues'  => $additionalValues
 			);
@@ -502,7 +506,7 @@ class WC_Payex_Payment {
 				return;
 			}
 
-			update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+			update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 			$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 			$order->payment_complete( $result['transactionNumber'] );
 		}
@@ -523,7 +527,7 @@ class WC_Payex_Payment {
 		// Get Payment Gateway
 		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		/** @var WC_Gateway_Payex_Abstract $gateway */
-		$gateway = $gateways[ $order->payment_method ];
+		$gateway = $gateways[ $order->get_payment_method() ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
 			// Call PxOrder.Cancel2
 			$params = array(
@@ -541,7 +545,7 @@ class WC_Payex_Payment {
 				return;
 			}
 
-			update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+			update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 			$order->add_order_note( sprintf( __( 'Transaction canceled. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 		}
 	}
@@ -819,6 +823,23 @@ class WC_Payex_Payment {
 		);
 
 		return $countries;
+	}
+
+	/**
+	 * Check is WooCommerce >= 3.0
+	 * @return bool
+	 */
+	public static function is_wc3() {
+		return version_compare( WC()->version, '3.0', '>=' );
+	}
+
+	/**
+	 * WC_Order Compatibility for WC < 3.0
+	 */
+	public static function add_compatibility() {
+		if ( ! self::is_wc3() ) {
+			include_once( dirname( __FILE__ ) . '/includes/deprecated/class-wc-order-compatibility-payex.php' );
+		}
 	}
 }
 

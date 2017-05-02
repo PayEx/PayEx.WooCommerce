@@ -161,7 +161,7 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 	 *
 	 * @param int $order_id
 	 *
-	 * @return array|void
+	 * @return array|false
 	 */
 	public function process_payment( $order_id ) {
 		// Init PayEx
@@ -175,10 +175,10 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 			'purchaseOperation' => $this->purchase_operation,
 			'price'             => round( $order->get_total() * 100 ),
 			'priceArgList'      => '',
-			'currency'          => $order->get_order_currency(),
+			'currency'          => $order->get_currency(),
 			'vat'               => 0,
-			'orderID'           => $order->id,
-			'productNumber'     => $order->id,
+			'orderID'           => $order->get_id(),
+			'productNumber'     => $order->get_id(),
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -197,7 +197,7 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 			$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 			$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+			wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return;
 		}
@@ -224,7 +224,8 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 
 		// Validate Payment Method
 		$order = $this->get_order_by_order_key( $_GET['key'] );
-		if ( $order && $order->payment_method !== $this->id ) {
+		$payment_method = $this->is_wc3() ? $order->get_payment_method() : $order->payment_method;
+		if ( $order && $payment_method !== $this->id ) {
 			return;
 		}
 
@@ -246,7 +247,7 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 			$result = $this->getPx()->Complete( $params );
 			if ( $result['errorCodeSimple'] !== 'OK' ) {
 				$this->log( 'PxOrder.Complete:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
@@ -268,15 +269,15 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 			$result = $this->getPx()->GetTransactionDetails2( $params );
 			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 				$this->log( 'PxOrder.GetTransactionDetails2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 				return;
 			}
 		}
 
 		// Validate Order
-		if ( $order->id !== (int) $result['orderId'] ) {
-			$this->add_message( __( 'The transaction belongs to another order.', 'woocommerce-gateway-payex-payment' ), 'error' );
+		if ( $order->get_id() !== (int) $result['orderId'] ) {
+			wc_add_notice( __( 'The transaction belongs to another order.', 'woocommerce-gateway-payex-payment' ), 'error' );
 
 			return;
 		}
@@ -291,7 +292,7 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Check transaction is already success
-		$transaction_status = get_post_meta( $order->id, '_payex_transaction_status', TRUE );
+		$transaction_status = get_post_meta( $order->get_id(), '_payex_transaction_status', TRUE );
 		if ( in_array( $transaction_status, array( '0', '3', '6' ) ) ) {
 			return;
 		}
@@ -301,8 +302,8 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Save Transaction
-		update_post_meta( $order->id, '_transaction_id', $result['transactionNumber'] );
-		update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 
 		/* Transaction statuses:
 		0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */
@@ -323,7 +324,7 @@ class WC_Gateway_Payex_Mobilepay extends WC_Gateway_Payex_Abstract {
 				break;
 			case 4:
 				// Cancel
-				$order->cancel_order();
+				$order->update_status( 'cancelled' );
 				break;
 			case 5:
 			default:

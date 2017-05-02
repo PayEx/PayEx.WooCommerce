@@ -164,7 +164,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 	 *
 	 * @param int $order_id
 	 *
-	 * @return array|void
+	 * @return array|false
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -187,10 +187,10 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 			'purchaseOperation' => 'SALE',
 			'price'             => round( $order->get_total() * 100 ),
 			'priceArgList'      => '',
-			'currency'          => $order->get_order_currency(),
+			'currency'          => $order->get_currency(),
 			'vat'               => 0,
-			'orderID'           => $order->id,
-			'productNumber'     => $order->id,
+			'orderID'           => $order->get_id(),
+			'productNumber'     => $order->get_id(),
 			'description'       => $this->description,
 			'clientIPAddress'   => $_SERVER['REMOTE_ADDR'],
 			'clientIdentifier'  => 'USERAGENT=' . $_SERVER['HTTP_USER_AGENT'],
@@ -206,7 +206,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 			$this->log( 'PxOrder.Initialize8:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 			$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+			wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return;
 		}
@@ -216,194 +216,46 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 
 		if ( $this->checkout_info === 'yes' ) {
 			// add Order Lines
-			$i = 1;
-			foreach ( $order->get_items() as $order_item ) {
-				$price        = $order->get_line_subtotal( $order_item, false, false );
-				$priceWithTax = $order->get_line_subtotal( $order_item, true, false );
-				$tax          = $priceWithTax - $price;
-				$taxPercent   = ( $tax > 0 ) ? round( 100 / ( $price / $tax ) ) : 0;
-
+			$items = $this->get_order_items( $order );
+			foreach ($items as $id => $item) {
 				// Call PxOrder.AddSingleOrderLine2
 				$params = array(
 					'accountNumber'    => '',
 					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => $order_item['name'],
+					'itemNumber'       => $id,
+					'itemDescription1' => $item['name'],
 					'itemDescription2' => '',
 					'itemDescription3' => '',
 					'itemDescription4' => '',
 					'itemDescription5' => '',
-					'quantity'         => $order_item['qty'],
-					'amount'           => (int) ( 100 * $priceWithTax ),
+					'quantity'         => $item['qty'],
+					'amount'           => (int) ( 100 * $item['price_with_tax'] ),
 					//must include tax
-					'vatPrice'         => (int) ( 100 * $tax ),
-					'vatPercent'       => (int) ( 100 * $taxPercent )
+					'vatPrice'         => (int) ( 100 * $item['tax_price'] ),
+					'vatPercent'       => (int) ( 100 * $item['tax_percent'] )
 				);
 				$result = $this->getPx()->AddSingleOrderLine2( $params );
 				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+					wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
-					return;
-				}
-
-				$i ++;
-			};
-
-			// Add Shipping Line
-			if ( (float) $order->order_shipping > 0 ) {
-				$taxPercent = ( $order->order_shipping_tax > 0 ) ? round( 100 / ( $order->order_shipping / $order->order_shipping_tax ) ) : 0;
-
-				$params = array(
-					'accountNumber'    => '',
-					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => ! empty( $order->shipping_method_title ) ? $order->shipping_method_title : __( 'Shipping', 'woocommerce-gateway-payex-payment' ),
-					'itemDescription2' => '',
-					'itemDescription3' => '',
-					'itemDescription4' => '',
-					'itemDescription5' => '',
-					'quantity'         => 1,
-					'amount'           => (int) ( 100 * ( $order->order_shipping + $order->order_shipping_tax ) ),
-					//must include tax
-					'vatPrice'         => (int) ( 100 * $order->order_shipping_tax ),
-					'vatPercent'       => (int) ( 100 * $taxPercent )
-				);
-				$result = $this->getPx()->AddSingleOrderLine2( $params );
-				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-					return;
-				}
-
-				$i ++;
-			}
-
-			// Add fee lines
-			foreach ( $order->get_fees() as $fee ) {
-				$taxPercent = ( $fee['line_tax'] > 0 ) ? round( 100 / ( $fee['line_total'] / $fee['line_tax'] ) ) : 0;
-
-				$params = array(
-					'accountNumber'    => '',
-					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => $fee['name'],
-					'itemDescription2' => '',
-					'itemDescription3' => '',
-					'itemDescription4' => '',
-					'itemDescription5' => '',
-					'quantity'         => 1,
-					'amount'           => (int) ( 100 * ( $fee['line_total'] + $fee['line_tax'] ) ), //must include tax
-					'vatPrice'         => (int) ( 100 * $fee['line_tax'] ),
-					'vatPercent'       => (int) ( 100 * $taxPercent )
-				);
-				$result = $this->getPx()->AddSingleOrderLine2( $params );
-				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-					return;
-				}
-
-				$i ++;
-			}
-
-			// Add discount line
-			if ( $order->get_total_discount( false ) > 0 ) {
-				$params = array(
-					'accountNumber'    => '',
-					'orderRef'         => $orderRef,
-					'itemNumber'       => $i,
-					'itemDescription1' => __( 'Discount', 'woocommerce-gateway-payex-payment' ),
-					'itemDescription2' => '',
-					'itemDescription3' => '',
-					'itemDescription4' => '',
-					'itemDescription5' => '',
-					'quantity'         => 1,
-					'amount'           => - 1 * (int) ( $order->get_total_discount( false ) * 100 ),
-					'vatPrice'         => 0,
-					'vatPercent'       => 0
-				);
-				$result = $this->getPx()->AddSingleOrderLine2( $params );
-				if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-					$this->log( 'PxOrder.AddSingleOrderLine2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-					$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-					$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
-
-					return;
+					return false;
 				}
 			}
 
-			// Add Order Address
-			$countries = WC()->countries->countries;
-			$states    = WC()->countries->states;
-
-			// Call PxOrder.AddOrderAddress2
-			$params = array(
-				'accountNumber'      => '',
-				'orderRef'           => $orderRef,
-				'billingFirstName'   => $order->billing_first_name,
-				'billingLastName'    => $order->billing_last_name,
-				'billingAddress1'    => $order->billing_address_1,
-				'billingAddress2'    => $order->billing_address_2,
-				'billingAddress3'    => '',
-				'billingPostNumber'  => $order->billing_postcode,
-				'billingCity'        => $order->billing_city,
-				'billingState'       => isset( $states[ $order->billing_country ][ $order->billing_state ] ) ? $states[ $order->billing_country ][ $order->billing_state ] : $order->billing_state,
-				'billingCountry'     => isset( $countries[ $order->billing_country ] ) ? $countries[ $order->billing_country ] : $order->billing_country,
-				'billingCountryCode' => $order->billing_country,
-				'billingEmail'       => $order->billing_email,
-				'billingPhone'       => $order->billing_phone,
-				'billingGsm'         => '',
-			);
-
-			$shipping_params = array(
-				'deliveryFirstName'   => '',
-				'deliveryLastName'    => '',
-				'deliveryAddress1'    => '',
-				'deliveryAddress2'    => '',
-				'deliveryAddress3'    => '',
-				'deliveryPostNumber'  => '',
-				'deliveryCity'        => '',
-				'deliveryState'       => '',
-				'deliveryCountry'     => '',
-				'deliveryCountryCode' => '',
-				'deliveryEmail'       => '',
-				'deliveryPhone'       => '',
-				'deliveryGsm'         => '',
-			);
-
-			if ( WC()->cart->needs_shipping() ) {
-				$shipping_params = array(
-					'deliveryFirstName'   => $order->shipping_first_name,
-					'deliveryLastName'    => $order->shipping_last_name,
-					'deliveryAddress1'    => $order->shipping_address_1,
-					'deliveryAddress2'    => $order->shipping_address_2,
-					'deliveryAddress3'    => '',
-					'deliveryPostNumber'  => $order->shipping_postcode,
-					'deliveryCity'        => $order->shipping_city,
-					'deliveryState'       => isset( $states[ $order->shipping_country ][ $order->shipping_state ] ) ? $states[ $order->shipping_country ][ $order->shipping_state ] : $order->shipping_state,
-					'deliveryCountry'     => isset( $countries[ $order->shipping_country ] ) ? $countries[ $order->shipping_country ] : $order->shipping_country,
-					'deliveryCountryCode' => $order->shipping_country,
-					'deliveryEmail'       => $order->billing_email,
-					'deliveryPhone'       => $order->billing_phone,
-					'deliveryGsm'         => '',
-				);
-			}
-
-			$params += $shipping_params;
-
+			// Add Order Address Info
+			$params = array_merge( array(
+				'accountNumber' => '',
+				'orderRef' => $orderRef
+			), $this->get_address_info( $order ) );
 			$result = $this->getPx()->AddOrderAddress2( $params );
 			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
 				$this->log( 'PxOrder.AddOrderAddress2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
 				$order->update_status( 'failed', $this->getVerboseErrorMessage( $result ) );
-				$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+				wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
-				return;
+				return false;
 			}
 		}
 
@@ -425,7 +277,8 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 
 		// Validate Payment Method
 		$order = $this->get_order_by_order_key( $_GET['key'] );
-		if ( $order && $order->payment_method !== $this->id ) {
+		$payment_method = $this->is_wc3() ? $order->get_payment_method() : $order->payment_method;
+		if ( $order && $payment_method !== $this->id ) {
 			return;
 		}
 
@@ -445,7 +298,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		$result = $this->getPx()->Complete( $params );
 		if ( $result['errorCodeSimple'] !== 'OK' ) {
 			$this->log( 'PxOrder.Complete:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-			$this->add_message( $this->getVerboseErrorMessage( $result ), 'error' );
+			wc_add_notice( $this->getVerboseErrorMessage( $result ), 'error' );
 
 			return;
 		}
@@ -469,7 +322,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		}
 
 		// Check transaction is already success
-		$transaction_status = get_post_meta( $order->id, '_payex_transaction_status', true );
+		$transaction_status = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
 		if ( in_array( $transaction_status, array( '0', '3', '6' ) ) ) {
 			return;
 		}
@@ -477,8 +330,8 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		$order->add_order_note( sprintf( __( 'Customer returned from PayEx. Order reference: %s', 'woocommerce-gateway-payex-payment' ), $_GET['orderRef'] ) );
 
 		// Save Transaction
-		update_post_meta( $order->id, '_transaction_id', $result['transactionNumber'] );
-		update_post_meta( $order->id, '_payex_transaction_status', $result['transactionStatus'] );
+		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 
 		/* Transaction statuses:
 		0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */
@@ -500,7 +353,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 				break;
 			case 4:
 				// Cancel
-				$order->cancel_order();
+				$order->update_status( 'cancelled' );
 				break;
 			case 5:
 			default:

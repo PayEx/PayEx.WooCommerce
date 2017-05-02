@@ -32,7 +32,7 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 
 		// Full Refund
 		if ( is_null( $amount ) ) {
-			$amount = $order->order_total;
+			$amount = $order->get_total();
 		}
 
 		// Init PayEx
@@ -43,7 +43,7 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 			'accountNumber'     => '',
 			'transactionNumber' => $order->get_transaction_id(),
 			'amount'            => round( 100 * $amount ),
-			'orderId'           => $order->id,
+			'orderId'           => $order->get_id(),
 			'vatAmount'         => 0,
 			'additionalValues'  => ''
 		);
@@ -122,22 +122,16 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 	 *
 	 * @param $message
 	 *
-	 * @return int
+	 * @return void
 	 */
 	public function log( $message ) {
-		global $woocommerce;
-
 		// Is Enabled
 		if ( $this->debug !== 'yes' ) {
 			return;
 		}
 
 		// Get Logger instance
-		if ( version_compare( $woocommerce->version, '2.1.0', '>=' ) ) {
-			$log = new WC_Logger();
-		} else {
-			$log = $woocommerce->logger();
-		}
+		$log = new WC_Logger();
 
 		// Write message to log
 		if ( ! is_string( $message ) ) {
@@ -237,28 +231,6 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Add message
-	 *
-	 * @param string $message
-	 *
-	 * @param string $notice_type
-	 */
-	public function add_message( $message = '', $notice_type = 'error' ) {
-		if ( function_exists( 'wc_add_notice' ) ) {
-			wc_add_notice( $message, $notice_type );
-		} else { // WC < 2.1
-			global $woocommerce;
-			if ( 'error' === $notice_type ) {
-				$woocommerce->add_error( $message );
-			} else {
-				$woocommerce->add_message( $message );
-			}
-
-			$woocommerce->set_messages();
-		}
-	}
-
-	/**
 	 * Check Order is Recurring Payment available
 	 *
 	 * @param WC_Order $order
@@ -292,8 +264,8 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 	/**
 	 * Prepare Additional Values string
 	 *
-	 * @param array|false                   $additional
-	 * @param WC_Order|WC_Subscription|bool $order
+	 * @param array|false   $additional
+	 * @param WC_Order|bool $order
 	 *
 	 * @return string
 	 */
@@ -301,5 +273,252 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 		$result = apply_filters( 'woocommerce_payex_additional_values', $additional, $order );
 
 		return implode( '&', $result );
+	}
+
+	/**
+	 * Check is WooCommerce >= 3.0
+	 * @return bool
+	 */
+	public function is_wc3() {
+		return version_compare( WC()->version, '3.0', '>=' );
+	}
+
+	/**
+	 * Get Order Lines
+	 * @param WC_Order $order
+	 *
+	 * @return array
+	 */
+	public function get_order_items( $order ) {
+		$item = array();
+
+		// WooCommerce 3
+		if ( $this->is_wc3() ) {
+			foreach ( $order->get_items() as $order_item ) {
+				/** @var WC_Order_Item_Product $order_item */
+				$price        = $order->get_line_subtotal( $order_item, false, false );
+				$priceWithTax = $order->get_line_subtotal( $order_item, true, false );
+				$tax          = $priceWithTax - $price;
+				$taxPercent   = ( $tax > 0 ) ? round( 100 / ( $price / $tax ) ) : 0;
+
+				$item[] = array(
+					'type' => 'product',
+					'name' => $order_item->get_name(),
+					'qty' => $order_item->get_quantity(),
+					'price_with_tax' => sprintf( "%.2f", $priceWithTax ),
+					'price_without_tax' => sprintf( "%.2f", $price ),
+					'tax_price' => sprintf( "%.2f", $tax ),
+					'tax_percent' => sprintf( "%.2f", $taxPercent )
+				);
+			};
+
+			// Add Shipping Line
+			if ( (float) $order->get_shipping_total() > 0 ) {
+				$shipping = $order->get_shipping_total();
+				$tax = $order->get_shipping_tax();
+				$shippingWithTax = $shipping + $tax;
+				$taxPercent = ( $tax > 0 ) ? round( 100 / ( $shipping / $tax) ) : 0;
+
+				$item[] = array(
+					'type' => 'shipping',
+					'name' => $order->get_shipping_method(),
+					'qty' => 1,
+					'price_with_tax' => sprintf( "%.2f", $shippingWithTax ),
+					'price_without_tax' => sprintf( "%.2f", $shipping ),
+					'tax_price' => sprintf( "%.2f", $tax ),
+					'tax_percent' => sprintf( "%.2f", $taxPercent )
+				);
+			}
+
+			// Add fee lines
+			foreach ( $order->get_fees() as $order_fee ) {
+				/** @var WC_Order_Item_Fee $order_fee */
+				$fee = $order_fee->get_total();
+				$tax = $order_fee->get_total_tax();
+				$feeWithTax = $fee + $tax;
+				$taxPercent = ( $tax > 0 ) ? round( 100 / ( $fee / $tax) ) : 0;
+
+				$item[] = array(
+					'type' => 'fee',
+					'name' => $order_fee->get_name(),
+					'qty' => 1,
+					'price_with_tax' => sprintf( "%.2f", $feeWithTax ),
+					'price_without_tax' => sprintf( "%.2f", $fee ),
+					'tax_price' => sprintf( "%.2f", $tax ),
+					'tax_percent' => sprintf( "%.2f", $taxPercent )
+				);
+			}
+
+			// Add discount line
+			if ( $order->get_total_discount( false ) > 0 ) {
+				$discount = $order->get_total_discount( true );
+				$discountWithTax = $order->get_total_discount( false );
+				$tax          = $discountWithTax - $discount;
+				$taxPercent   = ( $tax > 0 ) ? round( 100 / ( $discount / $tax ) ) : 0;
+
+				$item[] = array(
+					'type' => 'discount',
+					'name' => __( 'Discount', 'woocommerce-gateway-payex-payment' ),
+					'qty' => 1,
+					'price_with_tax' => sprintf( "%.2f", -1 * $discountWithTax ),
+					'price_without_tax' => sprintf( "%.2f", -1 * $discount ),
+					'tax_price' => sprintf( "%.2f", -1 * $tax ),
+					'tax_percent' => sprintf( "%.2f", $taxPercent )
+				);
+			}
+			return $item;
+		}
+
+		// WooCommerce 2.6
+		foreach ( $order->get_items() as $order_item ) {
+			$price        = $order->get_line_subtotal( $order_item, false, false );
+			$priceWithTax = $order->get_line_subtotal( $order_item, true, false );
+			$tax          = $priceWithTax - $price;
+			$taxPercent   = ( $tax > 0 ) ? round( 100 / ( $price / $tax ) ) : 0;
+
+			$item[] = array(
+				'type' => 'product',
+				'name' => $order_item['name'],
+				'qty' => $order_item['qty'],
+				'price_with_tax' => sprintf( "%.2f", $priceWithTax ),
+				'price_without_tax' => sprintf( "%.2f", $price ),
+				'tax_price' => sprintf( "%.2f", $tax ),
+				'tax_percent' => sprintf( "%.2f", $taxPercent )
+			);
+		};
+
+		// Add Shipping Line
+		if ( (float) $order->order_shipping > 0 ) {
+			$taxPercent = ( $order->order_shipping_tax > 0 ) ? round( 100 / ( $order->order_shipping / $order->order_shipping_tax ) ) : 0;
+
+			$item[] = array(
+				'type' => 'shipping',
+				'name' => $order->get_shipping_method(),
+				'qty' => 1,
+				'price_with_tax' => sprintf( "%.2f", $order->order_shipping + $order->order_shipping_tax ),
+				'price_without_tax' => sprintf( "%.2f", $order->order_shipping ),
+				'tax_price' => sprintf( "%.2f", $order->order_shipping_tax ),
+				'tax_percent' => sprintf( "%.2f", $taxPercent )
+			);
+		}
+
+		// Add fee lines
+		foreach ( $order->get_fees() as $order_fee ) {
+			$taxPercent = ( $order_fee['line_tax'] > 0 ) ? round( 100 / ( $order_fee['line_total'] / $order_fee['line_tax'] ) ) : 0;
+
+			$item[] = array(
+				'type' => 'fee',
+				'name' => $order_fee['name'],
+				'qty' => 1,
+				'price_with_tax' => sprintf( "%.2f", $order_fee['line_total'] + $order_fee['line_tax'] ),
+				'price_without_tax' => sprintf( "%.2f", $order_fee['line_total'] ),
+				'tax_price' => sprintf( "%.2f", $order_fee['line_tax'] ),
+				'tax_percent' => sprintf( "%.2f", $taxPercent )
+			);
+		}
+
+		// Add discount line
+		if ( $order->get_total_discount( false ) > 0 ) {
+			$discount = $order->get_total_discount( true );
+			$discountWithTax = $order->get_total_discount( false );
+			$tax          = $discountWithTax - $discount;
+			$taxPercent   = ( $tax > 0 ) ? round( 100 / ( $discount / $tax ) ) : 0;
+
+			$item[] = array(
+				'type' => 'discount',
+				'name' => __( 'Discount', 'woocommerce-gateway-payex-payment' ),
+				'qty' => 1,
+				'price_with_tax' => sprintf( "%.2f", -1 * $discountWithTax ),
+				'price_without_tax' => sprintf( "%.2f", -1 * $discount ),
+				'tax_price' => sprintf( "%.2f", -1 * $tax ),
+				'tax_percent' => sprintf( "%.2f", $taxPercent )
+			);
+		}
+
+		return $item;
+	}
+
+	/**
+	 * Prepare Address Info
+	 * @param WC_Order $order
+	 * @return array
+	 */
+	public function get_address_info( $order ) {
+		$countries = WC()->countries->countries;
+		$states    = WC()->countries->states;
+
+		$billing_country = $order->get_billing_country();
+		$billing_state = $order->get_billing_state();
+
+		$params = array(
+			'billingFirstName' => $order->get_billing_first_name(),
+			'billingLastName' => $order->get_billing_last_name(),
+			'billingAddress1' => $order->get_billing_address_1(),
+			'billingAddress2' => $order->get_billing_address_2(),
+			'billingAddress3' => '',
+			'billingPostNumber' => $order->get_billing_postcode(),
+			'billingCity' => $order->get_billing_city(),
+			'billingState' => isset( $states[ $billing_country ][ $billing_state ] ) ? $states[ $billing_country ][ $billing_state ] : $billing_state,
+			'billingCountry' => isset( $countries[ $billing_country ] ) ? $countries[ $billing_country ] : $billing_country,
+			'billingCountryCode' => $billing_country,
+			'billingEmail' => $order->get_billing_email(),
+			'billingPhone' => $order->get_billing_phone(),
+			'billingGsm' => '',
+			'deliveryFirstName' => '',
+			'deliveryLastName' => '',
+			'deliveryAddress1' => '',
+			'deliveryAddress2' => '',
+			'deliveryAddress3' => '',
+			'deliveryPostNumber' => '',
+			'deliveryCity' => '',
+			'deliveryState' => '',
+			'deliveryCountry' => '',
+			'deliveryCountryCode' => '',
+			'deliveryEmail' => '',
+			'deliveryPhone' => '',
+			'deliveryGsm' => '',
+		);
+
+		// Add Delivery Info
+		if ( $this->order_needs_shipping( $order ) ) {
+			$shipping_country = $order->get_shipping_country();
+			$shipping_state = $order->get_shipping_state();
+
+			$params = array_merge($params, array(
+				'deliveryFirstName' => $order->get_shipping_first_name(),
+				'deliveryLastName' => $order->get_shipping_last_name(),
+				'deliveryAddress1' => $order->get_shipping_address_1(),
+				'deliveryAddress2' => $order->get_shipping_address_2(),
+				'deliveryAddress3' => '',
+				'deliveryPostNumber' => $order->get_shipping_postcode(),
+				'deliveryCity' => $order->get_shipping_city(),
+				'deliveryState' => isset( $states[ $shipping_country ][ $shipping_state ] ) ? $states[ $shipping_country ][ $shipping_state ] : $shipping_state,
+				'deliveryCountry' => isset( $countries[ $shipping_country ] ) ? $countries[ $shipping_country ] : $shipping_country,
+				'deliveryCountryCode' => $shipping_country,
+				'deliveryEmail' => $order->get_billing_email(),
+				'deliveryPhone' => $order->get_billing_phone(),
+				'deliveryGsm' => '',
+			));
+		}
+
+		return $params;
+	}
+
+	/**
+	 * Check is Order should be shipped
+	 * @param WC_Order $order
+	 *
+	 * @return bool
+	 */
+	public function order_needs_shipping( $order ) {
+		$items = $order->get_items();
+		foreach ($items as $item) {
+			$product = $this->is_wc3() ? $item->get_product() : wc_get_product( $item['product_id'] );
+			if ( $product && $product->needs_shipping() ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -2,26 +2,23 @@ language: php
 sudo: false
 
 php:
-  - 5.5
   - 5.6
   - 7.0
   - hhvm
 env:
-  - WOO_VERSION="2.6.4" WP_VERSION=latest
-#  - WOO_VERSION="2.5.5" WP_VERSION=4.5
-#  - WOO_VERSION="2.4.13" WP_VERSION=4.4
+  - WOO_VERSION="release/3.0" WP_VERSION=latest
 
 matrix:
   fast_finish: true
   allow_failures:
     - php: hhvm
+    - php: 7.0
 
 install:
   - cd ..
-  - wget https://github.com/woothemes/woocommerce/archive/$WOO_VERSION.tar.gz -O woocommerce.tar.gz
-  - tar zxf ./woocommerce.tar.gz
-  - mv woocommerce-*/ woocommerce/
+  - git clone https://github.com/woocommerce/woocommerce
   - cd woocommerce/
+  - git checkout $WOO_VERSION
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - cd ..
   - cd PayEx.WooCommerce

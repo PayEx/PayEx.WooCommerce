@@ -1,12 +1,14 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/../../includes/class-wc-payement-unit-test-case.php';
+require_once dirname( __FILE__ ) . '/../../includes/class-wc-payment-unit-test-case.php';
 
 class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	/**
 	 * @var WC_Payex_Payment
 	 */
 	protected $object;
+
+	const METHOD = 'payex';
 
 	/**
 	 * Setup test case.
@@ -22,7 +24,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'payment_gateways' ) );
 
 		// Override order currency
-		add_filter( 'woocommerce_get_order_currency', array( $this, 'order_currency' ), 1, 2 );
+		add_filter( 'woocommerce_order_get_currency', array( $this, 'order_currency' ), 1, 2 );
 	}
 
 	/**
@@ -32,10 +34,9 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * @return mixed
 	 */
 	public function payment_gateways($gateways) {
-		// Enable and Configure PayEx Payments
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		foreach ($payment_gateways as $id => $gateway) {
-			if ( strpos( $id, 'payex' ) !== false ) {
+			if ( strpos( $id, self::METHOD ) !== false ) {
 				$gateways[$id] = $payment_gateways[$id];
 				$gateways[$id]->enabled = 'yes';
 				$gateways[$id]->testmode = 'yes';
@@ -61,9 +62,9 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * Test PayEx is available
 	 */
 	public function test_wc_payment() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$this->assertArrayHasKey( 'payex', $payment_gateways );
-		$this->assertInstanceOf( 'WC_Gateway_Payex_Payment', $payment_gateways['payex'] );
+		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$this->assertArrayHasKey( self::METHOD, $payment_gateways );
+		$this->assertInstanceOf( 'WC_Gateway_Payex_Payment', $payment_gateways[self::METHOD] );
 	}
 
 	/**
@@ -71,16 +72,20 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 */
 	public function test_wc_payment_payex_order() {
 		// Get payment gateways
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
 
 		// Set payment gateway
-		$order->set_payment_method( $payment_gateways['payex'] );
+		$order->set_payment_method( $payment_gateways[self::METHOD] );
+		$order->save();
 
-		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->id ) );
-		$this->assertEquals( 'payex', $order->payment_method );
+		// Reload Order
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->get_id() ) );
+		$this->assertEquals( self::METHOD, $order->get_payment_method() );
 	}
 
 	/**
@@ -88,11 +93,15 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * @see WC_Payex_Payment::add_valid_order_statuses
 	 */
 	public function test_wc_payment_payex_complete_statuses() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
-		$order->set_payment_method( $payment_gateways['payex'] );
+		$order->set_payment_method( $payment_gateways[self::METHOD] );
+		$order->save();
+
+		// Reload Order
+		$order = wc_get_order( $order->get_id() );
 
 		$valid_order_statuses = apply_filters(
 			'woocommerce_valid_order_statuses_for_payment_complete',
@@ -119,20 +128,27 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * @see WC_Payex_Payment::capture_payment
 	 */
 	public function test_wc_payment_payex_capture() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
-		$order->set_payment_method( $payment_gateways['payex'] );
+		$order->set_payment_method( $payment_gateways[self::METHOD] );
 
 		// Add Transaction data
-		update_post_meta( $order->id, '_transaction_id', '123456' );
-		update_post_meta( $order->id, '_payex_transaction_status', '3' );
+		$order->set_transaction_id( '123456' );
+		$order->update_meta_data('_payex_transaction_status', '3');
+		$order->save();
+
+		// Reload Order
+		$order = wc_get_order( $order->get_id() );
 
 		// Check Transaction Id
 		$this->assertEquals( '123456', $order->get_transaction_id() );
 
-		$this->object->capture_payment($order->id);
+		$this->object->capture_payment( $order->get_id() );
+
+		// Reload Order
+		$order = wc_get_order( $order->get_id() );
 
 		// Check Order Status
 		$this->assertEquals( 'on-hold', $order->get_status() );
@@ -143,20 +159,27 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * @see WC_Payex_Payment::cancel_payment
 	 */
 	public function test_wc_payment_payex_cancel() {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
-		$order->set_payment_method( $payment_gateways['payex'] );
+		$order->set_payment_method( $payment_gateways[self::METHOD] );
 
 		// Add Transaction data
-		update_post_meta( $order->id, '_transaction_id', '123456' );
-		update_post_meta( $order->id, '_payex_transaction_status', '3' );
+		$order->set_transaction_id( '123456' );
+		$order->update_meta_data('_payex_transaction_status', '3');
+		$order->save();
+
+		// Reload Order
+		$order = wc_get_order( $order->get_id() );
 
 		// Check Transaction Id
 		$this->assertEquals( '123456', $order->get_transaction_id() );
 
-		$this->object->cancel_payment($order->id);
+		$this->object->cancel_payment( $order->get_id() );
+
+		// Reload Order
+		$order = wc_get_order( $order->get_id() );
 
 		// Check Order Status
 		$this->assertEquals( 'on-hold', $order->get_status() );
@@ -167,29 +190,28 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * @throws Exception
 	 */
 	public function test_wc_payment_payex_checkout() {
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
+        wc_maybe_define_constant( 'DOING_AJAX', true );
+        wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		if ( ! defined( 'DOING_AJAX' ) ) {
-			define( 'DOING_AJAX', true );
-		}
+        // Get Payment Gateways
+        $payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Set product is virtual
-		update_post_meta( $product->id, '_virtual', 'yes' );
+		$product->set_virtual( 'yes' );
+		$product->save();
 
 		// Add product to cart
-		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
 		// Set Checkout fields
 		$_POST['_wpnonce'] = wp_create_nonce( 'woocommerce-process_checkout' );
 		$_POST['terms'] = 0;
 		$_POST['createaccount'] = 0;
-		$_POST['payment_method'] = 'payex';
+		$_POST['payment_method'] = self::METHOD;
 		$_POST['shipping_method'] = 'flat-rate';
 		$_POST['ship_to_different_address'] = false;
 
@@ -212,19 +234,27 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 		}
 
 		// Process Checkout
-		try {
-			$_SERVER['HTTP_USER_AGENT'] = '';
-			WC()->checkout()->process_checkout();
-		} catch (Exception $e) {
-			if ($e->getCode() !== 200) {
-				throw $e;
-			}
+        $_SERVER['HTTP_USER_AGENT'] = '';
+     	//WC()->checkout()->process_checkout();
 
-			$json = json_decode( $this->_last_response, true );
-			$this->assertInternalType( 'array', $json );
+        // Simulate checkout process
+        wc_set_time_limit( 0 );
+        do_action( 'woocommerce_before_checkout_process' );
+        do_action( 'woocommerce_checkout_process' );
 
-			// Check Payex response is success
-			$this->assertArrayHasKey( 'redirect', $json );
-		}
+        // Create Order
+        $order_id = WC()->checkout()->create_order( $_POST );
+
+        // Store Order ID in session so it can be re-used after payment failure
+      	WC()->session->set( 'order_awaiting_payment', $order_id );
+
+      	// Process Payment
+      	$result = $payment_gateways[self::METHOD]->process_payment( $order_id );
+
+     	$this->assertInternalType( 'array', $result );
+
+     	// Check response have redirect
+     	$this->assertArrayHasKey( 'redirect', $result );
 	}
 }
+
