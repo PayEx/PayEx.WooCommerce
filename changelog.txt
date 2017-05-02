@@ -1,3 +1,10 @@
+Version 2.2.0
+* WooCommerce 3 support
+* Factoring utf8mb4 charset bugfix
+* Option "Enable checkout information" for WyWallet
+* Increased default "max agreement transaction" value
+* Updated tests
+
 Version 2.1.5
 * Migration for woocommerce-gateway-payex plugin
 
