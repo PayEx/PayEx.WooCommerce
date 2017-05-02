@@ -22,9 +22,11 @@ abstract class WC_Payment_Unit_Test_Case extends WC_Unit_Test_Case {
 
 		parent::setUp();
 
-		// @todo Fix "Test code or tested code did not (only) close its own output buffers"
-		// Ajax Die Handler
-		add_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1, 1 );
+		// Remove default handler
+        remove_filter( 'wp_die_ajax_handler', '_ajax_wp_die_handler' );
+
+        // Add Ajax Die Handler
+		add_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1, 3 );
 	}
 
 	/**
@@ -37,7 +39,9 @@ abstract class WC_Payment_Unit_Test_Case extends WC_Unit_Test_Case {
 		$_POST = array();
 		$_GET = array();
 
+		// Restore Die handlers
 		remove_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1 );
+        add_filter( 'wp_die_ajax_handler', '_ajax_wp_die_handler', 10, 3 );
 	}
 
 	/**
@@ -49,20 +53,14 @@ abstract class WC_Payment_Unit_Test_Case extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @param $message
-	 *
-	 * @throws Exception
+     * Filter handler for wp_die_ajax_handler
+     * @param string       $message Error message.
+     * @param string       $title   Optional. Error title (unused). Default empty.
+     * @param string|array $args    Optional. Arguments to control behavior. Default empty array.
 	 */
-	public function dieHandler( $message ) {
-		$this->_last_response .= ob_get_clean();
-		if ( '' === $this->_last_response ) {
-			if ( is_scalar( $message ) ) {
-				throw new \Exception( (string) $message );
-			} else {
-				throw new \Exception( '0' );
-			}
-		} else {
-			throw new \Exception( $message, 200 );
-		}
+	public function dieHandler( $message, $title = '', $args = array() ) {
+	    while ( ob_get_level() > 0 ) {
+            $this->_last_response .= ob_get_clean();
+        }
 	}
 }
