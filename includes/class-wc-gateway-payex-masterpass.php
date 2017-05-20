@@ -88,7 +88,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Description', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( 'Buy with MasterPass', 'woocommerce-gateway-payex-payment' ),
+				'default'     => '',
 			),
 			'account_no'          => array(
 				'title'       => __( 'Account Number', 'woocommerce-gateway-payex-payment' ),
@@ -159,6 +159,7 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * If There are no payment fields show the description if set.
 	 */
 	public function payment_fields() {
+		parent::payment_fields();
 		echo sprintf( __( 'You will be redirected to <a target="_blank" href="%s" rel="external">MasterPass</a> website when you place an order. ', 'woocommerce-gateway-payex-payment' ), '' );
 		?>
 		<a target="_blank" href="<?php echo self::get_read_more_url(); ?>" rel="external"><?php _e( 'Read more', 'woocommerce-gateway-payex-payment' ); ?></a>

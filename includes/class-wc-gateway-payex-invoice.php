@@ -85,7 +85,7 @@ class WC_Gateway_Payex_InvoiceLedgerService extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Description', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( 'PayEx Invoice', 'woocommerce-gateway-payex-payment' ),
+				'default'     => '',
 			),
 			'account_no'         => array(
 				'title'       => __( 'Account Number', 'woocommerce-gateway-payex-payment' ),
@@ -203,6 +203,7 @@ class WC_Gateway_Payex_InvoiceLedgerService extends WC_Gateway_Payex_Abstract {
 	 * If There are no payment fields show the description if set.
 	 */
 	public function payment_fields() {
+		parent::payment_fields();
 		?>
 		<div class="invoice-type-select">
 			<label for="pxinvoice_method:private">

@@ -148,7 +148,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Description', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( 'PayEx Payments', 'woocommerce-gateway-payex-payment' ),
+				'default'     => '',
 			),
 			'account_no'           => array(
 				'title'       => __( 'Account Number', 'woocommerce-gateway-payex-payment' ),
@@ -261,6 +261,8 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			$subscription_id = abs( $_GET['change_payment_method'] );
 			$card_id         = get_post_meta( $subscription_id, '_payex_card_id', true );
 		}
+
+		parent::payment_fields();
 
 		wc_get_template(
 			'checkout/payment-fields.php',

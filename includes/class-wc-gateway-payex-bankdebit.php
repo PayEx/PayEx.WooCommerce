@@ -90,7 +90,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 				'title'       => __( 'Description', 'woocommerce-gateway-payex-payment' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-payex-payment' ),
-				'default'     => __( 'PayEx Bank Debit', 'woocommerce-gateway-payex-payment' ),
+				'default'     => '',
 			),
 			'account_no'    => array(
 				'title'       => __( 'Account Number', 'woocommerce-gateway-payex-payment' ),
@@ -166,6 +166,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 	public function payment_fields() {
 		$banks           = $this->banks;
 		$available_banks = self::$available_banks;
+		parent::payment_fields();
 		?>
 		<label for="bank_id"><?php echo __( 'Select bank:', 'woocommerce-gateway-payex-payment' ); ?></label>
 		<select name="bank_id" id="bank_id">
