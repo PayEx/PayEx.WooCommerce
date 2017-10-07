@@ -43,6 +43,7 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 				$gateways[$id]->account_no = getenv ( 'PAYEX_ACCOUNT_NUMBER' );
 				$gateways[$id]->encrypted_key = getenv ( 'PAYEX_ENCRYPTION_KEY' );
 				$gateways[$id]->credit_check = 'no';
+                $gateways[$id]->description = 'Test';
 			}
 		}
 

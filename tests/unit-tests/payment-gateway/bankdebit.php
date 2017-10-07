@@ -42,6 +42,7 @@ class WC_Tests_Payment_Bankdebit extends WC_Payment_Unit_Test_Case {
 				$gateways[$id]->testmode = 'yes';
 				$gateways[$id]->account_no = getenv ( 'PAYEX_ACCOUNT_NUMBER' );
 				$gateways[$id]->encrypted_key = getenv ( 'PAYEX_ENCRYPTION_KEY' );
+                $gateways[$id]->description = 'Test';
 			}
 		}
 
