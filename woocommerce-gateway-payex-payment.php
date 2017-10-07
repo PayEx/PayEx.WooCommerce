@@ -15,7 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
 
-require_once dirname( __FILE__ ) . '/vendor/autoload.php';
+$vendorDir = dirname( __FILE__ ) . '/vendor';
+if ( ! class_exists( '\\PayEx\\Px', FALSE ) ) {
+    require_once $vendorDir . '/aait/payex-wordpress-api/src/PayEx/Px.php';
+}
+
+if ( ! class_exists( 'FullNameParser', FALSE ) ) {
+    require_once $vendorDir . '/aait/php-name-parser/parser.php';
+}
 
 class WC_Payex_Payment {
 
