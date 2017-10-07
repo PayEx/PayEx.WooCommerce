@@ -13,13 +13,15 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		'DDB'     => 'Den Danske Bank',
 		'BAX'     => 'BankAxess',
 		'SAMPO'   => 'Danske Bank',
-		'AKTIA'   => 'Aktia, Säästöpankki',
-		'OP'      => 'Osuuspanki, Pohjola, Oko',
+		'AKTIA'   => 'Aktia',
+		'OP'      => 'OP',
 		'NB:FI'   => 'Nordea Finland',
-		'SHB:FI'  => 'Handelsbanken',
-		'SPANKKI' => 'SPANKKI',
+		'SHB:FI'  => 'Handelsbanken Finland',
+		'SPANKKI' => 'S-Pankki',
 		'TAPIOLA' => 'TAPIOLA',
 		'AALAND'  => 'Ålandsbanken',
+		'POP'     => 'POP Pankki',
+		'SP'      => 'Säästöpankki',
 	);
 
 	/**
