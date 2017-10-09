@@ -6,7 +6,7 @@ php:
   - 7.0
   - hhvm
 env:
-  - WOO_VERSION="release/3.0" WP_VERSION=latest
+  - WOO_VERSION="3.1.2" WP_VERSION=4.8.2
 
 matrix:
   fast_finish: true
@@ -18,7 +18,7 @@ install:
   - cd ..
   - git clone https://github.com/woocommerce/woocommerce
   - cd woocommerce/
-  - git checkout $WOO_VERSION
+  - git checkout tags/$WOO_VERSION
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - cd ..
   - cd PayEx.WooCommerce

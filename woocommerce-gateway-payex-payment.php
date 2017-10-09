@@ -15,7 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
 
-require_once dirname( __FILE__ ) . '/vendor/autoload.php';
+$vendorDir = dirname( __FILE__ ) . '/vendor';
+if ( ! class_exists( '\\PayEx\\Px', FALSE ) ) {
+    require_once $vendorDir . '/aait/payex-wordpress-api/src/PayEx/Px.php';
+}
+
+if ( ! class_exists( 'FullNameParser', FALSE ) ) {
+    require_once $vendorDir . '/aait/php-name-parser/parser.php';
+}
 
 class WC_Payex_Payment {
 
@@ -529,6 +536,9 @@ class WC_Payex_Payment {
 		/** @var WC_Gateway_Payex_Abstract $gateway */
 		$gateway = $gateways[ $order->get_payment_method() ];
 		if ( $gateway && (string) $transaction_status === '3' ) {
+			// Init PayEx
+			$gateway->getPx()->setEnvironment( $gateway->account_no, $gateway->encrypted_key, $gateway->testmode === 'yes' );
+
 			// Call PxOrder.Cancel2
 			$params = array(
 				'accountNumber'     => '',

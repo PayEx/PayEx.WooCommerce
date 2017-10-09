@@ -15,17 +15,17 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		// Init PayEx Payments plugin
-		$this->object = new WC_Payex_Payment();
-		$this->object->init();
-		$this->object->create_credit_card_post_type();
+        // Init PayEx Payments plugin
+        $this->object = new WC_Payex_Payment();
+        $this->object->init();
+        $this->object->create_credit_card_post_type();
 
 		// Add PayEx to PM List
 		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'payment_gateways' ) );
 
 		// Override order currency
 		add_filter( 'woocommerce_order_get_currency', array( $this, 'order_currency' ), 1, 2 );
-	}
+    }
 
 	/**
 	 * Register Payment Gateway and inject settings
@@ -42,6 +42,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 				$gateways[$id]->testmode = 'yes';
 				$gateways[$id]->account_no = getenv ( 'PAYEX_ACCOUNT_NUMBER' );
 				$gateways[$id]->encrypted_key = getenv ( 'PAYEX_ENCRYPTION_KEY' );
+                $gateways[$id]->description = 'Test';
 			}
 		}
 
