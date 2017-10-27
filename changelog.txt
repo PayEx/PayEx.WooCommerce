@@ -1,3 +1,12 @@
+Version 2.2.1
+* Update libraries
+* Ledger Service: Use billing address instead shipping
+* Financing Invoice: require country phone code
+* Financing Invoice: OnlineInvoice xml changes
+* Bank debit: Updated Finnish Bank names
+* Fixed problem with payment cancel
+* Update tests
+
 Version 2.2.0
 * WooCommerce 3 support
 * Factoring utf8mb4 charset bugfix
