@@ -15,13 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly
 
-$vendorDir = dirname( __FILE__ ) . '/vendor';
+$vendorsDir = dirname( __FILE__ ) . '/vendor';
 if ( ! class_exists( '\\PayEx\\Px', FALSE ) ) {
-    require_once $vendorDir . '/aait/payex-wordpress-api/src/PayEx/Px.php';
+    require_once $vendorsDir . '/payex-php-api/vendor/autoload.php';
 }
 
 if ( ! class_exists( 'FullNameParser', FALSE ) ) {
-    require_once $vendorDir . '/aait/php-name-parser/parser.php';
+	require_once $vendorsDir . '/php-name-parser/vendor/autoload.php';
 }
 
 class WC_Payex_Payment {

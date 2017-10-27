@@ -1,0 +1,5 @@
+{
+    "require": {
+        "payex/php-api": "^1.0"
+    }
+}

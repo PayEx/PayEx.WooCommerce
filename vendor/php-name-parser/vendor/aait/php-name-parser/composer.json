@@ -1,10 +1,10 @@
 {
     "name": "aait/php-name-parser",
     "description": "PHP library to split names into their respective components (first, last, etc). Fork of joshfraser/PHP-Name-Parser",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": "Apache-2.0",
     "require": {
-        "php": "~5.3.0|~5.4.0|~5.5.0|~5.6.0|~7.0.0"
+        "php": "~5.3.0|~5.4.0|~5.5.0|~5.6.0|~7.0.0|~7.1.0|~7.2.0"
     },
     "autoload": {
         "files": [

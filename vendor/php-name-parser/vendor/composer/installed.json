@@ -1,0 +1,34 @@
+[
+    {
+        "name": "aait/php-name-parser",
+        "version": "1.0.1",
+        "version_normalized": "1.0.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/aait/PHP-Name-Parser.git",
+            "reference": "f3123935f275e6ae07eaa1bf1284fcad5c1c1ac3"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/aait/PHP-Name-Parser/zipball/f3123935f275e6ae07eaa1bf1284fcad5c1c1ac3",
+            "reference": "f3123935f275e6ae07eaa1bf1284fcad5c1c1ac3",
+            "shasum": ""
+        },
+        "require": {
+            "php": "~5.3.0|~5.4.0|~5.5.0|~5.6.0|~7.0.0|~7.1.0|~7.2.0"
+        },
+        "time": "2017-10-19 07:32:30",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "parser.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "description": "PHP library to split names into their respective components (first, last, etc). Fork of joshfraser/PHP-Name-Parser"
+    }
+]

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "aait/php-name-parser": "^1.0"
+    }
+}

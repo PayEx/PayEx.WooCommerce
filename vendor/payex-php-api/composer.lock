@@ -1,0 +1,59 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "daf05b03bfa5273a473129e628088359",
+    "content-hash": "d8f530ac1356fdea2ca298065c771e65",
+    "packages": [
+        {
+            "name": "payex/php-api",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PayEx/PayEx.Ecommerce.Php.git",
+                "reference": "cd82dd0501bc311dfeb4ef1ce1d9f27cb6de29f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PayEx/PayEx.Ecommerce.Php/zipball/cd82dd0501bc311dfeb4ef1ce1d9f27cb6de29f3",
+                "reference": "cd82dd0501bc311dfeb4ef1ce1d9f27cb6de29f3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-soap": "*",
+                "ext-xml": "*",
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~5.7|~6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PayEx\\": "src/PayEx/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PayEx Payments API Library for PHP provide library work with PayEx Payments API",
+            "homepage": "https://github.com/PayEx/PayEx.Ecommerce.Php",
+            "keywords": [
+                "payex"
+            ],
+            "time": "2017-10-27 09:44:27"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}
