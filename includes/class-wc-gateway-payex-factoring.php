@@ -215,12 +215,9 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			wc_add_notice( __( 'This country is not supported by the payment system.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
 
-		// Validate country phone code
-		if ( in_array( $_POST['billing_country'], ['SE', 'NO'] ) ) {
-			$phone_code = mb_substr( ltrim( $_POST['billing_phone'], '+' ), 0, 2, 'UTF-8' );
-			if ( ! in_array( $phone_code, [ '46', '47' ] ) ) {
-				wc_add_notice( __( 'Invalid phone number. Phone code must include country phone code.', 'woocommerce-gateway-payex-payment' ), 'error' );
-			}
+		// Validate phone number
+		if ( empty( $_POST['billing_phone'] ) ) {
+			wc_add_notice( __( 'Phone number required.', 'woocommerce-gateway-payex-payment' ), 'error' );
 		}
 
 		if ( ( $this->checkout_field !== 'yes' && empty( $_POST['social-security-number'] ) ) ||
