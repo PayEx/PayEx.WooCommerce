@@ -150,8 +150,9 @@ Use the following URL: <http://siteurl.net/?wc-api=WC_Gateway_Payex>
 
 Troubleshooting
 ---------------
+* You'll find logfiles of the payment module at [wordpress-root]/wp-content/uploads/wc-logs
 
-There have been cases where the total cost of a product in the cart and the total in the payex payment view isn’t the same. That would be because of woocommerce rounding the total up or down because of lack of decimals. To fix this you have to add decimals to your products cost.  
+* There have been cases where the total cost of a product in the cart and the total in the payex payment view isn’t the same. That would be because of woocommerce rounding the total up or down because of lack of decimals. To fix this you have to add decimals to your products cost.  
 1.  To do this you login as admin  
 2.  Click woocommerce and then settings
 3.  There under general look for “Number of decimals” and set them to 2 and then save the changes.
