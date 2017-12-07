@@ -162,6 +162,39 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 	}
 
 	/**
+	 * Get phone number from WC Order
+	 *
+	 * @param $order
+	 *
+	 * @return string|null
+	 */
+	protected function get_phone_number( $order ) {
+		$billing_country = $order->get_billing_country();
+		$billing_phone = preg_replace('/[^0-9\+]/', '', $order->get_billing_phone());
+
+		if ( ! preg_match('/^((00|\+)([1-9][1-9])|0([1-9]))(\d*)/', $billing_phone, $matches) ) {
+			return null;
+		}
+		switch ($billing_country) {
+			case 'SE':
+				$country_code = '46';
+				break;
+			default:
+				$country_code = '46';
+		}
+
+
+		if ( isset( $matches[3] ) && isset( $matches[5]) ) { // country code present
+			$billing_phone = $matches[3] . $matches[5];
+		}
+		if ( isset( $matches[4]) && isset( $matches[5]) ) { // no country code present. removing leading 0
+			$billing_phone = $country_code . $matches[4] . $matches[5];
+		}
+
+		return strlen($billing_phone) > 7 && strlen($billing_phone) < 16 ? $billing_phone : null;
+	}
+
+	/**
 	 * Process Payment
 	 *
 	 * @param int $order_id
@@ -175,6 +208,9 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		$additional = array();
 		if ( $this->responsive === 'yes' ) {
 			$additional[] = 'USECSS=RESPONSIVEDESIGN';
+		}
+		if ( $phone = $this->get_phone_number( $order ) ) {
+			$additional[] = 'MSISDN=' . $phone;
 		}
 
 		$returnUrl = html_entity_decode( $this->get_return_url( $order ) );
