@@ -461,7 +461,13 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			}
 		}
 
-		$amount      = $order->get_total();
+        $items = $this->get_order_items( $order );
+		if ($this->checkout_info === 'yes') {
+            $amount = array_sum( array_column( $items, 'price_with_tax' ) );
+        } else {
+            $amount = $order->get_total();
+        }
+
 		$currency    = $order->get_currency();
 		$agreement   = '';
 
@@ -739,7 +745,6 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 
 		if ( $this->checkout_info === 'yes' ) {
 			// add Order Lines
-			$items = $this->get_order_items( $order );
 			foreach ($items as $id => $item) {
 				// Call PxOrder.AddSingleOrderLine2
 				$params = array(

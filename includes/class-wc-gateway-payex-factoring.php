@@ -236,9 +236,10 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+        $items = $this->get_order_items( $order );
+        $amount = array_sum( array_column( $items, 'price_with_tax' ) );
 
 		$customer_id = (int) $order->get_user_id();
-		$amount      = $order->get_total();
 		$currency    = $order->get_currency();
 		$ssn         = $this->checkout_field !== 'yes' ? wc_clean( $_POST['social-security-number'] ) : $_POST['payex_ssn'];
 
