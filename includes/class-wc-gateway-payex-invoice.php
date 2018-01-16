@@ -371,9 +371,10 @@ class WC_Gateway_Payex_InvoiceLedgerService extends WC_Gateway_Payex_Abstract {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+        $items = $this->get_order_items( $order );
+        $amount = array_sum( array_column( $items, 'price_with_tax' ) );
 
 		$customer_id = (int) $order->get_user_id();
-		$amount      = $order->get_total();
 
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
@@ -412,7 +413,6 @@ class WC_Gateway_Payex_InvoiceLedgerService extends WC_Gateway_Payex_Abstract {
 
 
 		// add Order Lines
-		$items = $this->get_order_items( $order );
 		foreach ($items as $id => $item) {
 			// Call PxOrder.AddSingleOrderLine2
 			$params = array(

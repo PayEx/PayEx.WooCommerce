@@ -209,8 +209,14 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+        $items = $this->get_order_items( $order );
+        if ($this->checkout_info === 'yes') {
+            $amount = array_sum( array_column( $items, 'price_with_tax' ) );
+        } else {
+            $amount = $order->get_total();
+        }
 
-		$bank_id     = ! empty( $_POST['bank_id'] ) ? wc_clean( $_POST['bank_id'] ) : 'NB';
+        $bank_id     = ! empty( $_POST['bank_id'] ) ? wc_clean( $_POST['bank_id'] ) : 'NB';
 
 		// Additional Values
 		$additional  = array();
@@ -229,7 +235,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 			'accountNumber'     => '',
 			'purchaseOperation' => 'SALE',
 			'price'             => 0,
-			'priceArgList'      => $bank_id . '=' . round( $order->get_total() * 100 ),
+			'priceArgList'      => $bank_id . '=' . round( $amount * 100 ),
 			'currency'          => $order->get_currency(),
 			'vat'               => 0,
 			'orderID'           => $order->get_id(),
@@ -258,7 +264,6 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 
 		if ( $this->checkout_info === 'yes' ) {
 			// add Order Lines
-			$items = $this->get_order_items( $order );
 			foreach ($items as $id => $item) {
 				// Call PxOrder.AddSingleOrderLine2
 				$params = array(

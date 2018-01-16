@@ -170,6 +170,12 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+        $items = $this->get_order_items( $order );
+        if ($this->checkout_info === 'yes') {
+            $amount = array_sum( array_column( $items, 'price_with_tax' ) );
+        } else {
+            $amount = $order->get_total();
+        }
 
 		// Additional Values
 		$additional = array();
@@ -187,7 +193,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 		$params = array(
 			'accountNumber'     => '',
 			'purchaseOperation' => 'SALE',
-			'price'             => round( $order->get_total() * 100 ),
+			'price'             => round( $amount * 100 ),
 			'priceArgList'      => '',
 			'currency'          => $order->get_currency(),
 			'vat'               => 0,
