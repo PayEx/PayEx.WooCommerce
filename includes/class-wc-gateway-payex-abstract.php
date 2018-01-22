@@ -485,8 +485,8 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 			$shipping_state = $order->get_shipping_state();
 
 			$params = array_merge($params, array(
-				'deliveryFirstName' => $order->get_shipping_first_name(),
-				'deliveryLastName' => $order->get_shipping_last_name(),
+				'deliveryFirstName' => $order->get_shipping_first_name()?$order->get_shipping_first_name():$order->get_billing_first_name(),
+				'deliveryLastName' => $order->get_shipping_last_name()?$order->get_shipping_last_name():$order->get_billing_last_name(),
 				'deliveryAddress1' => $order->get_shipping_address_1(),
 				'deliveryAddress2' => $order->get_shipping_address_2(),
 				'deliveryAddress3' => '',
