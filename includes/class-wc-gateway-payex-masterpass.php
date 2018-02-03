@@ -330,6 +330,10 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * Payment confirm action
 	 */
 	public function payment_confirm() {
+		if ( ! is_wc_endpoint_url( 'order-received' ) ) {
+			return;
+		}
+
 		if ( empty( $_GET['key'] ) ) {
 			return;
 		}
