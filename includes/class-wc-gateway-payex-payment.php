@@ -70,6 +70,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$this->agreement_max_amount = isset( $this->settings['agreement_max_amount'] ) ? $this->settings['agreement_max_amount'] : '100000';
 		$this->agreement_url        = isset( $this->settings['agreement_url'] ) ? $this->settings['agreement_url'] : '';
 		$this->debug                = isset( $this->settings['debug'] ) ? $this->settings['debug'] : 'no';
+		$this->use_statuses         = isset( $this->settings['use_statuses'] ) ? $this->settings['use_statuses'] : 'yes';
 
 		// Init PayEx
 		$this->getPx()->setEnvironment( $this->account_no, $this->encrypted_key, $this->testmode === 'yes' );
@@ -242,6 +243,13 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable logging', 'woocommerce-gateway-payex-payment' ),
 				'default' => 'no'
+			),
+			'use_statuses'         => array(
+				'title'   => __( 'Use order statuses for payment actions', 'woocommerce-gateway-payex-payment' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Use order statuses for payment actions', 'woocommerce-gateway-payex-payment' ),
+				'description' => __( '"Processing/Completed" - for capture payment. "Cancelled" - for cancel payment.', 'woocommerce-gateway-payex-payment' ),
+				'default' => 'yes'
 			),
 		);
 	}

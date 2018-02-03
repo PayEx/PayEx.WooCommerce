@@ -60,6 +60,97 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get Transaction Info
+	 * @param $transaction_id
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
+	public function get_transaction_info( $transaction_id ) {
+		// Call PxOrder.GetTransactionDetails2
+		$params = array(
+			'accountNumber'     => '',
+			'transactionNumber' => $transaction_id
+		);
+		$details = $this->getPx()->GetTransactionDetails2( $params );
+		if ( $details['code'] !== 'OK' || $details['description'] !== 'OK' || $details['errorCode'] !== 'OK' ) {
+			throw new Exception( $this->getVerboseErrorMessage( $details ) );
+		}
+
+		return $details;
+	}
+
+	/**
+	 * Capture
+	 *
+	 * @param WC_Order|int $order
+	 * @param bool         $amount
+	 *
+	 * @throws \Exception
+	 * @return void
+	 */
+	public function capture_payment( $order, $amount = FALSE ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+
+		if ( ! $amount ) {
+			$amount = $order->get_total();
+		}
+
+		// Call PxOrder.Capture5
+		$params = array(
+			'accountNumber'     => '',
+			'transactionNumber' => $order->get_transaction_id(),
+			'amount'            => round( 100 * $amount ),
+			'orderId'           => $order->get_id(),
+			'vatAmount'         => 0,
+			'additionalValues'  => ''
+		);
+		$result = $this->getPx()->Capture5( $params );
+		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
+			$this->log( 'PxOrder.Capture5:' . $result['errorCode'] . '(' . $result['description'] . ')' );
+			$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
+			throw new Exception( $message );
+		}
+
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
+		$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
+		$order->payment_complete( $result['transactionNumber'] );
+	}
+
+	/**
+	 * Cancel
+	 *
+	 * @param WC_Order|int $order
+	 *
+	 * @throws \Exception
+	 * @return void
+	 */
+	public function cancel_payment( $order ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+
+		// Call PxOrder.Cancel2
+		$params = array(
+			'accountNumber'     => '',
+			'transactionNumber' => $order->get_transaction_id()
+		);
+		$result = $this->getPx()->Cancel2( $params );
+		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
+			$this->log( 'PxOrder.Cancel2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
+			$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
+			throw new Exception( $message );
+		}
+
+		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
+		$message = sprintf( __( 'Transaction canceled. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] );
+		$order->update_status('cancelled', $message);
+	}
+
+	/**
 	 * Get PayEx Handler
 	 * @return \PayEx\Px
 	 */
