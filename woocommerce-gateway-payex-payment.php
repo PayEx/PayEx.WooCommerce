@@ -39,9 +39,6 @@ class WC_Payex_Payment {
 		add_action( 'plugins_loaded', array( $this, 'init' ), 0 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_scripts' ) );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'register_gateway' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'capture_payment' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'capture_payment' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_cancelled', array( $this, 'cancel_payment' ) );
 
 		// Add admin menu
 		add_action( 'admin_menu', array( &$this, 'admin_menu' ), 99 );
@@ -141,6 +138,7 @@ class WC_Payex_Payment {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
         include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-mobilepay.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
+		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-admin-actions.php' );
 	}
 
 	/**
@@ -465,99 +463,6 @@ class WC_Payex_Payment {
 				'supports'     => false,
 			)
 		);
-	}
-
-	/**
-	 * Capture payment when the order is changed from on-hold to complete or processing
-	 *
-	 * @param  int $order_id
-	 */
-	public function capture_payment( $order_id ) {
-		$order              = wc_get_order( $order_id );
-		$transaction_status = get_post_meta( $order_id, '_payex_transaction_status', true );
-		if ( empty( $transaction_status ) ) {
-			return;
-		}
-
-		// Get Payment Gateway
-		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		/** @var WC_Gateway_Payex_Abstract $gateway */
-		$gateway = $gateways[ $order->get_payment_method() ];
-		if ( $gateway && (string) $transaction_status === '3' ) {
-			// Get Additional Values
-			$additionalValues = '';
-			if ( $gateway->id === 'payex_factoring' ) {
-				$additionalValues = 'FINANCINGINVOICE_ORDERLINES=' . urlencode( $gateway->getInvoiceExtraPrintBlocksXML( $order ) );
-			}
-
-			// Init PayEx
-			$gateway->getPx()->setEnvironment( $gateway->account_no, $gateway->encrypted_key, $gateway->testmode === 'yes' );
-
-			// Call PxOrder.Capture5
-			$params = array(
-				'accountNumber'     => '',
-				'transactionNumber' => $order->get_transaction_id(),
-				'amount'            => round( 100 * $order->get_total() ),
-				'orderId'           => $order->get_id(),
-				'vatAmount'         => 0,
-				'additionalValues'  => $additionalValues
-			);
-			$result = $gateway->getPx()->Capture5( $params );
-			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-				$gateway->log( 'PxOrder.Capture5:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-
-				$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
-				$order->update_status( 'on-hold', $message );
-				WC_Admin_Meta_Boxes::add_error( $message );
-
-				return;
-			}
-
-			update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
-			$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-			$order->payment_complete( $result['transactionNumber'] );
-		}
-	}
-
-	/**
-	 * Capture payment when the order is changed from on-hold to cancelled
-	 *
-	 * @param  int $order_id
-	 */
-	public function cancel_payment( $order_id ) {
-		$order              = wc_get_order( $order_id );
-		$transaction_status = get_post_meta( $order_id, '_payex_transaction_status', true );
-		if ( empty( $transaction_status ) ) {
-			return;
-		}
-
-		// Get Payment Gateway
-		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		/** @var WC_Gateway_Payex_Abstract $gateway */
-		$gateway = $gateways[ $order->get_payment_method() ];
-		if ( $gateway && (string) $transaction_status === '3' ) {
-			// Init PayEx
-			$gateway->getPx()->setEnvironment( $gateway->account_no, $gateway->encrypted_key, $gateway->testmode === 'yes' );
-
-			// Call PxOrder.Cancel2
-			$params = array(
-				'accountNumber'     => '',
-				'transactionNumber' => $order->get_transaction_id()
-			);
-			$result = $gateway->getPx()->Cancel2( $params );
-			if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
-				$gateway->log( 'PxOrder.Cancel2:' . $result['errorCode'] . '(' . $result['description'] . ')' );
-
-				$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
-				$order->update_status( 'on-hold', $message );
-				WC_Admin_Meta_Boxes::add_error( $message );
-
-				return;
-			}
-
-			update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
-			$order->add_order_note( sprintf( __( 'Transaction canceled. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
-		}
 	}
 
 	/**

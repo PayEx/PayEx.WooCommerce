@@ -428,4 +428,46 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 
 		return str_replace( "\n", '', html_entity_decode( str_replace( 'xsi:xsd', 'xmlns:xsd', $dom->saveXML() ), ENT_COMPAT|ENT_XHTML, 'UTF-8' ) );
 	}
+
+	/**
+	 * Capture
+	 *
+	 * @param WC_Order|int $order
+	 * @param bool         $amount
+	 *
+	 * @throws \Exception
+	 * @return void
+	 */
+	public function capture_payment( $order, $amount = FALSE ) {
+		if ( is_int( $order ) ) {
+			$order = wc_get_order( $order );
+		}
+
+		if ( ! $amount ) {
+			$amount = $order->get_total();
+		}
+
+		// Get Additional Values
+		$additionalValues = 'FINANCINGINVOICE_ORDERLINES=' . urlencode( $this->getInvoiceExtraPrintBlocksXML( $order ) );
+
+		// Call PxOrder.Capture5
+		$params = array(
+			'accountNumber'     => '',
+			'transactionNumber' => $order->get_transaction_id(),
+			'amount'            => round( 100 * $amount ),
+			'orderId'           => $order->get_id(),
+			'vatAmount'         => 0,
+			'additionalValues'  => $additionalValues
+		);
+		$result = $this->getPx()->Capture5( $params );
+		if ( $result['code'] !== 'OK' || $result['description'] !== 'OK' || $result['errorCode'] !== 'OK' ) {
+			$this->log( 'PxOrder.Capture5:' . $result['errorCode'] . '(' . $result['description'] . ')' );
+			$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
+			throw new Exception( $message );
+		}
+
+		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
+		$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
+		$order->payment_complete( $result['transactionNumber'] );
+	}
 }
