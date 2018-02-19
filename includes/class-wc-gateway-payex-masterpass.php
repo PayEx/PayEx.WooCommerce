@@ -511,6 +511,10 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * @return mixed
 	 */
 	public function maybe_change_default_checkout_country( $value, $input = null ) {
+		if ( is_admin() ) {
+			return $value;
+		}
+
 		$delivery_address = WC()->session->get( 'mp_delivery_address' );
 		if ( $delivery_address ) {
 			$value = $delivery_address['country'];
@@ -528,6 +532,10 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * @return mixed
 	 */
 	public function maybe_change_default_checkout_postcode( $value, $input = null ) {
+		if ( is_admin() ) {
+			return $value;
+		}
+
 		$delivery_address = WC()->session->get( 'mp_delivery_address' );
 		if ( $delivery_address ) {
 			$value = $delivery_address['postalCode'];
@@ -546,6 +554,10 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 	 * @return mixed
 	 */
 	public function override_checkout_fields( $args, $key, $value ) {
+	    if ( is_admin() ) {
+	        return $args;
+        }
+
 		$delivery_address = WC()->session->get( 'mp_delivery_address' );
 		if ( ! $delivery_address ) {
 			return $args;
