@@ -1,4 +1,4 @@
-$(document).ready(function ($) {
+jQuery(document).ready(function ($) {
     $(document).on('click', '.payex-action', function (e) {
         e.preventDefault();
 
