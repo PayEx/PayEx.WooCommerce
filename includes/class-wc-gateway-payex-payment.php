@@ -1171,7 +1171,8 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			$card_id = get_post_meta( $subscription->get_id(), '_payex_card_id', true );
 
 			if ( empty( $card_id ) ) {
-				$order_card_id = get_post_meta( $subscription->order->get_id(), '_payex_card_id', true );
+				$parent_id = $payment_method = $this->is_wc3() ? $subscription->get_parent_id() : $subscription->order->id;
+				$order_card_id = get_post_meta( $parent_id, '_payex_card_id', true );
 				add_post_meta( $subscription->get_id(), '_payex_card_id', $order_card_id );
 			}
 		}
