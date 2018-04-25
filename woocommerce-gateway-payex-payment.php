@@ -25,6 +25,16 @@ if ( ! class_exists( 'FullNameParser', FALSE ) ) {
 }
 
 class WC_Payex_Payment {
+	public static $_methods = array(
+		'payex_bankdebit',
+		'payex_factoring',
+		'payex_invoice',
+		'payex_masterpass',
+		'payex_mobilepay',
+		'payex',
+		'payex_swish',
+		'payex_wywallet'
+	);
 
 	/**
 	 * Constructor
@@ -439,7 +449,7 @@ class WC_Payex_Payment {
 	 * @return array
 	 */
 	public function add_valid_order_statuses( $statuses, $order ) {
-		if ( strpos( self::is_wc3() ? $order->get_payment_method() : $order->payment_method, 'payex' ) !== false ) {
+		if ( in_array( $order->get_payment_method(), WC_Payex_Payment::$_methods ) ) {
 			$statuses = array_merge( $statuses, array( 'processing', 'completed' ) );
 		}
 

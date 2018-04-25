@@ -28,7 +28,7 @@ class WC_Payex_Admin_Actions {
 	public static function add_meta_boxes() {
 		global $post_id;
 		$order = wc_get_order( $post_id );
-		if ( $order && strpos( $order->get_payment_method(), 'payex' ) !== false ) {
+		if ( $order && in_array( $order->get_payment_method(), WC_Payex_Payment::$_methods ) ) {
 			add_meta_box(
 				'payex_payment_actions',
 				__( 'PayEx Payments', 'woocommerce-gateway-payex-payment' ),
