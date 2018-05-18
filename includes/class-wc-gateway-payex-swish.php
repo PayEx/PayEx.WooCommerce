@@ -325,8 +325,12 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 
 		// Validate Payment Method
 		$order = $this->get_order_by_order_key( $_GET['key'] );
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
 		$payment_method = $this->is_wc3() ? $order->get_payment_method() : $order->payment_method;
-		if ( $order && $payment_method !== $this->id ) {
+		if ( $payment_method !== $this->id ) {
 			return;
 		}
 
