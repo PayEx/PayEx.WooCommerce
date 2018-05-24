@@ -317,6 +317,25 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			exit( 'FAILURE' );
 		}
 
+		// Check orderID in Store
+		$order_id = wc_clean( $_POST['orderId'] );
+		if ( ! $order = wc_get_order( $order_id ) ) {
+			$this->log( 'TC: OrderID ' . $order_id . ' not found on store.' );
+			header( sprintf( '%s %s %s', 'HTTP/1.1', '500', 'FAILURE' ), true, '500' );
+			header( sprintf( 'Status: %s %s', '500', 'FAILURE' ), true, '500' );
+			exit( 'FAILURE' );
+		}
+
+		// Get Payment Method
+		$payment_method = $order->get_payment_method();
+		$gateways = WC()->payment_gateways()->payment_gateways();
+
+		/** @var WC_Gateway_Payex_Abstract $gateway */
+		$gateway = $gateways[ $payment_method ];
+
+		// Init PayEx
+		$gateway->getPx()->setEnvironment( $gateway->account_no, $gateway->encrypted_key, $gateway->testmode === 'yes' );
+
 		// Get Transaction Details
 		$transactionId = wc_clean( $_POST['transactionNumber'] );
 
@@ -325,28 +344,16 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			'accountNumber'     => '',
 			'transactionNumber' => $transactionId
 		);
-		$details = $this->getPx()->GetTransactionDetails2( $params );
+		$details = $gateway->getPx()->GetTransactionDetails2( $params );
 		if ( $details['code'] !== 'OK' || $details['description'] !== 'OK' || $details['errorCode'] !== 'OK' ) {
 			exit( 'Error:' . $details['errorCode'] . ' (' . $details['description'] . ')' );
 		}
 
-		$order_id          = $details['orderId'];
 		$transactionStatus = (int) $details['transactionStatus'];
 
 		$this->log( 'TC: Incoming transaction: ' . $transactionId );
 		$this->log( 'TC: Transaction Status: ' . $transactionStatus );
 		$this->log( 'TC: OrderId: ' . $order_id );
-
-		// Load order
-		$order = new WC_Order( $order_id );
-
-		// Check orderID in Store
-		if ( ! $order ) {
-			$this->log( 'TC: OrderID ' . $order_id . ' not found on store.' );
-			header( sprintf( '%s %s %s', 'HTTP/1.1', '500', 'FAILURE' ), true, '500' );
-			header( sprintf( 'Status: %s %s', '500', 'FAILURE' ), true, '500' );
-			exit( 'FAILURE' );
-		}
 
 		// Save Transaction
 		update_post_meta( $order->get_id(), '_transaction_id', $transactionId );
@@ -361,7 +368,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 					'accountNumber' => '',
 					'orderRef'      => $_POST['orderRef']
 				);
-				$result = $this->getPx()->Complete( $params );
+				$result = $gateway->getPx()->Complete( $params );
 				if ( $result['errorCodeSimple'] !== 'OK' ) {
 					exit( 'Error:' . $details['errorCode'] . ' (' . $details['description'] . ')' );
 				}
