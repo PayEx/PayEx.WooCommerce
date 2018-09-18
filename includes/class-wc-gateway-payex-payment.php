@@ -380,9 +380,19 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 						$order->payment_complete();
 						break;
 					case 1:
+						$order_stock_reduced = $this->is_wc3() ? $order->get_meta( '_order_stock_reduced', true ) : get_post_meta( $order_id, '_order_stock_reduced', true );
+						if ( ! $order_stock_reduced ) {
+							$this->is_wc3() ? wc_reduce_stock_levels( $order_id ) : $order->reduce_order_stock();
+						}
+
 						$order->update_status( 'on-hold', sprintf( __( 'Transaction pending. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 						break;
 					case 3:
+						$order_stock_reduced = $this->is_wc3() ? $order->get_meta( '_order_stock_reduced', true ) : get_post_meta( $order_id, '_order_stock_reduced', true );
+						if ( ! $order_stock_reduced ) {
+							$this->is_wc3() ? wc_reduce_stock_levels( $order_id ) : $order->reduce_order_stock();
+						}
+
 						$order->update_status( 'on-hold', sprintf( __( 'Transaction authorized. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 						break;
 					case 4:
@@ -928,10 +938,20 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				WC()->cart->empty_cart();
 				break;
 			case 1:
+				$order_stock_reduced = $this->is_wc3() ? $order->get_meta( '_order_stock_reduced', true ) : get_post_meta( $order_id, '_order_stock_reduced', true );
+				if ( ! $order_stock_reduced ) {
+					$this->is_wc3() ? wc_reduce_stock_levels( $order_id ) : $order->reduce_order_stock();
+				}
+
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction is pending. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 				WC()->cart->empty_cart();
 				break;
 			case 3:
+				$order_stock_reduced = $this->is_wc3() ? $order->get_meta( '_order_stock_reduced', true ) : get_post_meta( $order_id, '_order_stock_reduced', true );
+				if ( ! $order_stock_reduced ) {
+					$this->is_wc3() ? wc_reduce_stock_levels( $order_id ) : $order->reduce_order_stock();
+				}
+
 				$order->update_status( 'on-hold', sprintf( __( 'Transaction authorized. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 				WC()->cart->empty_cart();
 				break;
