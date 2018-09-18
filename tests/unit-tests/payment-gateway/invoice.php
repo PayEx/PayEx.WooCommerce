@@ -132,9 +132,12 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 	public function test_wc_payment_payex_capture() {
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
+		/** @var WC_Gateway_Payex_Abstract $gateway */
+		$gateway = $payment_gateways[self::METHOD];
+
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
-		$order->set_payment_method( $payment_gateways[self::METHOD] );
+		$order->set_payment_method( $gateway );
 
 		// Add Transaction data
 		$order->set_transaction_id( '123456' );
@@ -147,7 +150,7 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 		// Check Transaction Id
 		$this->assertEquals( '123456', $order->get_transaction_id() );
 
-		$this->object->capture_payment( $order->get_id() );
+		$gateway->capture_payment( $order->get_id() );
 
 		// Reload Order
 		$order = wc_get_order( $order->get_id() );
@@ -163,9 +166,12 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 	public function test_wc_payment_payex_cancel() {
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
+		/** @var WC_Gateway_Payex_Abstract $gateway */
+		$gateway = $payment_gateways[self::METHOD];
+
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
-		$order->set_payment_method( $payment_gateways[self::METHOD] );
+		$order->set_payment_method( $gateway );
 
 		// Add Transaction data
 		$order->set_transaction_id( '123456' );
@@ -178,7 +184,7 @@ class WC_Tests_Payment_Invoice extends WC_Payment_Unit_Test_Case {
 		// Check Transaction Id
 		$this->assertEquals( '123456', $order->get_transaction_id() );
 
-		$this->object->cancel_payment( $order->get_id() );
+		$gateway->cancel_payment( $order->get_id() );
 
 		// Reload Order
 		$order = wc_get_order( $order->get_id() );
