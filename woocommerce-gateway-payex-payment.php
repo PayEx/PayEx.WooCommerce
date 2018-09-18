@@ -1,15 +1,18 @@
 <?php
 /*
-Plugin Name: WooCommerce PayEx Payments Gateway
-Plugin URI: http://payex.com/
-Description: Provides a Credit Card Payment Gateway through PayEx for WooCommerce.
-Version: 2.2.1
-Author: AAIT Team
-Author URI: http://aait.se/
-License: GNU General Public License v3.0
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Requires at least: 3.1
-*/
+ * Plugin Name: WooCommerce PayEx Payments Gateway
+ * Plugin URI: http://payex.com/
+ * Description: Provides a Credit Card Payment Gateway through PayEx for WooCommerce.
+ * Author: AAIT Team
+ * Author URI: http://aait.se/
+ * License: GNU General Public License v3.0
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ * Version: 2.2.1
+ * Text Domain: woocommerce-gateway-payex-payment
+ * Domain Path: /languages
+ * WC requires at least: 3.0.0
+ * WC tested up to: 3.4.5
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
