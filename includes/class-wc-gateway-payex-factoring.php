@@ -427,7 +427,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$items = $this->get_order_items( $order );
 		foreach ( $items as $order_item ) {
 			$OrderLine = $dom->createElement( 'OrderLine' );
-			$OrderLine->appendChild( $dom->createElement( 'Product', htmlentities( $order_item['name'] ) ) );
+			$OrderLine->appendChild( $dom->createElement( 'Product', str_replace( '&amp;', '-', htmlentities( $order_item['name'] ) ) ) );
 			$OrderLine->appendChild( $dom->createElement( 'Qty', $order_item['qty'] ) );
 			$OrderLine->appendChild( $dom->createElement( 'UnitPrice', sprintf( "%.2f",$order_item['price_without_tax'] / $order_item['qty'] ) ) );
 			$OrderLine->appendChild( $dom->createElement( 'VatRate', round( $order_item['tax_percent'] ) ) );
