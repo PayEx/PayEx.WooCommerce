@@ -50,6 +50,7 @@ class WC_Payex_Payment {
 		add_action( 'init', array( $this, 'create_credit_card_post_type' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 		add_action( 'plugins_loaded', array( $this, 'init' ), 0 );
+		add_action( 'woocommerce_loaded', array( $this, 'woocommerce_loaded' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_scripts' ) );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'register_gateway' ) );
 
@@ -133,13 +134,14 @@ class WC_Payex_Payment {
 	 * Init localisations and files
 	 */
 	public function init() {
-		if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
-			return;
-		}
-
 		// Localization
 		load_plugin_textdomain( 'woocommerce-gateway-payex-payment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	}
 
+	/**
+	 * WooCommerce Loaded: load classes
+	 */
+	public function woocommerce_loaded() {
 		// Includes
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-abstract.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-payment.php' );
@@ -149,7 +151,7 @@ class WC_Payex_Payment {
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-wywallet.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
-        include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-mobilepay.php' );
+		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-mobilepay.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-admin-actions.php' );
 	}

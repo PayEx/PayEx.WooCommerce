@@ -114,6 +114,9 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 			throw new Exception( $message );
 		}
 
+		// Disable status change hook
+		remove_action( 'woocommerce_order_status_changed', 'WC_Payex_Admin_Actions::order_status_changed', 10 );
+
 		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );
 		$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $result['transactionNumber'] ) );
 		$order->payment_complete( $result['transactionNumber'] );
@@ -143,6 +146,9 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 			$message = sprintf( __( 'PayEx error: %s', 'woocommerce-gateway-payex-payment' ), $result['errorCode'] . ' (' . $result['description'] . ')' );
 			throw new Exception( $message );
 		}
+
+		// Disable status change hook
+		remove_action( 'woocommerce_order_status_changed', 'WC_Payex_Admin_Actions::order_status_changed', 10 );
 
 		update_post_meta( $order->get_id(), '_transaction_id', $result['transactionNumber'] );
 		update_post_meta( $order->get_id(), '_payex_transaction_status', $result['transactionStatus'] );

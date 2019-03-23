@@ -359,6 +359,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		update_post_meta( $order->get_id(), '_transaction_id', $transactionId );
 		update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus );
 
+		// Disable status change hook
+		remove_action( 'woocommerce_order_status_changed', 'WC_Payex_Admin_Actions::order_status_changed', 10 );
+
 		/* 0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */
 		switch ( $transactionStatus ) {
 			case 0;
@@ -927,6 +930,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				$this->agreement_save( $order->get_id(), $result['agreementRef'], $result );
 			}
 		}
+
+		// Disable status change hook
+		remove_action( 'woocommerce_order_status_changed', 'WC_Payex_Admin_Actions::order_status_changed', 10 );
 
 		/* Transaction statuses:
 		0=Sale, 1=Initialize, 2=Credit, 3=Authorize, 4=Cancel, 5=Failure, 6=Capture */

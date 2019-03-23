@@ -20,14 +20,25 @@
             xhr.abort();
         }
 
-        $('#customer_details').block({
-            message: null,
-            overlayCSS: {
-                background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center',
-                backgroundSize: '16px 16px',
-                opacity: 0.6
-            }
-        });
+        if (wc_checkout_params.hasOwnProperty('ajax_loader_url')) {
+            // Deprecated
+            $('#customer_details').block({
+                message: null,
+                overlayCSS: {
+                    background: '#fff url(' + wc_checkout_params.ajax_loader_url + ') no-repeat center',
+                    backgroundSize: '16px 16px',
+                    opacity: 0.6
+                }
+            });
+        } else {
+            $('#customer_details').block({
+                message: null,
+                overlayCSS: {
+                    background: '#fff',
+                    opacity: 0.6
+                }
+            });
+        }
 
         xhr = $.ajax({
             type: 'POST',
