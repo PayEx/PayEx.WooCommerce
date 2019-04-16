@@ -1,0 +1,10 @@
+{
+    "name": "payex/payex-woocommerce",
+    "description": "PayEx Payment Provider for WooCommerce",
+    "homepage": "https://github.com/PayEx/PayEx.WooCommerce",
+    "type": "wordpress-plugin",
+    "license": "GPL-3.0",
+    "require": {
+        "php": ">=5.3"
+    }
+}
