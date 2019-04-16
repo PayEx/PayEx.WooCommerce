@@ -136,22 +136,25 @@ class WC_Payex_Payment {
 	public function init() {
 		// Localization
 		load_plugin_textdomain( 'woocommerce-gateway-payex-payment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+		if ( class_exists('WC_Payment_Gateway', false) ) {
+			// Includes
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-abstract.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-payment.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-bankdebit.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-invoice.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-factoring.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-wywallet.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
+			include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-mobilepay.php' );
+        }
 	}
 
 	/**
 	 * WooCommerce Loaded: load classes
 	 */
 	public function woocommerce_loaded() {
-		// Includes
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-abstract.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-payment.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-bankdebit.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-invoice.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-factoring.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-wywallet.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-masterpass.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-swish.php' );
-		include_once( dirname( __FILE__ ) . '/includes/class-wc-gateway-payex-mobilepay.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-credit-cards.php' );
 		include_once( dirname( __FILE__ ) . '/includes/class-wc-payex-admin-actions.php' );
 	}
