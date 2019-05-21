@@ -15,6 +15,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		'SAMPO'   => 'Danske Bank',
 		'AKTIA'   => 'Aktia',
 		'OP'      => 'OP',
+		'OMASP'   => 'Oma Säästöpankki',
 		'NB:FI'   => 'Nordea Finland',
 		'SHB:FI'  => 'Handelsbanken Finland',
 		'SPANKKI' => 'S-Pankki',
