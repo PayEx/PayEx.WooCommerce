@@ -330,6 +330,15 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$payment_method = $order->get_payment_method();
 		$gateways = WC()->payment_gateways()->payment_gateways();
 
+		// Exit if payment method isn't from this plugin,
+		// otherwise the call to getPx on the payment gateway below will trigger a fatal.
+		if ( ! in_array( $payment_method, WC_Payex_Payment::$_methods, true ) ) {
+			$this->log( 'TC: Payment method ' . $payment_method . ' not PayEx.' );
+			header( sprintf( '%s %s %s', 'HTTP/1.1', '500', 'FAILURE' ), true, '500' );
+			header( sprintf( 'Status: %s %s', '500', 'FAILURE' ), true, '500' );
+			exit( 'FAILURE' );
+		}
+
 		/** @var WC_Gateway_Payex_Abstract $gateway */
 		$gateway = $gateways[ $payment_method ];
 
