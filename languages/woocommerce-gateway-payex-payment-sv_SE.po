@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce PayEx\n"
 "POT-Creation-Date: 2016-02-24 18:27+0600\n"
-"PO-Revision-Date: 2016-02-24 18:28+0600\n"
+"PO-Revision-Date: 2019-05-29 11:08+0200\n"
 "Last-Translator: aait <info@aait.se>\n"
 "Language-Team: \n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 2.2.3\n"
 "X-Poedit-KeywordsList: __;_e;_e(sprintf\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -33,7 +33,7 @@ msgstr "Fakturaavgift"
 #: ../includes/class-wc-gateway-payex-abstract.php:219
 #, php-format
 msgid "PayEx error: %s"
-msgstr ""
+msgstr "PayEx fel: %s"
 
 #: ../woocommerce-gateway-payex-payment.php:212
 #: ../includes/class-wc-gateway-payex-invoice.php:705
@@ -47,20 +47,20 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-bankdebit.php:551
 #, php-format
 msgid "Transaction captured. Transaction Id: %s"
-msgstr ""
+msgstr "Transaktion fångad. Transaktionsid: %s"
 
 #: ../woocommerce-gateway-payex-payment.php:252
 #, php-format
 msgid "Transaction canceled. Transaction Id: %s"
-msgstr ""
+msgstr "Transaktion avbruten. Transaktionsid: %s"
 
 #: ../woocommerce-gateway-payex-payment.php:263
 msgid "PayEx Add-Ons"
-msgstr "Personnummer"
+msgstr "PayEx Tillägg"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:13
 msgid "PayEx Invoice (Ledger Service)"
-msgstr ""
+msgstr "PayEx Faktura (Ledger Service)"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:83
 #: ../includes/class-wc-gateway-payex-wywallet.php:64
@@ -71,7 +71,7 @@ msgstr ""
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:23
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:29
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Aktivera/Inaktivera"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:85
 #: ../includes/class-wc-gateway-payex-wywallet.php:66
@@ -80,7 +80,7 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-masterpass.php:73
 #: ../includes/class-wc-gateway-payex-bankdebit.php:90
 msgid "Enable plugin"
-msgstr ""
+msgstr "Aktivera tillägg"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:89
 #: ../includes/class-wc-gateway-payex-wywallet.php:70
@@ -89,7 +89,7 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-masterpass.php:77
 #: ../includes/class-wc-gateway-payex-bankdebit.php:94
 msgid "Title"
-msgstr ""
+msgstr "Titel"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:91
 #: ../includes/class-wc-gateway-payex-wywallet.php:72
@@ -98,12 +98,12 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-masterpass.php:79
 #: ../includes/class-wc-gateway-payex-bankdebit.php:96
 msgid "This controls the title which the user sees during checkout."
-msgstr ""
+msgstr "Detta kontrollerar titeln besökaren ser vid kassan."
 
 #: ../includes/class-wc-gateway-payex-invoice.php:92
 #: ../includes/class-wc-gateway-payex-invoice.php:98
 msgid "PayEx Invoice"
-msgstr ""
+msgstr "PayEx Faktura"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:95
 #: ../includes/class-wc-gateway-payex-wywallet.php:76
@@ -112,7 +112,7 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-masterpass.php:83
 #: ../includes/class-wc-gateway-payex-bankdebit.php:100
 msgid "Description"
-msgstr ""
+msgstr "Beskrivning"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:97
 #: ../includes/class-wc-gateway-payex-wywallet.php:78
@@ -121,7 +121,7 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-masterpass.php:85
 #: ../includes/class-wc-gateway-payex-bankdebit.php:102
 msgid "This controls the description which the user sees during checkout."
-msgstr ""
+msgstr "Detta kontrollerar beskrivningen besökaren ser vid kassan."
 
 #: ../includes/class-wc-gateway-payex-invoice.php:101
 #: ../includes/class-wc-gateway-payex-wywallet.php:82
@@ -132,7 +132,7 @@ msgstr ""
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:42
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:48
 msgid "Account Number"
-msgstr ""
+msgstr "Kontonummer"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:103
 #: ../includes/class-wc-gateway-payex-wywallet.php:84
@@ -142,7 +142,7 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-bankdebit.php:108
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:51
 msgid "Account Number of PayEx Merchant."
-msgstr ""
+msgstr "Kontonummer för PayEx Merchant."
 
 #: ../includes/class-wc-gateway-payex-invoice.php:107
 #: ../includes/class-wc-gateway-payex-wywallet.php:88
@@ -153,7 +153,7 @@ msgstr ""
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:58
 #: ../addons/includes/admin/view/html-admin-page-ssn.php:64
 msgid "Encryption Key"
-msgstr ""
+msgstr "Krypteringsnyckel"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:109
 #: ../includes/class-wc-gateway-payex-wywallet.php:90
@@ -162,7 +162,7 @@ msgstr ""
 #: ../includes/class-wc-gateway-payex-masterpass.php:97
 #: ../includes/class-wc-gateway-payex-bankdebit.php:114
 msgid "PayEx Encryption Key of PayEx Merchant."
-msgstr ""
+msgstr "PayEx krypteringsnyckel för PayEx Merchant."
 
 #: ../includes/class-wc-gateway-payex-invoice.php:113
 #: ../includes/class-wc-gateway-payex-wywallet.php:94
@@ -308,7 +308,7 @@ msgstr "Organisation"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:242
 msgid "Organization Number"
-msgstr "Organisations nummer"
+msgstr "Organisationsnummer"
 
 #: ../includes/class-wc-gateway-payex-invoice.php:291
 msgid "Please select invoice method."
@@ -337,6 +337,8 @@ msgid ""
 "Unfortunately PayEx did not grant you Invoice credit. Please try other means "
 "of payment"
 msgstr ""
+"Tyvärr tillåter inte PayEx kreditkontroll att du betalar via faktura. "
+"Vänligen välj en annan betalmetod."
 
 #: ../includes/class-wc-gateway-payex-invoice.php:467
 #: ../includes/class-wc-gateway-payex-wywallet.php:268
@@ -627,22 +629,24 @@ msgstr "Personnummer:"
 
 #: ../includes/class-wc-gateway-payex-factoring.php:225
 msgid "Please specify country."
-msgstr ""
+msgstr "Vänligen specificera land."
 
 #: ../includes/class-wc-gateway-payex-factoring.php:369
 #: ../includes/class-wc-gateway-payex-factoring.php:370
 msgid "Invalid payment mode"
-msgstr ""
+msgstr "Ogiltig betalningsmetod"
 
 #: ../includes/class-wc-gateway-payex-factoring.php:377
 msgid ""
 "Phone number not recognized, please use +countrycodenumber  ex. "
 "+467xxxxxxxxxx"
 msgstr ""
+"Telefonnumret kunde inte fastställas, vänligen använd +landskod t.ex. "
+"+467xxxxxxxxxx"
 
 #: ../includes/class-wc-gateway-payex-factoring.php:425
 msgid "Order canceled."
-msgstr ""
+msgstr "Order avbruten."
 
 #: ../includes/class-wc-gateway-payex-payment.php:19
 #: ../includes/class-wc-gateway-payex-payment.php:105
@@ -799,7 +803,7 @@ msgstr "Välj betalsätt"
 
 #: ../includes/class-wc-gateway-payex-masterpass.php:618
 msgid "Proceed to MasterPass"
-msgstr ""
+msgstr "Fortsätt till MasterPass"
 
 #: ../includes/class-wc-gateway-payex-bankdebit.php:31
 #: ../includes/class-wc-gateway-payex-bankdebit.php:97
@@ -809,19 +813,19 @@ msgstr ""
 
 #: ../includes/class-wc-gateway-payex-bankdebit.php:118
 msgid "Banks"
-msgstr ""
+msgstr "Banker"
 
 #: ../includes/class-wc-gateway-payex-bankdebit.php:123
 msgid "Available banks for payment."
-msgstr ""
+msgstr "Tillgängliga banker för betalning."
 
 #: ../includes/class-wc-gateway-payex-bankdebit.php:180
 msgid "Select bank:"
-msgstr ""
+msgstr "Välj bank:"
 
 #: ../includes/class-wc-gateway-payex-bankdebit.php:206
 msgid "Wrong bank."
-msgstr ""
+msgstr "Fel bank."
 
 #: ../includes/class-wc-gateway-payex-bankdebit.php:473
 msgid "Customer has been redirected to Bank."
