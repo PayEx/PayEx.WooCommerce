@@ -1,3 +1,22 @@
+Version 2.2.2
+* Transaction Callback: Exit if payment method isn't from this plugin
+* Transaction Callback: Prevent order cancellation problem
+* Transaction Callback: Check orderID in Store
+* Bankdebit: Add "Oma Säästöpankki" bank
+* Status change fixes
+* Factoring: Fixed problem with capturing and "&amp;"
+* Factoring: Removed Country check for phone number
+* Reduce stock on Authorization
+* Check order on order-received page
+* Fixed conflicts with payex psp plugin
+* Fixed bug with WC Subscriptions and WC3
+* Fixed: Use jQuery instead $ in admin.js
+* Fixed masterpass bug in admin backend
+* Add Endpoint check
+* Admin backend: payment info, payment actions etc
+* Rounding issue workaround
+* Swish: get phone number from order
+
 Version 2.2.1
 * Update libraries
 * Ledger Service: Use billing address instead shipping

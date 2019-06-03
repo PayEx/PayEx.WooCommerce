@@ -7,7 +7,7 @@
  * Author URI: http://aait.se/
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- * Version: 2.2.1
+ * Version: 2.2.2
  * Text Domain: woocommerce-gateway-payex-payment
  * Domain Path: /languages
  * WC requires at least: 3.0.0
