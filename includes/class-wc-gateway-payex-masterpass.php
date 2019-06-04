@@ -625,6 +625,10 @@ class WC_Gateway_Payex_MasterPass extends WC_Gateway_Payex_Abstract {
 			return $gateways;
 		}
 
+		if ( ! WC()->session ) {
+			return $gateways;
+        }
+
 		if ( ! WC()->session->get( 'mp_payment_selected' ) ) {
 			return $gateways;
 		}
