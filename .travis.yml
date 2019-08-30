@@ -6,7 +6,7 @@ services:
   - mysql
 
 php:
-  - 7.3
+  - 7.1
 
 env:
   - WOO_VERSION="3.6.1" WP_VERSION=latest
