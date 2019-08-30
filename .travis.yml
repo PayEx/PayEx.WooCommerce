@@ -11,9 +11,6 @@ php:
 env:
   - WOO_VERSION="3.6.1" WP_VERSION=latest
 
-before_install:
-  - mysql -e 'CREATE DATABASE woocommerce_test;'
-
 install:
   - cd ..
   - git clone https://github.com/woocommerce/woocommerce
