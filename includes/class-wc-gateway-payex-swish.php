@@ -232,7 +232,7 @@ class WC_Gateway_Payex_Swish extends WC_Gateway_Payex_Abstract {
 			'price'             => round( $amount * 100 ),
 			'priceArgList'      => '',
 			'currency'          => $order->get_currency(),
-			'vat'               => 0,
+			'vat'               => round( self::get_items_vat( $items ) * 100 ),
 			'orderID'           => $order->get_id(),
 			'productNumber'     => $order->get_id(),
 			'description'       => $this->description,
