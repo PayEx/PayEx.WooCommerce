@@ -28,6 +28,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - mkdir -p $HOME/.composer/vendor/bin
   - curl -sSfL -o $HOME/.composer/vendor/bin/phpunit https://phar.phpunit.de/phpunit-7.phar
   - chmod +x $HOME/.composer/vendor/bin/phpunit
 
