@@ -536,6 +536,23 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Calculate VAT of items
+	 *
+	 * @param array $items
+	 *
+	 * @return int|mixed
+	 */
+	public static function get_items_vat( array $items ) {
+		$values = array_unique( array_column( $items, 'tax_percent' ), SORT_NUMERIC );
+
+		if ( count( $values) >= 2 ) {
+			return 0;
+		}
+
+		return array_shift( $values );
+	}
+
+	/**
 	 * Prepare Address Info
 	 * @param WC_Order $order
 	 * @return array

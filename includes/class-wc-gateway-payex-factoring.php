@@ -258,7 +258,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 			'price'             => round( $amount * 100 ),
 			'priceArgList'      => '',
 			'currency'          => $currency,
-			'vat'               => 0,
+			'vat'               => round( self::get_items_vat( $items ) * 100 ),
 			'orderID'           => $order->get_id(),
 			'productNumber'     => $customer_id, // Customer Id
 			'description'       => $this->description,
