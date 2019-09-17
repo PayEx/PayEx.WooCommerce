@@ -5,8 +5,7 @@ services:
   - mysql
 
 php:
-  - 7.1
-  #- 7.2
+  - 7.2
   #- 7.3
 
 env:
@@ -15,7 +14,7 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-    - php: 7.2
+    - php: 7.3
 
 install:
   - cd ..
