@@ -16,13 +16,13 @@ matrix:
   allow_failures:
   - php: 7.3
 install:
-- cd ..
-- git clone https://github.com/woocommerce/woocommerce
-- cd woocommerce/
-- git checkout tags/$WOO_VERSION
-- bash tests/bin/install.sh woocommerce_test root '' 127.0.0.1 $WP_VERSION
-- cd ..
-- cd $TRAVIS_BUILD_DIR
+  - cd /tmp
+  - git clone https://github.com/woocommerce/woocommerce
+  - cd woocommerce/
+  - git checkout tags/$WOO_VERSION
+  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+  - cd ..
+  - cd $TRAVIS_BUILD_DIR
 before_script:
 - |
   echo "TRAVIS_PHP_VERSION:" $TRAVIS_PHP_VERSION;
