@@ -84,7 +84,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * Test PayEx is available
 	 */
 	public function test_wc_payment() {
-		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways();
 		$this->assertArrayHasKey( self::METHOD, $payment_gateways );
 		$this->assertInstanceOf( 'WC_Gateway_Payex_Payment', $payment_gateways[ self::METHOD ] );
 	}
@@ -94,7 +94,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 */
 	public function test_wc_payment_payex_order() {
 		// Get payment gateways
-		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
@@ -115,7 +115,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 	 * @see WC_Payex_Payment::add_valid_order_statuses
 	 */
 	public function test_wc_payment_payex_complete_statuses() {
-		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
@@ -212,7 +212,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		// Get Payment Gateways
-		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways();
 
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
@@ -222,8 +222,8 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 		$product->save();
 
 		// Add product to cart
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->calculate_totals();
+		$this->wc->cart->add_to_cart( $product->get_id(), 1 );
+		$this->wc->cart->calculate_totals();
 
 		// Set Checkout fields
 		$_POST['_wpnonce']                  = wp_create_nonce( 'woocommerce-process_checkout' );
@@ -253,7 +253,7 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 
 		// Process Checkout
 		$_SERVER['HTTP_USER_AGENT'] = '';
-		//WC()->checkout()->process_checkout();
+		//$this->wc->checkout()->process_checkout();
 
 		// Simulate checkout process
 		wc_set_time_limit( 0 );
@@ -261,10 +261,10 @@ class WC_Tests_Payment_Payex extends WC_Payment_Unit_Test_Case {
 		do_action( 'woocommerce_checkout_process' );
 
 		// Create Order
-		$order_id = WC()->checkout()->create_order( $_POST );
+		$order_id = $this->wc->checkout()->create_order( $_POST );
 
 		// Store Order ID in session so it can be re-used after payment failure
-		WC()->session->set( 'order_awaiting_payment', $order_id );
+		$this->wc->session->set( 'order_awaiting_payment', $order_id );
 
 		// Process Payment
 		$result = $payment_gateways[ self::METHOD ]->process_payment( $order_id );
