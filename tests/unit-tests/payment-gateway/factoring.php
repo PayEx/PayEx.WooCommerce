@@ -55,7 +55,7 @@ class WC_Tests_Payment_Factoring extends WC_Payment_Unit_Test_Case {
 	 * @return mixed
 	 */
 	public function payment_gateways( $gateways ) {
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways->payment_gateways();
 		foreach ( $payment_gateways as $id => $gateway ) {
 			if ( strpos( $id, self::METHOD ) !== false ) {
 				$gateways[ $id ]                = $payment_gateways[ $id ];
@@ -84,7 +84,7 @@ class WC_Tests_Payment_Factoring extends WC_Payment_Unit_Test_Case {
 	 * Test PayEx is available
 	 */
 	public function test_wc_payment() {
-		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
 		$this->assertArrayHasKey( self::METHOD, $payment_gateways );
 		$this->assertInstanceOf( 'WC_Gateway_Payex_Factoring', $payment_gateways[ self::METHOD ] );
 	}
@@ -94,7 +94,7 @@ class WC_Tests_Payment_Factoring extends WC_Payment_Unit_Test_Case {
 	 */
 	public function test_wc_payment_payex_order() {
 		// Get payment gateways
-		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
@@ -115,7 +115,7 @@ class WC_Tests_Payment_Factoring extends WC_Payment_Unit_Test_Case {
 	 * @see WC_Payex_Payment::add_valid_order_statuses
 	 */
 	public function test_wc_payment_payex_complete_statuses() {
-		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
 
 		/** @var WC_Order $order */
 		$order = WC_Helper_Order::create_order();
@@ -212,7 +212,7 @@ class WC_Tests_Payment_Factoring extends WC_Payment_Unit_Test_Case {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		// Get Payment Gateways
-		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$payment_gateways = $this->wc->payment_gateways->get_available_payment_gateways();
 
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();

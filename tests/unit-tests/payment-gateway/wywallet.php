@@ -66,7 +66,7 @@ class WC_Tests_Payment_WyWallet extends WC_Payment_Unit_Test_Case
      */
     public function payment_gateways($gateways)
     {
-        $payment_gateways = WC()->payment_gateways->payment_gateways();
+        $payment_gateways = $this->wc->payment_gateways->payment_gateways();
         foreach ($payment_gateways as $id => $gateway) {
             if (strpos($id, self::METHOD) !== false) {
                 $gateways[$id] = $payment_gateways[$id];
