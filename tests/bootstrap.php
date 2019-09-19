@@ -39,15 +39,27 @@ function _payex_install() {
 		'payex_swish',
 		'payex_wywallet'] as $method)
 	{
-		update_option( sprintf( 'woocommerce_%s_settings', $method ), [
+		$settings = [
 			'enabled'       => 'yes',
 			'testmode'      => 'yes',
 			'debug'         => 'yes',
 			'account_no'    => getenv( 'PAYEX_ACCOUNT_NUMBER' ),
 			'encrypted_key' => getenv( 'PAYEX_ENCRYPTION_KEY' ),
 			'description'   => 'Test',
-			'payment_view'  => 'CREDITCARD',
-		], 'yes' );
+		];
+
+		switch ($method) {
+			case 'payex':
+				$settings['payment_view'] = 'CREDITCARD';
+				break;
+			case 'payex_factoring':
+				$settings['mode'] = 'FINANCING';
+				break;
+			case 'payex_invoice':
+				$settings['credit_check'] = 'no';
+				break;
+		}
+		update_option( sprintf( 'woocommerce_%s_settings', $method ), $settings, 'yes' );
 	}
 
 	echo esc_html( 'Installing PayEx Payments...' . PHP_EOL );

@@ -24,6 +24,13 @@ class WC_Tests_Payment_Invoice extends WC_Unit_Test_Case {
 		$this->wc->cart->add_to_cart( $product->get_id(), 1 );
 		$this->wc->cart->calculate_totals();
 
+		// Validate
+		$_POST['billing_first_name']        = 'Eva Dagmar Christina';
+		$_POST['billing_last_name']         = 'Tannerdal';
+		$_POST['pxinvoice_method']          = 'private';
+		$_POST['socialSecurityNumber']      = '5907195662';
+		$this->gateway->validate_fields();
+
 		// Set Checkout fields
 		$_POST['_wpnonce']                  = wp_create_nonce( 'woocommerce-process_checkout' );
 		$_POST['terms']                     = 0;
@@ -31,8 +38,6 @@ class WC_Tests_Payment_Invoice extends WC_Unit_Test_Case {
 		$_POST['payment_method']            = self::METHOD;
 		$_POST['shipping_method']           = 'flat-rate';
 		$_POST['ship_to_different_address'] = false;
-		$_POST['pxinvoice_method']          = 'private';
-		$_POST['socialSecurityNumber']      = '5907195662';
 
 		$address = [
 			'first_name' => 'Eva Dagmar Christina',
