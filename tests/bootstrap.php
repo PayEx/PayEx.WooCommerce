@@ -24,7 +24,36 @@ function _manually_load_plugin() {
 	require dirname( dirname( __FILE__ ) ) . '/woocommerce-gateway-payex-payment.php';
 }
 
-tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
+tests_add_filter( 'muplugins_loaded', '_manually_load_plugin', 20 );
+
+/**
+ * Install PayEx Test Data
+ */
+function _payex_install() {
+	foreach (['payex_bankdebit',
+		'payex_factoring',
+		'payex_invoice',
+		'payex_masterpass',
+		'payex_mobilepay',
+		'payex',
+		'payex_swish',
+		'payex_wywallet'] as $method)
+	{
+		update_option( sprintf( 'woocommerce_%s_settings', $method ), [
+			'enabled'       => 'yes',
+			'testmode'      => 'yes',
+			'debug'         => 'yes',
+			'account_no'    => getenv( 'PAYEX_ACCOUNT_NUMBER' ),
+			'encrypted_key' => getenv( 'PAYEX_ENCRYPTION_KEY' ),
+			'description'   => 'Test',
+			'payment_view'  => 'CREDITCARD',
+		], 'yes' );
+	}
+
+	echo esc_html( 'Installing PayEx Payments...' . PHP_EOL );
+}
+
+tests_add_filter( 'setup_theme', '_payex_install', 20 );
 
 // Start up the WP testing environment.
 //require $_tests_dir . '/includes/bootstrap.php';
