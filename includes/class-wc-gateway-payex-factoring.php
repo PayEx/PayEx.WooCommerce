@@ -28,7 +28,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$this->title          = isset( $this->settings['title'] ) ? $this->settings['title'] : '';
 		$this->account_no     = isset( $this->settings['account_no'] ) ? $this->settings['account_no'] : '';
 		$this->encrypted_key  = isset( $this->settings['encrypted_key'] ) ? $this->settings['encrypted_key'] : '';
-		$this->mode           = isset( $this->settings['mode'] ) ? $this->settings['mode'] : 'FACTORING';
+		$this->mode           = isset( $this->settings['mode'] ) ? $this->settings['mode'] : 'FINANCING';
 		$this->description    = isset( $this->settings['description'] ) ? $this->settings['description'] : '';
 		$this->language       = isset( $this->settings['language'] ) ? $this->settings['language'] : 'en-US';
 		$this->testmode       = isset( $this->settings['testmode'] ) ? $this->settings['testmode'] : 'yes';

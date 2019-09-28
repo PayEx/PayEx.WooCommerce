@@ -1,32 +1,49 @@
-language: php
 sudo: false
-
+dist: xenial
+language: php
+services:
+- mysql
 php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - hhvm
+- 7.2
 env:
-  - WOO_VERSION="3.2.1" WP_VERSION=4.8.2
-
+  matrix:
+  - WOO_VERSION="3.6.5" WP_VERSION=latest
+  global:
+  - secure: WOaorzvaU3EDHc+BdME43/Ktgrgk/X0ti2QeYcyUfiNpvwaz4JRa7H2XmgUfY/uzpRIE0zmHCQhgiCVvNu1SJRQ4NEdcrnqdjsLOVEJJUJNsvu0G9ejbmVzjEiDqOMQKGG/d9q+Ry/vsvUG/gx5qzXZhf4DUP/AB1LW4Du3+aXX23jEu33OG3zakbLYPVAH+WNCOkLCjaUWYOLrvHgKQGARFFyWyORm5c6yfSzPaxULciNzPF40cmzc0eKOTvbdeGh4VKnowAPxU59LiVigsI4FMjNpeX++sWyGbzQRageMkvrrpsk099L0QALzW6jrCct08gkkjj9dS0TBBIN8Rs74cAPd0uDQAS9pt8zI6wJVf1zCznwUj2/u1I1RllY1EGVA1hXO64w5sS2Bfa/LwxHnNk8dzh+SKydt0MX8OfqWCWvgz1CvCfPiHWbAbkFIYcT/w5Oqe6F2GGD/6/YxrLuS9fe9PuvfLx+qjwGZ92S/elbEBhNBVrvDWAt56OyDQrAF4PwL6iF55XmwRmdUNKDC3XLYY3iaoQtVfI01l+Yf7ETXGzxBc9RRpJwn6eX5O6OrMLXx6ADlTcAgAb+RgbdTXf15eOYNoky/ZZslgjGsvPfTJ0w1HWX93qX7IMnd4Dw7RPzPEWbY5F8ymZtk1XmbyoNCJJq0ysCcGkHWoJsg=
+  - secure: g7gGR0yc6EVdMwULAU8zhCigLSBZrDaUfR73n0vUAl15TNmnciMU+ZcQTwOh8fWPyKq1SSgzjMz6IRj8n9KtQO+jKuPut6iEaX9frpN/KFPS1y4ceOdRAm5gVoYVfHLDcuYJ89mEFIWwsc6eVBT1sC/eS2FjwOPa/Lskg0zn6PbsGkrmpLZgykVEngBsyV8yVryXA0x8hScUVKE25EWP8iphu8hFso9L+brOGXUQSrZp39IKm+hYdzo4T4iq7JAvuGjj4FAyPrSi+WkOQFmsM0Yy33e53FEiCPALgS3WhQ8hSmRDGkInEsx+JhY7DkjQjzgqmXMcOW3r7u+mR4vlSvyamvIEdtgo/8W45WGsvOGgc9pGA5c3EUSnAyl3QaPs10RJZdUmSwxsAFAMrQG0jfLwF8Xu/17ihdoSvEiHEVkOimlWXi/qwPmZKrztqDlilJOrfS2gKs+o6ahNUicFccSytSUnl6AzvETq++tKFMqIwUxOZaEsmKhHtLJIIT271YGJHApqfg8NZP75g65H2DFRmJbikCxZl3vs3ooq0DdmMOJQx0WFGF4RzsKBBBGGytjEPOm5ZYKm4CUO4DCxh19sXMSRaN0VHf7OMcOjjhwYSW6B1n5RA6oIRTBav/ouTCmuf7vwSyITstAenju6oFp2cRrzwVOn3bDGdYLafkA=
 matrix:
   fast_finish: true
   allow_failures:
-    - php: hhvm
-
+  - php: 7.3
 install:
-  - cd ..
+  - cd /tmp
   - git clone https://github.com/woocommerce/woocommerce
   - cd woocommerce/
   - git checkout tags/$WOO_VERSION
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - cd ..
-  - cd PayEx.WooCommerce
+  - cd $TRAVIS_BUILD_DIR
+before_script:
+- |
+  echo "TRAVIS_PHP_VERSION:" $TRAVIS_PHP_VERSION;
+  php -v;
+  php -r 'echo "PHP: ".PHP_VERSION."\n";';
+  if [ $(echo "$TRAVIS_PHP_VERSION >= 7.2" | bc -l) -eq 1 ]; then
+    curl -sSfL -o ~/.phpenv/versions/$TRAVIS_PHP_VERSION/bin/phpunit https://phar.phpunit.de/phpunit-6.5.14.phar;
+  fi
+- export PATH="$HOME/.composer/vendor/bin:$PATH"
+- |
+  if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
+    phpenv config-rm xdebug.ini
+  else
+    echo "xdebug.ini does not exist"
+  fi
 script:
-  - phpunit
-
+- |
+  phpunit
+  WP_MULTISITE=1 phpunit
 notifications:
   email:
     recipients:
-      - ottofromhell@gmail.com
+    - ottofromhell@gmail.com
     on_failure: always

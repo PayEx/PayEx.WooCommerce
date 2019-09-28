@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <phpunit
-	bootstrap="../woocommerce/tests/bootstrap.php"
+	bootstrap="tests/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
@@ -9,6 +9,10 @@
 	verbose="true"
 	syntaxCheck="true"
 	>
+	<php>
+		<ini name="display_errors" value="On" />
+		<ini name="display_startup_errors" value="On" />
+	</php>
 	<testsuites>
 		<testsuite name="PayEx Payments for WooCommerce Test Suite">
 			<directory suffix=".php">./tests/unit-tests</directory>

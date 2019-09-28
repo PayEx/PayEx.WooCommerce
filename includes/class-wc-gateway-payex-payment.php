@@ -364,9 +364,9 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$this->log( 'TC: Transaction Status: ' . $transactionStatus );
 		$this->log( 'TC: OrderId: ' . $order_id );
 
-		// Save Transaction
-		update_post_meta( $order->get_id(), '_transaction_id', $transactionId );
-		update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus );
+		// Get Transaction state at moment
+		$currentTransactionId     = get_post_meta( $order->get_id(), '_transaction_id', true );
+		$currentTransactionStatus = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
 
 		// Disable status change hook
 		remove_action( 'woocommerce_order_status_changed', 'WC_Payex_Admin_Actions::order_status_changed', 10 );
@@ -384,6 +384,10 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 				if ( $result['errorCodeSimple'] !== 'OK' ) {
 					exit( 'Error:' . $details['errorCode'] . ' (' . $details['description'] . ')' );
 				}
+
+				// Save Transaction
+				update_post_meta( $order->get_id(), '_transaction_id', $transactionId, $currentTransactionId );
+				update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus, $currentTransactionStatus );
 
 				switch ( (int) $result['transactionStatus'] ) {
 					case 0:
@@ -423,6 +427,11 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			case 2:
 				// Refund
 				// @todo Perform WooCommerce Refund
+
+				// Save Transaction
+				update_post_meta( $order->get_id(), '_transaction_id', $transactionId, $currentTransactionId );
+				update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus, $currentTransactionStatus );
+
 				// Set Order Status
 				$order->update_status( 'refunded', __( 'Order refunded.', 'woocommerce-gateway-payex-payment' ) );
 				$this->log( 'TC: OrderId ' . $order_id . ' refunded', $order_id );
@@ -430,31 +439,40 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			case 4;
 				// Cancel
 				// Check current status
-				$current_status = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
-				if ( in_array( $current_status, ['0', '3', '6']) ) {
+				if ( in_array( $currentTransactionStatus, ['0', '3', '6']) ) {
 					$this->log( 'TC: OrderId ' . $order_id . ' won\'t be cancelled because already paid', $order_id );
 					break;
 				}
 
+				// Save Transaction
+				update_post_meta( $order->get_id(), '_transaction_id', $transactionId, $currentTransactionId );
+				update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus, $currentTransactionStatus );
+
 				// Set Order Status
-				update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus );
 				$order->update_status( 'cancelled' );
 				$this->log( 'TC: OrderId ' . $order_id . ' canceled', $order_id );
 				break;
 			case 5:
 				// Cancel when Errors
 				// Check current status
-				$current_status = get_post_meta( $order->get_id(), '_payex_transaction_status', true );
-				if ( in_array( $current_status, ['0', '3', '6']) ) {
+				if ( in_array( $currentTransactionStatus, ['0', '3', '6']) ) {
 					$this->log( 'TC: OrderId ' . $order_id . ' won\'t be cancelled because already paid', $order_id );
 					break;
 				}
+
+				// Save Transaction
+				update_post_meta( $order->get_id(), '_transaction_id', $transactionId, $currentTransactionId );
+				update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus, $currentTransactionStatus );
 
 				// Set Order Status
 				$order->update_status( 'failed', __( 'Transaction failed.', 'woocommerce-gateway-payex-payment' ) );
 				$this->log( 'TC: OrderId ' . $order_id . ' canceled', $order_id );
 				break;
 			case 6:
+				// Save Transaction
+				update_post_meta( $order->get_id(), '_transaction_id', $transactionId, $currentTransactionId );
+				update_post_meta( $order->get_id(), '_payex_transaction_status', $transactionStatus, $currentTransactionStatus );
+
 				// Set Order Status to captured
 				$order->add_order_note( sprintf( __( 'Transaction captured. Transaction Id: %s', 'woocommerce-gateway-payex-payment' ), $transactionId ) );
 				$order->payment_complete();
@@ -513,12 +531,12 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 			}
 		}
 
-        $items = $this->get_order_items( $order );
+		$items = $this->get_order_items( $order );
 		if ($this->checkout_info === 'yes') {
-            $amount = array_sum( array_column( $items, 'price_with_tax' ) );
-        } else {
-            $amount = $order->get_total();
-        }
+			$amount = array_sum( array_column( $items, 'price_with_tax' ) );
+		} else {
+			$amount = $order->get_total();
+		}
 
 		$currency    = $order->get_currency();
 		$agreement   = '';

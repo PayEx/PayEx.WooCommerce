@@ -218,10 +218,11 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 	 * Debug Log
 	 *
 	 * @param $message
+	 * @param $order_id
 	 *
 	 * @return void
 	 */
-	public function log( $message ) {
+	public function log( $message, $order_id = null ) {
 		// Is Enabled
 		if ( $this->debug !== 'yes' ) {
 			return;
@@ -233,6 +234,10 @@ class WC_Gateway_Payex_Abstract extends WC_Payment_Gateway {
 		// Write message to log
 		if ( ! is_string( $message ) ) {
 			$message = var_export( $message, true );
+		}
+
+		if ( ! empty( $order_id ) ) {
+			$message .= sprintf( ' (OrderID: %s)', $order_id );
 		}
 
 		$log->add( $this->id, $message );
