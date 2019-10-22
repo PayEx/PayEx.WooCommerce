@@ -32,7 +32,7 @@ class WC_Gateway_Payex_Bankdebit extends WC_Gateway_Payex_Abstract {
 		$this->id           = 'payex_bankdebit';
 		$this->has_fields   = true;
 		$this->method_title = __( 'PayEx Bank Debit', 'woocommerce-gateway-payex-payment' );
-		$this->icon         = apply_filters( 'woocommerce_payex_bankdebit_icon', plugins_url( '/assets/images/payex.gif', dirname( __FILE__ ) ) );
+		$this->icon         = apply_filters( 'woocommerce_payex_bankdebit_icon', plugins_url( '/assets/images/null.png', dirname( __FILE__ ) ) );
 		$this->supports     = array(
 			'products',
 			'refunds',
