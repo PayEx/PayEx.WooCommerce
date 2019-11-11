@@ -11,7 +11,7 @@ class WC_Gateway_Payex_Factoring extends WC_Gateway_Payex_Abstract {
 		$this->id           = 'payex_factoring';
 		$this->has_fields   = true;
 		$this->method_title = __( 'PayEx Financing', 'woocommerce-gateway-payex-payment' );
-		$this->icon         = apply_filters( 'woocommerce_payex_factoring_icon', plugins_url( '/assets/images/payex.gif', dirname( __FILE__ ) ) );
+		$this->icon         = apply_filters( 'woocommerce_payex_factoring_icon', plugins_url( '/assets/images/null.png', dirname( __FILE__ ) ) );
 		$this->supports     = array(
 			'products',
 			'refunds',
