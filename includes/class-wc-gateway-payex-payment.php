@@ -17,7 +17,7 @@ class WC_Gateway_Payex_Payment extends WC_Gateway_Payex_Abstract {
 		$this->id           = 'payex';
 		$this->has_fields   = false;
 		$this->method_title = __( 'PayEx Payments', 'woocommerce-gateway-payex-payment' );
-		$this->icon         = apply_filters( 'woocommerce_payex_payment_icon', plugins_url( '/assets/images/payex.gif', dirname( __FILE__ ) ) );
+		//$this->icon         = apply_filters( 'woocommerce_payex_payment_icon', plugins_url( '/assets/images/payex.gif', dirname( __FILE__ ) ) );
 		$this->supports     = array(
 			'products',
 			'refunds',
